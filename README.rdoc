@@ -1,7 +1,3 @@
-#--
-#     石岡製dcpam解析スクリプト
-#           取扱説明書       
-#++
 = dcpam解析用スクリプト取扱説明書
 == 内容
 === 描画
@@ -19,15 +15,6 @@
 
 === ライブラリ
 * lib/utiles_spe.rb
-
-##--
-##//=== おまけ
-##* nostd_dcpam_setup.rb
-##* mkpre.rb
-##* mkrun.rb
-##* mksplit_nml.rb
-##* mkmerge_nml.rb
-##++
 
 == 準備
 * 依存ライブラリ
