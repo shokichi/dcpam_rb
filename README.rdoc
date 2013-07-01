@@ -20,14 +20,14 @@
 === ライブラリ
 * lib/utiles_spe.rb
 
-#--
-#=== おまけ
-#* nostd_dcpam_setup.rb
-#* mkpre.rb
-#* mkrun.rb
-#* mksplit_nml.rb
-#* mkmerge_nml.rb
-#++
+##--
+##//=== おまけ
+##* nostd_dcpam_setup.rb
+##* mkpre.rb
+##* mkrun.rb
+##* mksplit_nml.rb
+##* mkmerge_nml.rb
+##++
 
 == 準備
 * 依存ライブラリ
