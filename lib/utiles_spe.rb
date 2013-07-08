@@ -60,10 +60,17 @@ def self.str_add(char,str)
   return char
 end 
 #---------------------- 
-def self.glmean(gp)  # 全球平均の計算
+def self.glmean(gp)  # 全球平均
   cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
   fact = cos_phi / cos_phi.mean
   gp_mean = (gp * fact).mean("lon","lat")
+  return gp_mean
+end
+#---------------------- 
+def self.latmean(gp)  # 南北平均
+  cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
+  fact = cos_phi / cos_phi.mean
+  gp_mean = (gp * fact).mean("lat")
   return gp_mean
 end
 
@@ -80,7 +87,8 @@ def self.virtical_integral(gp)  # 鉛直積分
     end
   end
   gp_vintg = GPhys.each_along_dims(gp,"time"){ |gphys|
-    (gphys * sig_weight).sum("sig") 
+    intg = (gphys * sig_weight).sum("sig")
+    return intg
     }
   return gp_vintg
 end
@@ -309,7 +317,7 @@ def calc_prcwtr(dir) # 可降水量の計算
   lon = gqv.axis("lon")
   lat = gqv.axis("lat")
 
-  data_name = 'QVapCulumu'
+  data_name = 'PrcWtr'
   ofile = NetCDF.create( dir + data_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write([gqv,gps], ofile, 'time') { 
     |qvap,ps|  

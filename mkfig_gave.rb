@@ -76,9 +76,7 @@ end
 #
 list=ARGV[0]
 dir, name = Utiles_spe.explist(list)
-if list != nil
-  id_exp = list.split("/")[-1].sub(".list","")
-end
+id_exp = list.split("/")[-1].sub(".list","") if list != nil
 
 
 if ARGV.index("-net") or ARGV.index("-a") then
@@ -100,7 +98,7 @@ if !ARGV.index("-net") then
   gave_list('Rain',dir,name,file)
   gave_list('RainCumulus',dir,name,file)
   gave_list('RainLsc',dir,name,file)
-  gave_list('QVapCulumu',dir,name,file)
+  gave_list('PrcWtr',dir,name,file)
   gave_list('QVap',dir,name,file)
   gave_list('SSRA',dir,name,file)
   gave_list('SLRA',dir,name,file)

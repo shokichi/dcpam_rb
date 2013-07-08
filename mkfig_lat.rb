@@ -20,9 +20,7 @@ def lat_fig(var_name,dir,name,hash)
     end
 
     # 高さ方向にデータがある場合は最下層を取り出す
-    if gp.axnames.index("sig") != nil then
-      gp = gp.cut("sig"=>1)
-    end
+    gp = gp.cut("sig"=>1) if gp.axnames.index("sig") != nil then
 
     # 時間平均経度平均
     if gp.rank == 3 
@@ -32,9 +30,7 @@ def lat_fig(var_name,dir,name,hash)
     end
 
     # 降水量の単位変換
-    if var_name[0..3]=="Rain" then
-      gp = Utiles_spe.wm2mmyr(gp)
-    end
+    gp = Utiles_spe.wm2mmyr(gp) if var_name[0..3]=="Rain" 
 
     # 描画
     if n == 0 then
@@ -60,9 +56,7 @@ end
 # 
 list=ARGV[0]
 dir, name = Utiles_spe.explist(list)
-if list != nil
-  id_exp = list.split("/")[-1].sub(".list","")
-end
+id_exp = list.split("/")[-1].sub(".list","") if list != nil
 
 # DCL open
 if ARGV.index("-ps")
@@ -96,7 +90,7 @@ lat_fig("Rain",dir,name,"min"=>0,"max"=>6000)
 lat_fig("RainCumulus",dir,name,"min"=>0,"max"=>6000)
 lat_fig("RainLsc",dir,name,"min"=>0,"max"=>6000)
 lat_fig("Ps",dir,name,"min"=>90000,"max"=>110000)
-lat_fig("QVapCulumu",dir,name,"min"=>0,"max"=>50)
+lat_fig("PrcWtr",dir,name,"min"=>0,"max"=>50)
 
 
 DCL.grcls

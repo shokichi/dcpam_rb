@@ -21,15 +21,11 @@ def lonlat(var_name,dir,name,hash=nil)
     end
 
     # 時間平均
-    if gp.axnames.index("time") != nil then
-      gp = gp.mean("time")
-    end
+    gp = gp.mean("time") if gp.axnames.index("time") != nil
 
     # 高さ方向の次元を無くす
-    if gp.rank==3
-      gp = gp[false,0]
-    end
-
+    gp = gp[false,0] if gp.rank==3
+ 
     # 
     if gp.axis(0).to_gphys.long_name == "local time" then
       max = 24

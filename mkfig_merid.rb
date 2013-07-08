@@ -37,21 +37,18 @@ def merid_fig_strm(dir,name)
       print "[#{var_name}](#{dir[n]}) is not exist\n"
       next
     end
-    if gp.rank != 2 then
-      gp = gp.mean(0,-1)
-    end
+    gp = gp.mean(0,-1) if gp.rank != 2
+
     GGraph.next_linear_tone_options("min"=>-50,'max'=>50,'interval'=>5)
     GGraph.tone(gp*1e-10,true,'title'=>gp.long_name + " " + name[n],'annotate'=>false,"nlev"=>2)
-    GGraph.contour(gp,false,'interval'=>4*1e+10)
+    GGraph.contour(gp,false,'interval'=>5*1e+10)
   end
 end
 
 # 
 list=ARGV[0]
 dir, name = Utiles_spe.explist(list)
-if list != nil then
-  id_exp = list.split("/")[-1].sub(".list","")
-end
+id_exp = list.split("/")[-1].sub(".list","") if list != nil then
 
 # DCL open
 if ARGV.index("-ps")
