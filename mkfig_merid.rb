@@ -9,12 +9,12 @@ require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
 include Utiles_spe
 include NumRu
 
-def merid_fig(var_name,dir,name,hash)
-  for n in 0..dir.length-1
+def merid_fig(var_name,list,hash)
+  for n in 0..list.dir.length-1
     begin
-      gp = GPhys::IO.open(Utiles_spe.str_add(dir[n],var_name)+'.nc',var_name)
+      gp = GPhys::IO.open(Utiles_spe.str_add(list.dir[n],var_name)+'.nc',var_name)
     rescue
-      print "[#{var_name}](#{dir[n]}) is not exist\n"
+      print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
     end
     if gp.rank == 4 
@@ -22,33 +22,31 @@ def merid_fig(var_name,dir,name,hash)
     elsif gp.rank == 3
       gp = gp.mean(0)
     end
-    fig_opt = {'color_bar'=>true,'title'=>gp.long_name + " " + name[n],'annotate'=>false,'nlev'=>20}
+    fig_opt = {'color_bar'=>true,'title'=>gp.long_name + " " + lisr.name[n],'annotate'=>false,'nlev'=>20}
     GGraph.tone_and_contour(gp, true,fig_opt.merge(hash))
   end
 end
 
-def merid_fig_strm(dir,name)
+def merid_fig_strm(list)
   var_name = "Strm"
-  for n in 0..dir.length-1
+  for n in 0..list.dir.length-1
     begin
 #      gp = GPhys::IO.open(dir[n].sub("local_","") + var_name + '.nc',var_name)
-      gp = GPhys::IO.open(dir[n] + var_name + '.nc',var_name)
+      gp = GPhys::IO.open(list.dir[n] + var_name + '.nc',var_name)
     rescue
-      print "[#{var_name}](#{dir[n]}) is not exist\n"
+      print "[#{varl_name}](#{list.dir[n]}) is not exist\n"
       next
     end
     gp = gp.mean(0,-1) if gp.rank != 2
 
     GGraph.next_linear_tone_options("min"=>-50,'max'=>50,'interval'=>5)
-    GGraph.tone(gp*1e-10,true,'title'=>gp.long_name + " " + name[n],'annotate'=>false,"nlev"=>2)
+    GGraph.tone(gp*1e-10,true,'title'=>gp.long_name + " " + list.name[n],'annotate'=>false,"nlev"=>2)
     GGraph.contour(gp,false,'interval'=>5*1e+10)
   end
 end
 
 # 
-list=ARGV[0]
-dir, name = Utiles_spe.explist(list)
-id_exp = list.split("/")[-1].sub(".list","") if list != nil then
+list = ExpList.new(ARGV[0])
 
 # DCL open
 if ARGV.index("-ps")
@@ -73,19 +71,19 @@ GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
 
-merid_fig('Temp',dir,name,"min"=>120,"max"=>320,"interval"=>10)
-merid_fig('U',dir,name,"min"=>-80,"max"=>80,"interval"=>5)
-merid_fig('V',dir,name,"min"=>-8,"max"=>8)
-merid_fig('RH',dir,name,"min"=>0,"max"=>100)
-merid_fig('SigDot',dir,name,"min"=>-1.5e-6,"max"=>1.5e-6)
-merid_fig('QVap',dir,name,"min"=>0,"max"=>0.015)
-merid_fig_strm(dir,name)
+merid_fig('Temp',list,"min"=>120,"max"=>320,"interval"=>10)
+merid_fig('U',list,"min"=>-80,"max"=>80,"interval"=>5)
+merid_fig('V',list,"min"=>-8,"max"=>8)
+merid_fig('RH',list,"min"=>0,"max"=>100)
+merid_fig('SigDot',list,"min"=>-1.5e-6,"max"=>1.5e-6)
+merid_fig('QVap',list,"min"=>0,"max"=>0.015)
+merid_fig_strm(list)
 
 
 DCL.grcls
 
 if ARGV.index("-ps") 
-  system("mv dcl.ps #{id_exp}_merid.ps")
+  system("mv dcl.ps #{list.id}_merid.ps")
 elsif ARGV.index("-png")
-  system("rename 's/dcl_/#{id_exp}_merid_/' dcl_*.png")
+  system("rename 's/dcl_/#{list.id}_merid_/' dcl_*.png")
 end

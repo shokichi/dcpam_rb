@@ -10,6 +10,64 @@ require "numru/ggraph"
 require 'numru/gphys'
  
 #---------------------- 
+class Explist
+
+  def initialize(file_list)  # 実験ファイルリストの読み込み
+    @@filelist = file_list
+    if @@filelist != nil then
+      read_file
+      get_exp_id
+    else
+      default
+    end
+  end
+  
+  private
+  def read_file
+    n = 0
+    name = []
+    dir = []
+    begin
+      fin = File.open(@@filelist,"r")
+    rescue
+      default
+      error_msg
+      return
+    end
+    loop{
+      char = fin.gets
+      break if char == nil
+      next if char[0..0] == "#" # コメントアウト機能
+      char = char.chop.split(",")
+      name[n] = char[0]
+      dir[n]  = char[1]
+      dir[n]  = char[1].split(":") if char[1].include?(":") == true 
+      n += 1
+    }
+    fin.close
+    @dir = dir 
+    @name = name
+  end
+  
+  def get_exp_id
+    @id = @@filelist.split("/")[-1].sub(".list","")
+  end
+
+  def default
+    @name = [""]
+    @dir  = ["./"]
+    @id  = "none"
+  end
+
+  def error_msg
+    print "[#{@@filelist}] Such file is not exist \n"
+    print "[#{@dir[0]}] Set directory \n"
+  end
+
+  public  
+  attr_reader :dir, :name, :id
+end
+
 def self.explist(file_list)  # 実験ファイルリストの読み込み
   dir = []
   name = []

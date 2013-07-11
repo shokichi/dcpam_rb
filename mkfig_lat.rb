@@ -9,7 +9,7 @@ include Utiles_spe
 include NumRu
 
 
-def lat_fig(var_name,dir,name,hash)
+def lat_fig(var_name,dir,name,hash||{nil})
   for n in 0..dir.length-1
     # データの取得
     begin
