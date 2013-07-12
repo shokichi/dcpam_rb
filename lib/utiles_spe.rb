@@ -9,10 +9,9 @@ include NMath
 require "numru/ggraph"
 require 'numru/gphys'
  
-#---------------------- 
 class Explist
-
-  def initialize(file_list)  # 実験ファイルリストの読み込み
+  # 実験ファイルリストの読み込み
+  def initialize(file_list)
     @@filelist = file_list
     if @@filelist != nil then
       read_file
@@ -21,7 +20,7 @@ class Explist
       default
     end
   end
-  
+
   private
   def read_file
     n = 0
@@ -60,14 +59,15 @@ class Explist
   end
 
   def error_msg
-    print "[#{@@filelist}] Such file is not exist \n"
-    print "[#{@dir[0]}] Set directory \n"
+    print "[#{@@filelist}] No Such file \n"
+    print "[#{@dir[0]}] Set current directory \n"
   end
 
   public  
   attr_reader :dir, :name, :id
 end
 
+#---------------------- 
 def self.explist(file_list)  # 実験ファイルリストの読み込み
   dir = []
   name = []
@@ -107,15 +107,15 @@ def self.explist(file_list)  # 実験ファイルリストの読み込み
   return dir, name
 end
 #----------------------
-def self.str_add(char,str)
-  if char.class == Array then
-    for n in 0..char.size-1
-      char[n] = char[n] + str
+def self.str_add(str,add_str)
+  if str.class == Array then
+    for n in 0..str.size-1
+      str[n] = str[n] + add_str
     end    
   else
-    char = char + str
+    str = str + add_str
   end  
-  return char
+  return str
 end 
 #---------------------- 
 def self.glmean(gp)  # 全球平均
