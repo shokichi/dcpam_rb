@@ -298,9 +298,15 @@ end
 # -------------------------------------------
 def calc_rh(dir) # 相対湿度の計算
   # file open
-  gqvap = GPhys::IO.open(dir + "QVap.nc", "QVap")
-  gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-  gtemp = GPhys::IO.open(dir + "Temp.nc", "Temp")
+  data_name = 'RH'
+  begin
+    gqvap = GPhys::IO.open(dir + "QVap.nc", "QVap")
+    gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
+    gtemp = GPhys::IO.open(dir + "Temp.nc", "Temp")
+  rescue
+    print "[#{data_name}](#{dir}) is not created \n"
+    return
+  end
 
   # 座標データの取得
   lon = gtemp.axis('lon')
@@ -321,8 +327,6 @@ def calc_rh(dir) # 相対湿度の計算
   gasrwet = gasruniv / qvapmol
   epsv = qvapmol / drymol
 
-
-  data_name = 'RH'
   ofile = NetCDF.create( dir + data_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write([gqvap,gps,gtemp],ofile,'time'){ 
     |qvap,ps,temp| 
@@ -364,10 +368,16 @@ end
 
 # --------------------------------------------
 def calc_prcwtr(dir) # 可降水量の計算
+  data_name = 'PrcWtr'
   # file open
-  gqv = GPhys::IO.open(dir + "QVap.nc", "QVap")
-  gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-  sigm = GPhys::IO.open(dir + "QVap.nc", "sigm")
+  begin
+    gqv = GPhys::IO.open(dir + "QVap.nc", "QVap")
+    gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
+    sigm = GPhys::IO.open(dir + "QVap.nc", "sigm")
+  rescue
+    print "[#{data_name}](#{dir}) is not created \n"
+    return
+  end
 
   # constant
   grav = UNumeric[9.8, "m.s-2"]
@@ -375,7 +385,6 @@ def calc_prcwtr(dir) # 可降水量の計算
   lon = gqv.axis("lon")
   lat = gqv.axis("lat")
 
-  data_name = 'PrcWtr'
   ofile = NetCDF.create( dir + data_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write([gqv,gps], ofile, 'time') { 
     |qvap,ps|  
