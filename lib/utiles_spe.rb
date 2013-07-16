@@ -9,6 +9,9 @@ include NMath
 require "numru/ggraph"
 require 'numru/gphys'
  
+# 定数
+SolarConst = UNumeric[1366.0, "w.m-2"]
+
 class Explist
   # 実験ファイルリストの読み込み
   def initialize(file_list)
@@ -410,6 +413,12 @@ def calc_prcwtr(dir) # 可降水量の計算
   ofile.close
   print "[#{data_name}](#{dir}) is created\n"
 end
+# ---------------------------------------
+def planetary_albedo(dir) # 惑星アルベドの計算
+  osr = GPhys::IO.open(dir + "OSRA.nc","OSRA")
+  albedo = 1.0 - glmean(osr)/(SolarConst/4)
+  return albedo
+end 
 
 # ---------------------------------------
 def mirror_lat(gp) # 折り返し(緯度)
