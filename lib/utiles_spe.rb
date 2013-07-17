@@ -25,28 +25,28 @@ class Explist
   end
 
   private
+
   def read_file
     n = 0
     name = []
     dir = []
     begin
-      fin = File.open(@@filelist,"r")
+      File.open(@@filelist,"r") do |f|
+        f.each do |line|
+          puts.line
+          break if line == nil
+          next if line[0..0] == "#" # コメントアウト機能
+          char = line.chop.split(",")
+          name[n] = char[0]
+          dir[n]  = char[1]
+          dir[n]  = char[1].split(":") if char[1].include?(":") == true 
+          n += 1
+        end
+      end
     rescue
       default
       error_msg
-      return
     end
-    loop{
-      char = fin.gets
-      break if char == nil
-      next if char[0..0] == "#" # コメントアウト機能
-      char = char.chop.split(",")
-      name[n] = char[0]
-      dir[n]  = char[1]
-      dir[n]  = char[1].split(":") if char[1].include?(":") == true 
-      n += 1
-    }
-    fin.close
     @dir = dir 
     @name = name
   end
