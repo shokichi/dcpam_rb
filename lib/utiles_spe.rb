@@ -9,9 +9,6 @@ include NMath
 require "numru/ggraph"
 require 'numru/gphys'
  
-# 定数
-SolarConst = UNumeric[1366.0, "w.m-2"]
-
 class Explist
   # 実験ファイルリストの読み込み
   def initialize(file_list)
@@ -25,28 +22,28 @@ class Explist
   end
 
   private
-
   def read_file
     n = 0
     name = []
     dir = []
     begin
-      File.open(@@filelist,"r") do |f|
-        f.each do |line|
-          puts.line
-          break if line == nil
-          next if line[0..0] == "#" # コメントアウト機能
-          char = line.chop.split(",")
-          name[n] = char[0]
-          dir[n]  = char[1]
-          dir[n]  = char[1].split(":") if char[1].include?(":") == true 
-          n += 1
-        end
-      end
+      fin = File.open(@@filelist,"r")
     rescue
       default
       error_msg
+      return
     end
+    loop{
+      char = fin.gets
+      break if char == nil
+      next if char[0..0] == "#" # コメントアウト機能
+      char = char.chop.split(",")
+      name[n] = char[0]
+      dir[n]  = char[1]
+      dir[n]  = char[1].split(":") if char[1].include?(":") == true 
+      n += 1
+    }
+    fin.close
     @dir = dir 
     @name = name
   end
@@ -171,10 +168,11 @@ def self.array2gp(x_var,y_var)  # 簡単GPhysオブジェクトの作成
   y_val = NArray.to_na(y_var) # y軸
 
   x_coord = Axis.new
+  x_coord.name = "x_coord"
   x_coord.set_pos(VArray.new(x_val))
   grid = Grid.new(x_coord)
   gp = GPhys.new(grid,VArray.new(y_val))
-
+  gp.name = "y_coord"
   return gp
 end
 
@@ -301,15 +299,9 @@ end
 # -------------------------------------------
 def calc_rh(dir) # 相対湿度の計算
   # file open
-  data_name = 'RH'
-  begin
-    gqvap = GPhys::IO.open(dir + "QVap.nc", "QVap")
-    gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-    gtemp = GPhys::IO.open(dir + "Temp.nc", "Temp")
-  rescue
-    print "[#{data_name}](#{dir}) is not created \n"
-    return
-  end
+  gqvap = GPhys::IO.open(dir + "QVap.nc", "QVap")
+  gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
+  gtemp = GPhys::IO.open(dir + "Temp.nc", "Temp")
 
   # 座標データの取得
   lon = gtemp.axis('lon')
@@ -330,6 +322,8 @@ def calc_rh(dir) # 相対湿度の計算
   gasrwet = gasruniv / qvapmol
   epsv = qvapmol / drymol
 
+
+  data_name = 'RH'
   ofile = NetCDF.create( dir + data_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write([gqvap,gps,gtemp],ofile,'time'){ 
     |qvap,ps,temp| 
@@ -337,7 +331,8 @@ def calc_rh(dir) # 相対湿度の計算
     time = ps.axis('time')  
  
     # 気圧の計算
-    press_na = NArray.sfloat(lon.length,lat.length,sig.length,time.length)
+    press_na = NArray.sfloat(lon.length,lat.length,
+                             sig.length,time.length)
     grid = Grid.new(lon,lat,sig.axis('sig'),time)
     press = GPhys.new(grid,VArray.new(press_na))
     press.units = 'Pa'
@@ -371,16 +366,10 @@ end
 
 # --------------------------------------------
 def calc_prcwtr(dir) # 可降水量の計算
-  data_name = 'PrcWtr'
   # file open
-  begin
-    gqv = GPhys::IO.open(dir + "QVap.nc", "QVap")
-    gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-    sigm = GPhys::IO.open(dir + "QVap.nc", "sigm")
-  rescue
-    print "[#{data_name}](#{dir}) is not created \n"
-    return
-  end
+  gqv = GPhys::IO.open(dir + "QVap.nc", "QVap")
+  gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
+  sigm = GPhys::IO.open(dir + "QVap.nc", "sigm")
 
   # constant
   grav = UNumeric[9.8, "m.s-2"]
@@ -388,6 +377,7 @@ def calc_prcwtr(dir) # 可降水量の計算
   lon = gqv.axis("lon")
   lat = gqv.axis("lat")
 
+  data_name = 'PrcWtr'
   ofile = NetCDF.create( dir + data_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write([gqv,gps], ofile, 'time') { 
     |qvap,ps|  
@@ -414,11 +404,52 @@ def calc_prcwtr(dir) # 可降水量の計算
   print "[#{data_name}](#{dir}) is created\n"
 end
 # ---------------------------------------
-def planetary_albedo(dir) # 惑星アルベドの計算
-  osr = GPhys::IO.open(dir + "OSRA.nc","OSRA")
-  albedo = 1.0 - glmean(osr)/(SolarConst/4)
-  return albedo
-end 
+def local_time(gp,hr_in_day)
+
+  time = gp.axis("time").to_gphys
+  lon = gp.axis('lon')
+
+  if time.units.to_s=='min' 
+    time = time / 60
+    time.units = 'hrs'
+  elsif time.units.to_s=='day'
+    time = time * 24
+    time.units = 'hrs'
+  end
+
+  local_time = lon.pos / 360 * hr_in_day
+  local_time.long_name = "local time"
+  local_time.units = "hrs"
+  lon = lon.to_gphys
+  dlon = lon[1].val-lon[0].val
+  
+  gphys_local = GPhys.each_along_dims([gp,time],"time"){ 
+    |gphys,gtime|
+
+    gp_local = gphys.copy
+    gp_local[false] = 0
+
+    hr = gtime.val/hr_in_day
+    hr = hr - hr.to_i
+
+    eqtime = 360*hr
+    local = lon + eqtime
+    for i in 0..local.length-1
+      if local[i].val > 360 then
+        local[i].val = local[i].val-360.0
+      end
+    end
+    min = local.val.min
+    for i in 0..lon.length-1
+      n = local.to_a.index(min + dlon*i)
+      gp_local[i,false].val = gphys[n,false].val
+    end
+
+    gp_local.axis(0).set_pos(local_time)
+    return gp_local
+  }
+  return gphys_local
+end
 
 # ---------------------------------------
 def mirror_lat(gp) # 折り返し(緯度)

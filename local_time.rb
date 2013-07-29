@@ -6,21 +6,29 @@
 require 'numru/ggraph'
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require '/home/ishioka/ruby/lib/utiles_spe'
 include NumRu
 include Math
 
 
-def local_time(var_name,dir,name)
-  for n in 0..dir.length-1
+def local_time(var_name,list)
+  list.dir.each_index do |n|
     begin 
-      gp = GPhys::IO.open(dir[n] + var_name + '.nc',var_name)
-      time = GPhys::IO.open(dir[n] + var_name + '.nc','time')
+      gp = GPhys::IO.open(list.dir[n] + var_name + '.nc',var_name)
+      time = GPhys::IO.open(list.dir[n] + var_name + '.nc','time')
     rescue
-      print "[#{var_name}](#{dir[n]}) is not exist\n"
+      print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
     end
     #gp = gp[false,0..300]  
     #time = time[false,0..300]
+
+    if time.get_att("hour_in_day") != nil then
+      hr_in_day = time.get_att("hour_in_day")
+    else
+
+      hr_in_day = 24 / omega_ratio(list.name[n])
+    end
 
     if time.units.to_s=='min' 
       time = time / 60
@@ -29,20 +37,17 @@ def local_time(var_name,dir,name)
       time = time * 24
       time.units = 'hrs'
     end
-    lon = gp.axis('lon').to_gphys
-    dlon = lon[1].val-lon[0].val
-
-    begin
-      hr_in_day = time.get_att("hour_in_day")
-    rescue
-      hr_in_day = 24 / Utiles_spe.omega_ratio(name[n])
-    end
+    lon = gp.axis('lon')
+    p hr_in_day
     local_time = lon.pos / 360 * hr_in_day
     local_time.long_name = "local time"
     local_time.units = "hrs"
 
+    lon = lon.to_gphys
+    dlon = lon[1].val-lon[0].val
+
     data_name = 'local_' + var_name
-    ofile = NetCDF.create( dir[n] + data_name + '.nc')
+    ofile = NetCDF.create(list.dir[n] + data_name + '.nc')
     GPhys::NetCDF_IO.each_along_dims_write([gp,time], ofile, 'time') { 
       |gphys,gtime|  
       gp_local = gphys.copy
@@ -134,9 +139,29 @@ def local_time_mean(var_name,dir)
     ofile.close
   end
 end
+def omega_ratio(name)# 名前解析 nameからomega/omega_Eを抽出
+  if name[0..4] == "omega" or name[0..4] == "Omega" then
+    var = name.sub("omega","").sub("Omega","")
+    if var.include?("-")
+      var = var.split("-")
+      var = var[1].to_f/var[0].to_f
+    elsif var.include?("/")
+      var = var.split("/") 
+      var = var[0].to_f/var[1].to_f
+    end
+    ratio = var.to_f
+  else
+    print "ERROR: [#{name}] can't decode\n"
+    ratio = 1.0
+  end
+  return ratio
+end
 
-dir, name = Utiles_spe.explist(ARGV[0])
+list = Utiles_spe::Explist.new(ARGV[0])
+varname = ARGV[1]
 
+local_time(varname,list) if varname != nil
+local_time("OSRA",list)
 =begin
 local_time_mean('Rain',dir)
 local_time_mean('RainCumulus',dir)
@@ -150,7 +175,7 @@ local_time_mean('OLRA',dir)
 #local_time_mean('SurfTemp',dir)
 #local_time_mean('Temp',dir)
 =end
-local_time_mean('RH',dir,name)
+#local_time_mean('RH',dir,name)
 #local_time_mean("QVap",dir)
 #local_time_mean("SigDot",dir)
 #local_time_mean("U",dir)
