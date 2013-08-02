@@ -14,22 +14,30 @@ def anglmom(dir,name)
   data_name = 'AnglMom'
   # file open
   begin
-    gu = GPhys::IO.open(dir + "U.nc", "U")
-    gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-    sigm = GPhys::IO.open(dir + "U.nc","sigm")
+    gu = gpopen(dir + "U.nc", "U")
+    gps = gpopen(dir + "Ps.nc", "Ps")
+    sigm = gpopen(dir + "U.nc","sigm")
+    time = gpopen(dir + "U.nc","time")
   rescue
     print "[#{data_name}](#{dir}) is not created \n"
     return
   end
   # constants
-  grav = UNumeric[9.8, "m.s-2"]      #<= 重力加速度
-  round = UNumeric[6400000, "m"]     #<= 惑星半径
+  Grav    = UNumeric[9.8, "m.s-2"]       # 重力加速度
+  RPlanet = UNumeric[6371000.0, "m"]     # 惑星半径
   sec_in_day = UNumeric[86400, "s"]  #<= 24 hrs/day
 
-  # 
+  if time.get_att("hour_in_day") != nil then
+    hr_in_day = time.get_att("hour_in_day")
+  else
+    hr_in_day = 24.0 / omega_ratio(list.name[n])
+  end
+
+  omega = 2*PI/sec_in_day           # Earth
+  omega = omega * 24.0 / hr_in_day
+
+  #
   theta = (gu.axis("lat").to_gphys * (PI/180.0))
-  omega = 2*PI/sec_in_day
-  omega = omega * Utiles_spe.omega_ratio(name)
 
   # 計算
   ofile = NetCDF.create( dir + data_name + '.nc')
@@ -39,7 +47,7 @@ def anglmom(dir,name)
     angl = uwind.copy
     angl[false] = 0
     
-    angl = (round * theta.cos * omega + uwind ) * round * theta.cos
+    angl = (RPlanet * theta.cos * omega + uwind ) * RPlanet * theta.cos
 
     angl.units = 'm2.s-1'
     angl.long_name = 'angular momentum'
@@ -51,5 +59,5 @@ def anglmom(dir,name)
 end
 
 
-dir, name = Utiles_spe.explist(ARGV[0])
-(0..dir.length-1).each{|n| anglmom(dir[n],name[n])} 
+list = Utiles_spe::Explist.new(ARGV[0])
+list.dir.length.each_index{|n| anglmom(list.dir[n],list.name[n])} 
