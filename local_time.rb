@@ -78,11 +78,11 @@ def local_time(var_name,list)
   end
 end
 
-def local_time_mean(var_name,dir)
-  for n in 0..dir.length-1
+def local_time_mean(var_name,list)
+  list.dir.each_index do |n|
     begin 
-      gp = gpopen(dir[n] + var_name + '.nc',var_name)
-      time = gpopen(dir[n] + var_name + '.nc','time')
+      gp = gpopen(list.dir[n] + var_name + '.nc',var_name)
+      time = gpopen(list.dir[n] + var_name + '.nc','time')
     rescue
       print "[#{var_name}](#{dir[n]}) is not exist\n"
       next
@@ -120,7 +120,7 @@ def local_time_mean(var_name,dir)
     dlon = lon[1].val-lon[0].val
 
     ave = 0
-    ofile = NetCDF.create(dir[n] + "MTlocal_" + var_name + '.nc')
+    ofile = NetCDF.create(list.dir[n] + "MTlocal_" + var_name + '.nc')
     GPhys.each_along_dims([gp,time], 'time') do |gphys,gtime|  
       gp_local = gphys.copy
       gp_local[false] = 0
@@ -149,6 +149,7 @@ def local_time_mean(var_name,dir)
     ofile.close
   end
 end
+
 def omega_ratio(name)# 名前解析 nameからomega/omega_Eを抽出
   if name[0..4] == "omega" or name[0..4] == "Omega" then
     var = name.sub("omega","").sub("Omega","")
@@ -172,45 +173,45 @@ varname = ARGV[1]
 
 local_time(varname,list) if varname != nil
 #local_time("OSRA",list)
-=begin
-local_time_mean('Rain',dir)
-local_time_mean('RainCumulus',dir)
-local_time_mean('RainLsc',dir)
-local_time_mean('EvapA',dir)
-local_time_mean('SensA',dir)
-local_time_mean('SSRA',dir)
-local_time_mean('SLRA',dir)
-local_time_mean('OSRA',dir)
-local_time_mean('OLRA',dir)
-#local_time_mean('SurfTemp',dir)
-#local_time_mean('Temp',dir)
-=end
-#local_time_mean('RH',dir,name)
-#local_time_mean("QVap",dir)
-#local_time_mean("SigDot",dir)
-#local_time_mean("U",dir)
-#local_time_mean("V",dir)
-#local_time_mean("RadLDWFLXA",dir)
-#local_time_mean("RadSDWFLXA",dir)
-#local_time_mean("RadLUWFLXA",dir)
-#local_time_mean("RadSUWFLXA",dir)
+#=begin
+local_time_mean('Rain',list)
+local_time_mean('RainCumulus',list)
+local_time_mean('RainLsc',list)
+local_time_mean('EvapA',list)
+local_time_mean('SensA',list)
+local_time_mean('SSRA',list)
+local_time_mean('SLRA',list)
+local_time_mean('OSRA',list)
+local_time_mean('OLRA',list)
+local_time_mean('SurfTemp',list)
+local_time_mean('Temp',list)
+#=end
+#local_time_mean('RH',list,name)
+local_time_mean("QVap",list)
+local_time_mean("SigDot",list)
+local_time_mean("U",list)
+local_time_mean("V",list)
+local_time_mean("RadLDWFLXA",list)
+local_time_mean("RadSDWFLXA",list)
+local_time_mean("RadLUWFLXA",list)
+local_time_mean("RadSUWFLXA",list)
 
-#local_time_mean("Ps",dir)
-#local_time_mean("QVapCulumu",dir)
+local_time_mean("Ps",list)
+#local_time_mean("QVapCulumu",list)
 
-#local_time("DQVapDtCond",dir)
-#local_time("DQVapDtVDiff",dir)    
-#local_time("DTempDtDyn",dir)   
-#local_time("DTempDtVDiff",dir)
-#local_time("DQVapDtCumulus",dir)  
-#local_time("DTempDtCond",dir)     
-#local_time("DTempDtLsc",dir)   
-#local_time("DQVapDtDyn",dir)      
-#local_time("DTempDtCumulus",dir)  
-#local_time("DTempDtRadL",dir)
-#local_time("DQVapDtLsc",dir)      
-#local_time("DTempDtDryConv",dir)  
-#local_time("DTempDtRadS",dir)
+#local_time("DQVapDtCond",list)
+#local_time("DQVapDtVDiff",list)    
+#local_time("DTempDtDyn",list)   
+#local_time("DTempDtVDiff",list)
+#local_time("DQVapDtCumulus",list)  
+#local_time("DTempDtCond",list)     
+#local_time("DTempDtLsc",list)   
+#local_time("DQVapDtDyn",list)      
+#local_time("DTempDtCumulus",list)  
+#local_time("DTempDtRadL",list)
+#local_time("DQVapDtLsc",list)      
+#local_time("DTempDtDryConv",list)  
+#local_time("DTempDtRadS",list)
 print `date`
 
 =begin
