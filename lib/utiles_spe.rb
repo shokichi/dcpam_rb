@@ -520,7 +520,7 @@ def gpopen(file,name)
     if !file.include?("name")
       gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
     else
-    gp = GPhys::IO.open Regexp.new(file.sub(".nc","_rank00000(\\d).nc")), name
+      gp = GPhys::IO.open Regexp.new(file.sub(".nc","_rank0000(\\d\\d).nc")), name
     end
   end
   return gp

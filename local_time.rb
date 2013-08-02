@@ -111,7 +111,6 @@ def local_time_mean(var_name,dir)
 
     lon = lon.to_gphys
     dlon = lon[1].val-lon[0].val
-    hr_in_day = time.get_att("hour_in_day")
 
     local_time = lon.pos / 360 * hr_in_day
     local_time.long_name = "local time"
