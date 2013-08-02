@@ -9,11 +9,11 @@ include Utiles_spe
 include NumRu
 
 
-def lat_fig(var_name,dir,name,hash||{nil})
-  for n in 0..dir.length-1
+def lat_fig(var_name,list,hash||{nil})
+  for n in 0..list.dir.length-1
     # データの取得
     begin
-      gp = GPhys::IO.open(dir[n] + var_name + ".nc",var_name)
+      gp = gpopen(dir[n] + var_name + ".nc",var_name)
     rescue
       print "[#{var_name}.nc](#{dir[n]}) is not exist\n"
       next
@@ -34,13 +34,20 @@ def lat_fig(var_name,dir,name,hash||{nil})
 
     # 描画
     if n == 0 then
-      lc = 13
+      lc = 13 + 10 if list.ref != nil
       vx = 0.82
       vy = 0.8
       fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
       GGraph.line( gp ,true ,fig_opt.merge(hash))
-      DCL.sgtxzv(vx+0.05,vy,name[n],0.015,0,-1,3)
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
       DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+    elsif n == list.refnum
+      lc_ref = 13
+      vy = vy - 0.025
+      fig_opt = {'index'=>lc_ref}      
+      GGraph.line( gp ,false ,fig_opt.merge(hash))
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
     else
       lc = lc + 10
       vy = vy - 0.025
@@ -54,9 +61,7 @@ end
 
 
 # 
-list=ARGV[0]
-dir, name = Utiles_spe.explist(list)
-id_exp = list.split("/")[-1].sub(".list","") if list != nil
+list = Utiles_spe.Explist.new(ARGV[0])
 
 # DCL open
 if ARGV.index("-ps")
@@ -78,25 +83,25 @@ GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
 
-lat_fig("OSRA",dir,name,"min"=>0,"max"=>-320)
-lat_fig("OLRA",dir,name,"min"=>0,"max"=>320)
-lat_fig("EvapA",dir,name,"min"=>-20,"max"=>300)
-lat_fig("SensA",dir,name,"min"=>-20,"max"=>300)
-lat_fig("SSRA",dir,name,"min"=>20,"max"=>-300)
-lat_fig("SLRA",dir,name,"min"=>-20,"max"=>300)
-lat_fig("Temp",dir,name,"min"=>200,"max"=>300)
-lat_fig("SurfTemp",dir,name,"min"=>200,"max"=>300)
-lat_fig("Rain",dir,name,"min"=>0,"max"=>6000)
-lat_fig("RainCumulus",dir,name,"min"=>0,"max"=>6000)
-lat_fig("RainLsc",dir,name,"min"=>0,"max"=>6000)
-lat_fig("Ps",dir,name,"min"=>90000,"max"=>110000)
-lat_fig("PrcWtr",dir,name,"min"=>0,"max"=>50)
+lat_fig("OSRA",list,"min"=>0,"max"=>-320)
+lat_fig("OLRA",list,"min"=>0,"max"=>320)
+lat_fig("EvapA",list,"min"=>-20,"max"=>300)
+lat_fig("SensA",list,"min"=>-20,"max"=>300)
+lat_fig("SSRA",list,"min"=>20,"max"=>-300)
+lat_fig("SLRA",list,"min"=>-20,"max"=>300)
+lat_fig("Temp",list,"min"=>200,"max"=>300)
+lat_fig("SurfTemp",list,"min"=>200,"max"=>300)
+lat_fig("Rain",list,"min"=>0,"max"=>6000)
+lat_fig("RainCumulus",list,"min"=>0,"max"=>6000)
+lat_fig("RainLsc",list,"min"=>0,"max"=>6000)
+lat_fig("Ps",list,"min"=>90000,"max"=>110000)
+lat_fig("PrcWtr",list,"min"=>0,"max"=>50)
 
 
 DCL.grcls
 
 if ARGV.index("-ps") 
-  system("mv dcl.ps #{id_exp}_lat.ps")
+  system("mv dcl.ps #{list.id}_lat.ps")
 elsif ARGV.index("-png") 
-  system("rename 's/dcl_/#{id_exp}_lat_/' dcl_*.png")
+  system("rename 's/dcl_/#{list.id}_lat_/' dcl_*.png")
 end

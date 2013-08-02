@@ -16,9 +16,9 @@ def calc_msf(dir)
   data_name = 'Strm'
   # file open
   begin
-    gv = GPhys::IO.open(dir + "V.nc", "V")
-    gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-    sigm = GPhys::IO.open(dir + "V.nc", "sigm")
+    gv = gpopen(dir + "V.nc", "V")
+    gps = gpopen(dir + "Ps.nc", "Ps")
+    sigm = gpopen(dir + "V.nc", "sigm")
   rescue
     print "[#{data_name}](#{dir}) is not created \n"
     return

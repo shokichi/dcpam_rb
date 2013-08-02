@@ -15,9 +15,9 @@ def calc_rh(dir) # 相対湿度の計算
   # file open
   data_name = 'RH'
   begin
-    gqvap = GPhys::IO.open(dir + "QVap.nc", "QVap")
-    gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-    gtemp = GPhys::IO.open(dir + "Temp.nc", "Temp")
+    gqvap = gpopen(dir + "QVap.nc", "QVap")
+    gps = gpopen(dir + "Ps.nc", "Ps")
+    gtemp = gpopen(dir + "Temp.nc", "Temp")
   rescue
     print "[#{data_name}](#{dir}) is not created \n"
     return

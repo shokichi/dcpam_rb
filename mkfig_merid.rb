@@ -12,7 +12,7 @@ include NumRu
 def merid_fig(var_name,list,hash)
   for n in 0..list.dir.length-1
     begin
-      gp = GPhys::IO.open(Utiles_spe.str_add(list.dir[n],var_name)+'.nc',var_name)
+      gp = gpopen(Utiles_spe.str_add(list.dir[n],var_name)+'.nc',var_name)
     rescue
       print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
@@ -32,7 +32,7 @@ def merid_fig_strm(list)
   for n in 0..list.dir.length-1
     begin
 #      gp = GPhys::IO.open(dir[n].sub("local_","") + var_name + '.nc',var_name)
-      gp = GPhys::IO.open(list.dir[n] + var_name + '.nc',var_name)
+      gp = gpopen(list.dir[n] + var_name + '.nc',var_name)
     rescue
       print "[#{varl_name}](#{list.dir[n]}) is not exist\n"
       next
@@ -46,7 +46,7 @@ def merid_fig_strm(list)
 end
 
 # 
-list = ExpList.new(ARGV[0])
+list = Utiles_spe::ExpList.new(ARGV[0])
 
 # DCL open
 if ARGV.index("-ps")

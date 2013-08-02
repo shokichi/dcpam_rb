@@ -15,9 +15,9 @@ def calc_prcwtr(dir)
   data_name = 'PrcWtr'
   # file open
   begin
-    gqv = GPhys::IO.open(dir + "QVap.nc", "QVap")
-    gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-    sigm = GPhys::IO.open(dir + "QVap.nc", "sigm")
+    gqv = gpopen(dir + "QVap.nc", "QVap")
+    gps = gpopen(dir + "Ps.nc", "Ps")
+    sigm = gpopen(dir + "QVap.nc", "sigm")
   rescue
     print "[#{data_name}](#{dir}) is not created \n"
     return

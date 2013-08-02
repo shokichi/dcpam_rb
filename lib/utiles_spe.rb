@@ -9,6 +9,17 @@ include NMath
 require "numru/ggraph"
 require 'numru/gphys'
  
+# 定数
+Grav    = UNumeric[9.8, "m.s-2"]       # 重力加速度
+RPlanet = UNumeric[6371000.0, "m"]     # 惑星半径
+RefPrs  = UNumeric[100000, "Pa"]       # 基準気圧
+LatentHeat = UNumeric[2.5e+6,"J.kg-1"] # 凝結の潜熱
+WtWet   = UNumeric[1000, "kg.m-3"]     # 水の密度
+MolWtWet = UNumeric[18.01528e-3, "kg.mol-1"] # 水蒸気の平均分子量
+MolWtDry = UNumeric[28.964e-3,"kg.mol-1"]    # 乾燥大気の平均分子量
+GasRUniv = UNumeric[8.3144621,"J.K-1.mol-1"] # 気体定数
+
+
 class Explist
   # 実験ファイルリストの読み込み
   def initialize(file_list)
@@ -21,11 +32,13 @@ class Explist
     end
   end
 
+  def refnum
+    return @name.index(@ref)
+  end
+
   private
+
   def read_file
-    n = 0
-    name = []
-    dir = []
     begin
       fin = File.open(@@filelist,"r")
     rescue
@@ -33,16 +46,24 @@ class Explist
       error_msg
       return
     end
-    loop{
-      char = fin.gets
-      break if char == nil
+    analize(fin)
+  end
+
+  def analize(fin)
+    name = []
+    dir = []
+    fin.each do |f|
+      char = f.gets
       next if char[0..0] == "#" # コメントアウト機能
       char = char.chop.split(",")
-      name[n] = char[0]
-      dir[n]  = char[1]
-      dir[n]  = char[1].split(":") if char[1].include?(":") == true 
-      n += 1
-    }
+      if char[0][0..0] == "!" # 基準実験
+        char[0] = char[0].sub("!","")
+        @ref = char[0]
+      end    
+      name << char[0]
+      dir << char[1]
+      dir << char[1].split(":") if char[1].include?(":") == true 
+    end
     fin.close
     @dir = dir 
     @name = name
@@ -56,6 +77,7 @@ class Explist
     @name = [""]
     @dir  = ["./"]
     @id  = "none"
+    @ref = @name
   end
 
   def error_msg
@@ -64,7 +86,7 @@ class Explist
   end
 
   public  
-  attr_reader :dir, :name, :id
+  attr_reader :dir, :name, :id, :ref, :refnum
 end
 
 #---------------------- 
@@ -158,11 +180,15 @@ end
 #----------------------
 def self.wm2mmyr(gp)  # 降水量の単位変換(W.m-2 -> mm.yr-1)
 # if gp.units.to_s == "W.m-2" then
-  r = UNumeric[2265900, "J.kg-1"]
-  rho = UNumeric[1000, "kg.m-3"]
-  gp = gp*(3600 * 24 * 360) * 1000 / r / rho 
+  gp = gp*(3600 * 24 * 360) * 1000 / LetentHeat / WtWet 
   gp.units = Units["mm.yr-1"]
 #  end
+ return gp
+end
+#----------------------
+def self.wm2mmhr(gp)  # 降水量の単位変換(W.m-2 -> mm.hr-1)
+  gp = gp* 3600 * 1000 / LetentHeat / WtWet 
+  gp.units = Units["mm.hr-1"]
  return gp
 end
 
@@ -190,9 +216,6 @@ def sig2press_save(dir,var_name) # 鉛直座標変換(sig -> press)
   time = gphys.axis(-1).to_gphys
   sig = gphys.axis(-2).to_gphys
   
-  # 定数設定
-  p0 = UNumeric[100000, "Pa"]
-  
   ofile = NetCDF.create(dir + 'Prs_' + var_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write([gphys,gps],ofile, 'time') { 
     |gp,ps|  
@@ -211,7 +234,7 @@ def sig2press_save(dir,var_name) # 鉛直座標変換(sig -> press)
     gp.set_assoc_coords([press])
     
     # 気圧座標の値を準備
-    press_crd = sig.val*p0
+    press_crd = sig.val*RefPrs
     p press_crd
     press_crd = VArray.new( press_crd, {"units"=>"Pa"}, "press")
   
@@ -231,8 +254,6 @@ def self.sig2press(gp,ps) # 鉛直座標変換(sig -> press)
   time = gp.axis(-1).to_gphys
   sig = gp.axis(-2).to_gphys
 
-  # 定数設定
-  p0 = UNumeric[100000, "Pa"]
   
   # 気圧データの準備
   press = gp.copy
@@ -248,7 +269,7 @@ def self.sig2press(gp,ps) # 鉛直座標変換(sig -> press)
   gp.set_assoc_coords([press])
   
   # 気圧座標の値を準備
-  press_crd = VArray.new( sig.val*p0, {"units"=>"Pa"}, "press")
+  press_crd = VArray.new( sig.val*RefPrs, {"units"=>"Pa"}, "press")
 
   # 鉛直座標を気圧に変換
   gp_press = gp.interpolate(sig.name=>press_crd)
@@ -264,8 +285,6 @@ def calc_msf(dir)  # 質量流線関数の計算
   sigm = gpopen(dir + "V.nc", "sigm")
 
   # 定数設定
-  grav = UNumeric[9.8, "m.s-2"]
-  round = UNumeric[6400000.0, "m"]
 
   # 座標データの取得
   lon = gv.axis("lon")
@@ -287,7 +306,7 @@ def calc_msf(dir)  # 質量流線関数の計算
     msf[false] = 0
 
     cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
-    alph = vwind * cos_phi * ps * round * PI * 2 / grav 
+    alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
     kmax = 15
     for i in 0..kmax
       k = kmax-i
@@ -323,6 +342,8 @@ def calc_rh(dir) # 相対湿度の計算
 
   es0 = UNumeric[611,"Pa"]
   latentheat = UNumeric[2.5e+6,"J.kg-1"]
+  latheat = LatentHeat * MolWtWet
+
   gasrwet = gasruniv / qvapmol
   epsv = qvapmol / drymol
 
@@ -375,9 +396,6 @@ def calc_prcwtr(dir) # 可降水量の計算
   gps = gpopen(dir + "Ps.nc", "Ps")
   sigm = GPhys::IO.open(dir + "QVap.nc", "sigm")
 
-  # constant
-  grav = UNumeric[9.8, "m.s-2"]
-
   lon = gqv.axis("lon")
   lat = gqv.axis("lat")
 
@@ -396,7 +414,7 @@ def calc_prcwtr(dir) # 可降水量の計算
     qc.name = data_name
     qc[false] = 0
 
-    alph = qvap * ps / grav 
+    alph = qvap * ps / Grav 
     kmax = 15
     for i in 0..kmax
       k = kmax-i
@@ -495,11 +513,15 @@ def day2hrs(gp,name)
   return gp
 end
 #---------------------------------------
-def gpopen(dir,name)
+def gpopen(file,name)
   begin
-    gp = GPhys::IO.open dir+name+".nc", name
+    gp = GPhys::IO.open file, name
   rescue
-    gp = GPhys::IO.open Regexp.new(dir+name+"_rank00000(\\d).nc"), name
+    if !file.include?("name")
+      gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
+    else
+    gp = GPhys::IO.open Regexp.new(file.sub(".nc","_rank00000(\\d).nc")), name
+    end
   end
   return gp
 end

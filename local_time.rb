@@ -7,6 +7,7 @@ require 'numru/ggraph'
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
 require '/home/ishioka/ruby/lib/utiles_spe'
+include Utiles_spe
 include NumRu
 include Math
 
@@ -14,8 +15,8 @@ include Math
 def local_time(var_name,list)
   list.dir.each_index do |n|
     begin 
-      gp = GPhys::IO.open(list.dir[n] + var_name + '.nc',var_name)
-      time = GPhys::IO.open(list.dir[n] + var_name + '.nc','time')
+      gp = gpopen(list.dir[n] + var_name + '.nc',var_name)
+      time = gpopen(list.dir[n] + var_name + '.nc','time')
     rescue
       print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
@@ -23,13 +24,14 @@ def local_time(var_name,list)
     #gp = gp[false,0..300]  
     #time = time[false,0..300]
 
+    # hr_in_day の取得
     if time.get_att("hour_in_day") != nil then
       hr_in_day = time.get_att("hour_in_day")
     else
-
       hr_in_day = 24 / omega_ratio(list.name[n])
     end
 
+    # 時間の単位を hrs に合わせる
     if time.units.to_s=='min' 
       time = time / 60
       time.units = 'hrs'
@@ -37,8 +39,8 @@ def local_time(var_name,list)
       time = time * 24
       time.units = 'hrs'
     end
+
     lon = gp.axis('lon')
-    p hr_in_day
     local_time = lon.pos / 360 * hr_in_day
     local_time.long_name = "local time"
     local_time.units = "hrs"
@@ -49,7 +51,7 @@ def local_time(var_name,list)
     data_name = 'local_' + var_name
     ofile = NetCDF.create(list.dir[n] + data_name + '.nc')
     GPhys::NetCDF_IO.each_along_dims_write([gp,time], ofile, 'time') { 
-      |gphys,gtime|  
+      |gphys,gtime|
       gp_local = gphys.copy
       gp_local[false] = 0
 
@@ -70,7 +72,6 @@ def local_time(var_name,list)
       end
 
       gp_local.axis(0).set_pos(local_time)
-
       [gp_local]
     }
     ofile.close
@@ -80,16 +81,21 @@ end
 def local_time_mean(var_name,dir)
   for n in 0..dir.length-1
     begin 
-      gp = GPhys::IO.open(dir[n] + var_name + '.nc',var_name)
-      time = GPhys::IO.open(dir[n] + var_name + '.nc','time')
+      gp = gpopen(dir[n] + var_name + '.nc',var_name)
+      time = gpopen(dir[n] + var_name + '.nc','time')
     rescue
       print "[#{var_name}](#{dir[n]}) is not exist\n"
       next
     end
 
-#    gp = gp[false,0..300]  
-#    time = time[false,0..300]
+    # hr_in_day の取得
+    if time.get_att("hour_in_day") != nil then
+      hr_in_day = time.get_att("hour_in_day")
+    else
+      hr_in_day = 24 / omega_ratio(list.name[n])
+    end
 
+    # 時間の単位を hrs に合わせる
     if time.units.to_s=='min' 
       time = time / 60
       time.units = 'hrs'
@@ -97,10 +103,15 @@ def local_time_mean(var_name,dir)
       time = time * 24
       time.units = 'hrs'
     end
-    lon = gp.axis('lon')
 
+    lon = gp.axis('lon')
+    local_time = lon.pos / 360 * hr_in_day
+    local_time.long_name = "local time"
+    local_time.units = "hrs"
+
+    lon = lon.to_gphys
+    dlon = lon[1].val-lon[0].val
     hr_in_day = time.get_att("hour_in_day")
-    hr_in_day = 24
 
     local_time = lon.pos / 360 * hr_in_day
     local_time.long_name = "local time"
@@ -131,7 +142,7 @@ def local_time_mean(var_name,dir)
         n = local.to_a.index(min + dlon*i)
         gp_local[i,false].val = gphys[n,false].val
       end
-      gp_local.axis(0).set_pos(local_time)
+      gp_local.axis("lon").set_pos(local_time)
       ave = ave + gp_local      
     end
     ave = ave[false,0]/time.length

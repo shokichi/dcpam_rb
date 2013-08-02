@@ -10,11 +10,12 @@ include NumRu
 include Math
 include NMath
 
-def gave_list(var_name,dir,name,file)
-  for n in 0..dir.length-1
+def gave_list(var_name,list,file)
+  datalist = []
+  list.dir.lengtheach_index do |n|
     # データの取得
     begin
-      gp = GPhys::IO.open(dir[n] + var_name + ".nc",var_name).cut("time"=>1080..1440)
+      gp = gpopen(list.dir[n] + var_name + ".nc",var_name).cut("time"=>1080..1440)
     rescue
       print "[#{var_name}](#{dir[n]}) is not exist\n"
       return
@@ -28,13 +29,16 @@ def gave_list(var_name,dir,name,file)
     gp = Utiles_spe.wm2mmyr(gp) if var_name[0..3]=="Rain"
 
     # リスト作成
-    if n == 0 then
-      std = gp.mean("time")
-      file.print "--- #{gp.long_name} ---\n"       
-    end
-    file.print "#{name[n]}\t#{gp.mean("time")}\t#{(gp.mean("time")-std)/std}\n" 
-#    file.printf ("\t%6f",gp.mean("time"))
+    datalist << [list.name[n]}, gp.mean("time")] 
   end
+
+  # ファイル出力
+  file.print "--- #{gp.long_name} ---\n"
+  datalist.each do |data|
+    fin.print data, "\t"
+    fin.print data[1]-datalist[list.refnum][1]/datalist[list.refnum][1], "\n"
+  end
+
 end
 
 def gave_netrad(dir,name)  # エネルギー収支の確認
@@ -74,10 +78,7 @@ def gave_AM(dir,name)  # エネルギー収支の確認
 end
 
 #
-list=ARGV[0]
-dir, name = Utiles_spe.explist(list)
-id_exp = list.split("/")[-1].sub(".list","") if list != nil
-
+list = Utiles_spe::Explist.new(ARGV[0])
 
 if ARGV.index("-net") or ARGV.index("-a") then
   DCL.gropn(4)
@@ -90,24 +91,24 @@ if ARGV.index("-net") or ARGV.index("-a") then
 end 
 
 if !ARGV.index("-net") then 
-  file = File.open("#{id_exp}_global-ave.dat","w")
-  gave_list('OSRA',dir,name,file)
-  gave_list('OLRA',dir,name,file)
-  gave_list('SurfTemp',dir,name,file)
-  gave_list('Temp',dir,name,file)
-  gave_list('Rain',dir,name,file)
-  gave_list('RainCumulus',dir,name,file)
-  gave_list('RainLsc',dir,name,file)
-  gave_list('PrcWtr',dir,name,file)
-  gave_list('QVap',dir,name,file)
-  gave_list('SSRA',dir,name,file)
-  gave_list('SLRA',dir,name,file)
-  gave_list('EvapA',dir,name,file)
-  gave_list('SensA',dir,name,file)
-  gave_list('RadSUWFLXA',dir,name,file)
-  gave_list('RadSDWFLXA',dir,name,file)
-  gave_list('RadLUWFLXA',dir,name,file)
-  gave_list('RadLDWFLXA',dir,name,file)
+  file = File.open("#{list.id}_global-ave.dat","w")
+  gave_list('OSRA',list,file)
+  gave_list('OLRA',list,file)
+  gave_list('SurfTemp',list,file)
+  gave_list('Temp',list,file)
+  gave_list('Rain',list,file)
+  gave_list('RainCumulus',list,file)
+  gave_list('RainLsc',list,file)
+  gave_list('PrcWtr',list,file)
+  gave_list('QVap',list,file)
+  gave_list('SSRA',list,file)
+  gave_list('SLRA',list,file)
+  gave_list('EvapA',list,file)
+  gave_list('SensA',list,file)
+  gave_list('RadSUWFLXA',list,file)
+  gave_list('RadSDWFLXA',list,file)
+  gave_list('RadLUWFLXA',list,file)
+  gave_list('RadLDWFLXA',list,file)
   file.close
-  puts "#{id_exp}_global-ave.dat created\n"
+  puts "#{list.id}_global-ave.dat created\n"
 end
