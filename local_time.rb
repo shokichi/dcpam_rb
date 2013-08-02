@@ -161,7 +161,7 @@ list = Utiles_spe::Explist.new(ARGV[0])
 varname = ARGV[1]
 
 local_time(varname,list) if varname != nil
-local_time("OSRA",list)
+#local_time("OSRA",list)
 =begin
 local_time_mean('Rain',dir)
 local_time_mean('RainCumulus',dir)

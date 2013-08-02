@@ -135,7 +135,11 @@ end
 #---------------------- 
 def self.virtical_integral(gp)  # 鉛直積分
   begin
-    sig_weight = GPhys::IO.open(gp.data.file.path, "sig_weight")
+    if gp.data.file.class == NArray then
+      sig_weight = GPhys::IO.open(gp.data.file[0].path, "sig_weight")
+    else
+      sig_weight = GPhys::IO.open(gp.data.file.path, "sig_weight")    
+    end
   rescue
     if gp.data.file == nil then
       sig_weight = GPhys::IO.open("./Temp.nc","sig_weight")
@@ -179,8 +183,8 @@ end
 #----------------------------------------- 
 def sig2press_save(dir,var_name) # 鉛直座標変換(sig -> press)
   # ファイルオープン
-  gphys = GPhys::IO.open(dir + var_name +".nc",var_name)
-  gps = GPhys::IO.open(dir + "Ps.nc","Ps")
+  gphys = gpopen(dir + var_name +".nc",var_name)
+  gps = gpopen(dir + "Ps.nc","Ps")
 
   # 座標データ取得
   time = gphys.axis(-1).to_gphys
@@ -222,7 +226,7 @@ end
 
 #-----------------------------------------  
 def self.sig2press(gp,ps) # 鉛直座標変換(sig -> press)
-#  ps = GPhys::IO.open(gp.data.file.path.sub(gp.name+".nc","Ps.nc"),"Ps")
+#  ps = gpopen(gp.data.file.path.sub(gp.name+".nc","Ps.nc"),"Ps")
   # 座標データ取得
   time = gp.axis(-1).to_gphys
   sig = gp.axis(-2).to_gphys
@@ -255,9 +259,9 @@ end
 #----------------------------------------- 
 def calc_msf(dir)  # 質量流線関数の計算
   # file open
-  gv = GPhys::IO.open(dir + "V.nc", "V")
-  gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-  sigm = GPhys::IO.open(dir + "V.nc", "sigm")
+  gv = gpopen(dir + "V.nc", "V")
+  gps = gpopen(dir + "Ps.nc", "Ps")
+  sigm = gpopen(dir + "V.nc", "sigm")
 
   # 定数設定
   grav = UNumeric[9.8, "m.s-2"]
@@ -299,9 +303,9 @@ end
 # -------------------------------------------
 def calc_rh(dir) # 相対湿度の計算
   # file open
-  gqvap = GPhys::IO.open(dir + "QVap.nc", "QVap")
-  gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
-  gtemp = GPhys::IO.open(dir + "Temp.nc", "Temp")
+  gqvap = gpopen(dir + "QVap.nc", "QVap")
+  gps = gpopen(dir + "Ps.nc", "Ps")
+  gtemp = gpopen(dir + "Temp.nc", "Temp")
 
   # 座標データの取得
   lon = gtemp.axis('lon')
@@ -367,8 +371,8 @@ end
 # --------------------------------------------
 def calc_prcwtr(dir) # 可降水量の計算
   # file open
-  gqv = GPhys::IO.open(dir + "QVap.nc", "QVap")
-  gps = GPhys::IO.open(dir + "Ps.nc", "Ps")
+  gqv = gpopen(dir + "QVap.nc", "QVap")
+  gps = gpopen(dir + "Ps.nc", "Ps")
   sigm = GPhys::IO.open(dir + "QVap.nc", "sigm")
 
   # constant
@@ -488,6 +492,15 @@ def day2hrs(gp,name)
   hour_in_day = 24 / omega_ratio(name)
   time =  gp.axis("time").pos * hour_in_day
   gp.axis("time").set_pos(time)  
+  return gp
+end
+#---------------------------------------
+def gpopen(dir,name)
+  begin
+    gp = GPhys::IO.open dir+name+".nc", name
+  rescue
+    gp = GPhys::IO.open Regexp.new(dir+name+"_rank00000(\\d).nc"), name
+  end
   return gp
 end
 # ---------------------------------------
