@@ -39,7 +39,7 @@ def local_time(var_name,list)
       time.units = 'hrs'
     end
 =end
-#    lon = gp.axis('lon')
+    lon = gp.axis('lon').to_gphys
 #    local_time = lon.pos / 360 * hr_in_day
     local_time = lon.copy
     local_time.name = "local"
@@ -58,7 +58,7 @@ def local_time(var_name,list)
       nowtime = gtime/hr_in_day    if gtime.units.to_s != "hrs"
       nowtime = gtime/hr_in_day/60 if gtime.units.to_s != "min"
 
-      local_time.val = gtime.val + lon.val*/360
+      local_time.val = nowtime[0].val + lon.val/360
       local_time = (local_time - local_time.to_i)*hr_in_day
 
       # 補助座標に地方時を設定 
