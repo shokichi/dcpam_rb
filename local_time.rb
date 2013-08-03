@@ -21,8 +21,6 @@ def local_time(var_name,list)
       print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
     end
-    #gp = gp[false,0..300]  
-    #time = time[false,0..300]
 
     # hr_in_day の取得
     if time.get_att("hour_in_day") != nil then
