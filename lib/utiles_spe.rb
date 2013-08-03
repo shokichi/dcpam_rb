@@ -52,8 +52,7 @@ class Explist
   def analize(fin)
     name = []
     dir = []
-    fin.each do |f|
-      char = f.gets
+    fin.each do |char|
       next if char[0..0] == "#" # コメントアウト機能
       char = char.chop.split(",")
       if char[0][0..0] == "!" # 基準実験
@@ -130,14 +129,23 @@ def self.explist(file_list)  # 実験ファイルリストの読み込み
 end
 #----------------------
 def self.str_add(str,add_str)
+  result = []
   if str.class == Array then
-    for n in 0..str.size-1
-      str[n] = str[n] + add_str
-    end    
+    str.each_index do |n|
+      if add_str.class == Array then
+        result[n] = str[n] + add_str[n]
+      else
+        result[n] = str[n] + add_str
+      end
+    end
+  elsif add_str.class == Array and str.class != Array then
+    add_str.each_index do |n|
+      resilt[n] = str + add_str[n]
+    end
   else
-    str = str + add_str
-  end  
-  return str
+    result = str + add_str
+  end
+  return result
 end 
 #---------------------- 
 def self.glmean(gp)  # 全球平均
@@ -517,7 +525,7 @@ def gpopen(file,name)
   begin
     gp = GPhys::IO.open file, name
   rescue
-    if !file.include?("name")
+    if !file.include?(name)
       gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
     else
       gp = GPhys::IO.open Regexp.new(file.sub(".nc","_rank0000(\\d\\d).nc")), name

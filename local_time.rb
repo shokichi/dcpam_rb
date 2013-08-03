@@ -84,7 +84,7 @@ def local_time_mean(var_name,list)
       gp = gpopen(list.dir[n] + var_name + '.nc',var_name)
       time = gpopen(list.dir[n] + var_name + '.nc','time')
     rescue
-      print "[#{var_name}](#{dir[n]}) is not exist\n"
+      print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
     end
 
@@ -105,13 +105,6 @@ def local_time_mean(var_name,list)
     end
 
     lon = gp.axis('lon')
-    local_time = lon.pos / 360 * hr_in_day
-    local_time.long_name = "local time"
-    local_time.units = "hrs"
-
-    lon = lon.to_gphys
-    dlon = lon[1].val-lon[0].val
-
     local_time = lon.pos / 360 * hr_in_day
     local_time.long_name = "local time"
     local_time.units = "hrs"
