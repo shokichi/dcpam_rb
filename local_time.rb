@@ -29,6 +29,7 @@ def local_time(var_name,list)
       hr_in_day = 24 / omega_ratio(list.name[n])
     end
 
+=begin
     # 時間の単位を hrs に合わせる
     if time.units.to_s=='min' 
       time = time / 60
@@ -37,39 +38,47 @@ def local_time(var_name,list)
       time = time * 24
       time.units = 'hrs'
     end
-
-    lon = gp.axis('lon')
-    local_time = lon.pos / 360 * hr_in_day
+=end
+#    lon = gp.axis('lon')
+#    local_time = lon.pos / 360 * hr_in_day
+    local_time = lon.copy
+    local_time.name = "local"
     local_time.long_name = "local time"
     local_time.units = "hrs"
 
     lon = lon.to_gphys
-    dlon = lon[1].val-lon[0].val
+#    dlon = lon[1].val-lon[0].val
 
     data_name = 'local_' + var_name
     ofile = NetCDF.create(list.dir[n] + data_name + '.nc')
     GPhys::NetCDF_IO.each_along_dims_write([gp,time], ofile, 'time') { 
       |gphys,gtime|
-      gp_local = gphys.copy
-      gp_local[false] = 0
 
-      hr = gtime.val/hr_in_day
-      hr = hr - hr.to_i
+      # 時間の単位を[day]に変更
+      nowtime = gtime/hr_in_day    if gtime.units.to_s != "hrs"
+      nowtime = gtime/hr_in_day/60 if gtime.units.to_s != "min"
 
-      eqtime = 360*hr
-      local = lon + eqtime
-      for i in 0..local.length-1
-        if local[i].val > 360 then
-          local[i].val = local[i].val-360.0
-        end
-      end
-      min = local.val.min
-      for i in 0..lon.length-1
-        n = local.to_a.index(min + dlon*i)
-        gp_local[i,false].val = gphys[n,false].val
-      end
+      local_time.val = gtime.val + lon.val*/360
+      local_time = (local_time - local_time.to_i)*hr_in_day
 
-      gp_local.axis(0).set_pos(local_time)
+      # 補助座標に地方時を設定 
+      gphys.set_assoc_coords([local_time])
+    
+      # 地方時の値を準備
+#      press_crd = sig.val*RefPrs
+#      p press_crd
+      local_crd = VArray.new( local_crd, {"units"=>"hrs"}, "local")
+  
+      # 鉛直座標を気圧に変換
+      gp_local = gphys.interpolate(lon.name=>local_crd)
+#
+#      min = local.val.min
+#      for i in 0..lon.length-1
+#        n = local.to_a.index(min + dlon*i)
+#        gp_local[i,false].val = gphys[n,false].val
+#      end
+#
+#      gp_local.axis(0).set_pos(local_time)
       [gp_local]
     }
     ofile.close

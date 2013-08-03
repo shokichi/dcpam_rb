@@ -221,7 +221,6 @@ def sig2press_save(dir,var_name) # 鉛直座標変換(sig -> press)
   gps = gpopen(dir + "Ps.nc","Ps")
 
   # 座標データ取得
-  time = gphys.axis(-1).to_gphys
   sig = gphys.axis(-2).to_gphys
   
   ofile = NetCDF.create(dir + 'Prs_' + var_name + '.nc')
