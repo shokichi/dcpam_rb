@@ -140,7 +140,7 @@ def self.str_add(str,add_str)
     end
   elsif add_str.class == Array and str.class != Array then
     add_str.each_index do |n|
-      resilt[n] = str + add_str[n]
+      result[n] = str + add_str[n]
     end
   else
     result = str + add_str
@@ -528,7 +528,9 @@ def gpopen(file,name)
     if !file.include?(name)
       gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
     else
-      gp = GPhys::IO.open Regexp.new(file.sub(".nc","_rank0000(\\d\\d).nc")), name
+      dir = File::dirname(file)+"/"
+      file = Utiles_spe.str_add(dir,`ls #{file.sub(".nc","_rank")}*.nc`.split("\n"))
+      gp = GPhys::IO.open file, name
     end
   end
   return gp
