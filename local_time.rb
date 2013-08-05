@@ -16,7 +16,7 @@ def local_time(var_name,list)
   list.dir.each_index do |n|
     begin 
       gp = gpopen(list.dir[n] + var_name + '.nc',var_name)
-      time = gpopen(list.dir[n] + var_name + '.nc','time')
+      time = gpopen(list.dir[n].sub("data","rst_data") + 'rst1800.nc','time')
     rescue
       print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
@@ -29,6 +29,7 @@ def local_time(var_name,list)
       hr_in_day = 24 / omega_ratio(list.name[n])
     end
 
+    time = gp.axis("time").to_gphys
 =begin
     # 時間の単位を hrs に合わせる
     if time.units.to_s=='min' 
@@ -39,6 +40,7 @@ def local_time(var_name,list)
       time.units = 'hrs'
     end
 =end
+
     lon = gp.axis('lon').to_gphys
 #    local_time = lon.pos / 360 * hr_in_day
     local_time = lon.copy
@@ -46,7 +48,7 @@ def local_time(var_name,list)
     local_time.long_name = "local time"
     local_time.units = "hrs"
 
-    lon = lon.to_gphys
+#    lon = lon.to_gphys
 #    dlon = lon[1].val-lon[0].val
 
     data_name = 'local_' + var_name
@@ -54,23 +56,24 @@ def local_time(var_name,list)
     GPhys::NetCDF_IO.each_along_dims_write([gp,time], ofile, 'time') { 
       |gphys,gtime|
 
+      nowtime = gtime
       # 時間の単位を[day]に変更
-      nowtime = gtime/hr_in_day    if gtime.units.to_s != "hrs"
-      nowtime = gtime/hr_in_day/60 if gtime.units.to_s != "min"
+      nowtime.val = gtime.val/hr_in_day    if gtime.units.to_s == "hrs"
+      nowtime.val = gtime.val/hr_in_day/60 if gtime.units.to_s == "min"
 
-      local_time.val = nowtime[0].val + lon.val/360
+      local_time.val = nowtime.val + lon.val/360
       local_time = (local_time - local_time.to_i)*hr_in_day
 
       # 補助座標に地方時を設定 
-      gphys.set_assoc_coords([local_time])
+#      gphys.set_assoc_coords([local_time])
     
       # 地方時の値を準備
 #      press_crd = sig.val*RefPrs
 #      p press_crd
-      local_crd = VArray.new( local_crd, {"units"=>"hrs"}, "local")
+#      local_crd = VArray.new( local_crd, {"units"=>"hrs"}, "local")
   
       # 鉛直座標を気圧に変換
-      gp_local = gphys.interpolate(lon.name=>local_crd)
+#      gp_local = gphys.interpolate(lon.name=>local_crd)
 #
 #      min = local.val.min
 #      for i in 0..lon.length-1
