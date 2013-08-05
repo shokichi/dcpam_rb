@@ -16,72 +16,48 @@ def local_time(var_name,list)
   list.dir.each_index do |n|
     begin 
       gp = gpopen(list.dir[n] + var_name + '.nc',var_name)
-      time = gpopen(list.dir[n].sub("data","rst_data") + 'rst1800.nc','time')
     rescue
       print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
     end
-
-    # hr_in_day の取得
-    if time.get_att("hour_in_day") != nil then
-      hr_in_day = time.get_att("hour_in_day")
-    else
+ 
+    begin
+      rst_file = list.dir[n].sub("data/","rst_data/rst1800.nc").sub("data1400/","rst_data/rst1440.nc")
+      hr_in_day = gpopen(rst_file,'time').get_att("hour_in_day")
+    rescue
       hr_in_day = 24 / omega_ratio(list.name[n])
     end
 
-    time = gp.axis("time").to_gphys
-=begin
-    # 時間の単位を hrs に合わせる
-    if time.units.to_s=='min' 
-      time = time / 60
-      time.units = 'hrs'
-    elsif time.units.to_s=='day'
-      time = time * 24
-      time.units = 'hrs'
-    end
-=end
+    lon = gp.axis('lon')
 
-    lon = gp.axis('lon').to_gphys
-#    local_time = lon.pos / 360 * hr_in_day
+    local = lon.pos
+    local = lon.pos*hr_in_day/360
+    local.name = "local"
+    local.name = "hrs"
+
+    lon = lon.to_gphys
     local_time = lon.copy
-    local_time.name = "local"
-    local_time.long_name = "local time"
-    local_time.units = "hrs"
-
-#    lon = lon.to_gphys
-#    dlon = lon[1].val-lon[0].val
+    nlon = lon.length
 
     data_name = 'local_' + var_name
     ofile = NetCDF.create(list.dir[n] + data_name + '.nc')
-    GPhys::NetCDF_IO.each_along_dims_write([gp,time], ofile, 'time') { 
-      |gphys,gtime|
+    GPhys::NetCDF_IO.each_along_dims_write([gp], ofile, 'time') { 
+      |gphys|
 
-      nowtime = gtime
+      nowtime = gphys.axis("time").to_gphys
+      gp_local = gphys.copy
       # 時間の単位を[day]に変更
-      nowtime.val = gtime.val/hr_in_day    if gtime.units.to_s == "hrs"
-      nowtime.val = gtime.val/hr_in_day/60 if gtime.units.to_s == "min"
-
-      local_time.val = nowtime.val + lon.val/360
+      nowtime.val = nowtime.val/hr_in_day    if nowtime.units.to_s == "hrs"
+      nowtime.val = nowtime.val/hr_in_day/60 if nowtime.units.to_s == "min"
+      # 日付が変わる経度を検出
+      local_time = nowtime + lon/360
       local_time = (local_time - local_time.to_i)*hr_in_day
-
-      # 補助座標に地方時を設定 
-#      gphys.set_assoc_coords([local_time])
-    
-      # 地方時の値を準備
-#      press_crd = sig.val*RefPrs
-#      p press_crd
-#      local_crd = VArray.new( local_crd, {"units"=>"hrs"}, "local")
-  
-      # 鉛直座標を気圧に変換
-#      gp_local = gphys.interpolate(lon.name=>local_crd)
-#
-#      min = local.val.min
-#      for i in 0..lon.length-1
-#        n = local.to_a.index(min + dlon*i)
-#        gp_local[i,false].val = gphys[n,false].val
-#      end
-#
-#      gp_local.axis(0).set_pos(local_time)
+      local_min_index = local.val.to_a.index(local.val.min)
+      # データの並び替え
+      gp_local[0..local_min_index-nlon-1,false] = gphys[local_min_index..-1,false]
+      gp_local[local_index_min-nlon..-1,false] = gphys[0..local_min_index-1,false]
+      # lon -> localtime 変換
+      gp_local.axis("lon").set_pos(local)
       [gp_local]
     }
     ofile.close

@@ -128,7 +128,7 @@ def self.explist(file_list)  # 実験ファイルリストの読み込み
   return dir, name
 end
 #----------------------
-def self.str_add(str,add_str)
+def str_add(str,add_str)
   result = []
   if str.class == Array then
     str.each_index do |n|
@@ -527,8 +527,9 @@ def gpopen(file,name)
     if !file.include?(name)
       gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
     else
-      dir = File::dirname(file)+"/"
-      file = Utiles_spe.str_add(dir,`ls #{file.sub(".nc","_rank")}*.nc`.split("\n"))
+      rank = ["rank000006.nc","rank000004.nc","rank000002.nc","rank000000.nc",
+              "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
+      file = str_add(file.sub(".nc","_"), rank)
       gp = GPhys::IO.open file, name
     end
   end
