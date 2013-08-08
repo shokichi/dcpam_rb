@@ -55,6 +55,5 @@ def calc_prcwtr(dir)
   print "[#{data_name}](#{dir}) is created \n"
 end
 
-
-dir, name = Utiles_spe.explist(ARGV[0])
-dir.each{|dir| calc_prcwtr(dir)}
+list= Utiles_spe.explist(ARGV[0])
+list.dir.each{|dir| calc_prcwtr(dir)}
