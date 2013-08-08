@@ -88,45 +88,6 @@ class Explist
   attr_reader :dir, :name, :id, :ref, :refnum
 end
 
-#---------------------- 
-def self.explist(file_list)  # 実験ファイルリストの読み込み
-  dir = []
-  name = []
-  if file_list != nil then
-    if file_list[0..0] == "-" 
-      dir[0] = "./"
-      name[0] = ""
-    else
-      begin
-        fin = File.open(file_list,"r")
-      rescue
-        dir[0] = system("pwd")
-        name[0] = ""
-        print "not exist  [#{file_list}]\n"
-        print "set directory  [#{dir[0]}]\n"
-        return dir, name
-      end  
-      n = 0 
-      loop{
-        char = fin.gets
-        if char == nil then  break  end
-        if char[0..0] == "#" then next end # コメントアウト機能
-        char = char.chop.split(",")
-        name[n] = char[0]
-        dir[n] = char[1]
-        if dir[n].include?(":") == true then
-          dir[n] = dir[n].split(":")
-        end 
-        n += 1
-      }
-      fin.close
-    end
-  else
-    dir[0] = "./"
-    name[0] = ""
-  end
-  return dir, name
-end
 #----------------------
 def str_add(str,add_str)
   result = []
@@ -148,14 +109,14 @@ def str_add(str,add_str)
   return result
 end 
 #---------------------- 
-def self.glmean(gp)  # 全球平均
+def glmean(gp)  # 全球平均
   cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
   fact = cos_phi / cos_phi.mean
   gp_mean = (gp * fact).mean("lon","lat")
   return gp_mean
 end
 #---------------------- 
-def self.latmean(gp)  # 南北平均
+def latmean(gp)  # 南北平均
   cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
   fact = cos_phi / cos_phi.mean
   gp_mean = (gp * fact).mean("lat")
@@ -163,7 +124,7 @@ def self.latmean(gp)  # 南北平均
 end
 
 #---------------------- 
-def self.virtical_integral(gp)  # 鉛直積分
+def virtical_integral(gp)  # 鉛直積分
   begin
     if gp.data.file.class == NArray then
       sig_weight = GPhys::IO.open(gp.data.file[0].path, "sig_weight")
