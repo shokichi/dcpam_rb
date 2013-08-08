@@ -71,15 +71,15 @@ def lon_mean(dir,data_name)
   end
 end
 
-dir, name = Utiles_spe.explist(ARGV[0])
+list = Utiles_spe::Explist.new(ARGV[0])
 var_name = ARGV[1]
 
 if ARGV.index('-t') 
-  time_mean(dir,var_name)
+  time_mean(list.dir,var_name)
 elsif ARGV.index('-l')
-  lon_mean(dir,var_name)
+  lon_mean(list.dir,var_name)
 else
-  big_mean(dir,var_name)
+  big_mean(list.dir,var_name)
 end
 
 =begin
