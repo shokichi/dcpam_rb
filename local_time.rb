@@ -85,8 +85,6 @@ def local_time_mean(var_name,list)
 
     local = lon.pos
     local = lon.pos*hr_in_day/360
-    local.name = "local"
-    local.name = "hrs"
 
     lon = lon.to_gphys
     local_time = lon.copy
@@ -144,8 +142,7 @@ def local_time_mean_rank(var_name,list)
   
       local = lon.pos
       local = lon.pos*hr_in_day/360
-      local.name = "local"
-      local.name = "hrs"
+      local.long_name = "local time"
   
       lon = lon.to_gphys
       local_time = lon.copy

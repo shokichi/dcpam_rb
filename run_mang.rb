@@ -7,6 +7,7 @@ wait = 10 if wait==0 || wait==nil
 loop{
   if !`ps -A | grep dcpam`.include?("dcpam")  then
     system("./run.sh")
+    print "Start run.sh [#{Time.now}]"
     break
   end
   sleep wait*60
