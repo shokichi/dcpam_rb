@@ -35,10 +35,10 @@ def lonlat(var_name,list,hash=nil)
 #    end
 
     # 描画
-    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+#    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
     GGraph.set_fig('window'=>[0,nil,-90,90])
 
-    fig_opt = {'title'=>gp.long_name + " " + list.name[n],'annotate'=>false, 'color_bar'=>true}
+    fig_opt = {'title'=>gp.long_name + " " + list.name[n],'annotate'=>false,'color_bar'=>true,"nlev"=>20}
     GGraph.tone( gp ,true, fig_opt.merge(hash))
   end
 end
@@ -66,24 +66,22 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonlat("EvapA",list,"max"=>500)
-lonlat("SensA",list,"max"=>200)
-lonlat("SSRA",list,"min"=>-1000)
-lonlat("SLRA",list,"min"=>0,"max"=>300)
-lonlat("Rain",list,"min"=>0,"max"=>600)
-lonlat("RainCumulus",list,"min"=>0,"max"=>300)
-lonlat("RainLsc",list,"min"=>0,"max"=>300)
-lonlat("SurfTemp",list,"min"=>220,"max"=>320)
-lonlat("Temp",list,"min"=>220,"max"=>300)
-lonlat("RH",list,"min"=>0,"max"=>100,"nlev"=>20)
 lonlat("OSRA",list,"min"=>-1000,"max"=>0)
-lonlat("OLRA",list,"min"=>0,"max"=>300)
-lonlat("QVap",list,"min"=>0,"max"=>2e-2)
-lonlat("QVap",list,"min"=>0,"max"=>2e-2)
-lonlat("H2OLiq",list)      
+lonlat("OLRA",list,"min"=>0,"max"=>1000)
+lonlat("EvapA",list,"max"=>1000)
+lonlat("SensA",list,"max"=>400)
+lonlat("SSRA",list,"min"=>-1000)
+lonlat("SLRA",list,"min"=>0,"max"=>1000)
+lonlat("Rain",list,"min"=>0,"max"=>1000)
+lonlat("RainCumulus",list,"min"=>0,"max"=>500)
+lonlat("RainLsc",list,"min"=>0,"max"=>500)
+lonlat("SurfTemp",list,"min"=>220,"max"=>370)
+lonlat("Temp",list,"min"=>220,"max"=>370)
+lonlat("RH",list,"min"=>0,"max"=>100)
+lonlat("H2OLiq",list)
 lonlat("PrcWtr",list)      
-lonlat("U",list,"")      
-lonlat("V",list)      
+lonlat("U",list,"min"=>-30,"max"=>30)      
+lonlat("V",list,"min"=>-20,"max"=>20)      
 
 #=begin
 lonlat("DQVapDtDyn",list)      
@@ -103,7 +101,7 @@ lonlat("DTempDtDryConv",list)
 DCL.grcls
 
 if ARGV.index("-ps") 
-  system("mv dcl.ps #{id_exp}_lonlat.ps")
+  system("mv dcl.ps #{list.id}_lonlat.ps")
 elsif ARGV.index("-png")
-  system("rename 's/dcl_/#{id_exp}_lonlat_/' dcl_*.png")
+  system("rename 's/dcl_/#{list.id}_lonlat_/' dcl_*.png")
 end

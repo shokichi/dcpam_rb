@@ -201,7 +201,7 @@ varname = ARGV[1]
 
 local_time(varname,list) if varname != nil
 #local_time("OSRA",list)
-#=begin
+=begin
 local_time_mean_rank('Rain',list)
 local_time_mean_rank('RainCumulus',list)
 local_time_mean_rank('RainLsc',list)
@@ -213,7 +213,6 @@ local_time_mean_rank('OSRA',list)
 local_time_mean_rank('OLRA',list)
 local_time_mean_rank('SurfTemp',list)
 local_time_mean_rank('Temp',list)
-#=end
 #local_time_mean_rank('RH',list,name)
 local_time_mean_rank("QVap",list)
 local_time_mean_rank("SigDot",list)
@@ -225,6 +224,9 @@ local_time_mean_rank("RadLUWFLXA",list)
 local_time_mean_rank("RadSUWFLXA",list)
 
 local_time_mean_rank("Ps",list)
+=end
+local_time_mean_rank("H2OLiq",list)
+
 #local_time_mean("QVapCulumu",list)
 
 #local_time("DQVapDtCond",list)
