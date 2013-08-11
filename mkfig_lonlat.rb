@@ -11,104 +11,94 @@ include Utiles_spe
 include NumRu
 
 
-def lonlat(var_name,dir,name,hash=nil)
-  for n in 0..dir.length-1
+def lonlat(var_name,list,hash=nil)
+  list.dir.each_index do |n|
     begin
-      gp = GPhys::IO.open(dir[n] + var_name + ".nc",var_name)
+      gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
     rescue
-      print "[#{var_name}.nc](#{dir[n]}) is not exist\n"
+      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
       next
     end
 
     # 時間平均
     gp = gp.mean("time") if gp.axnames.index("time") != nil
 
-    # 高さ方向の次元を無くす
-    gp = gp[false,0] if gp.rank==3
+    # 高さ方向の次元をカット
+    gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
+    gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
  
     # 
-    if gp.axis(0).to_gphys.long_name == "local time" then
-      max = 24
-    else
-      max = 360
-    end
+#    if gp.axis(0).to_gphys.long_name == "local time" then
+#      max = 24
+#    else
+#      max = 360
+#    end
 
     # 描画
     GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-    GGraph.set_fig('window'=>[0,xmax,-90,90])
+    GGraph.set_fig('window'=>[0,nil,-90,90])
 
-    fig_opt = {'title'=>gp.long_name + " " + name[n],'annotate'=>false, 'color_bar'=>true}
+    fig_opt = {'title'=>gp.long_name + " " + list.name[n],'annotate'=>false, 'color_bar'=>true}
     GGraph.tone( gp ,true, fig_opt.merge(hash))
   end
 end
 
-=begin
-def local_fig_Dt(var_name,dir,name,min,max,dtime)
-  num = dir.length
-  dtime =  UNumeric[dtime.to_f*60, "s"]
-  for n in 0..num-1
-    begin
-      gp = GPhys::IO.open(dir[n] + "MT" + var_name + ".nc",var_name)
-    rescue
-      print "[#{var_name}.nc](#{dir[n]}) is not exist\n"
-      next
-    end
-    if gp.rank==3 then
-      gp = gp[false,0]
-    end
-    GGraph.tone( gp*dtime ,true, 'title'=>gp.long_name + " " + name[n],'min'=>min, 'max'=>max,'annotate'=>false, 'color_bar'=>true)
-  end
-end
-=end
-
 
 #
-dir, name = Utiles_spe.explist(ARGV[0])
+list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL open
 if ARGV.index("-ps")
-  DCL.gropn(2)
+  iws = 2
 elsif ARGV.index("-png")
   DCL::swlset('lwnd',false)
-  DCL.gropn(4)
+  iws = 4
 else
-  DCL.gropn(1)
+  iws = 1
 end
 
 # DCL set
+clrmp = 14  # カラーマップ
+DCL.sgscmn(clrmp)
+DCL.gropn(iws)
 #DCL.sldiv('Y',2,1)
 DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonlat("EvapA",dir,name,"max"=>500)
-lonlat("SensA",dir,name,"max"=>200)
-lonlat("SSRA",dir,name,"min"=>-1000)
-lonlat("SLRA",dir,name,"min"=>0,"max"=>300)
-lonlat("Rain",dir,name,"min"=>0,"max"=>600)
-lonlat("RainCumulus",dir,name,"min"=>0,"max"=>300)
-lonlat("RainLsc",dir,name,"min"=>0,"max"=>300)
-lonlat("SurfTemp",dir,name,"min"=>220,"max"=>320)
-lonlat("Temp",dir,name,"min"=>220,"max"=>300)
-lonlat("RH",dir,name,"min"=>0,"max"=>100,"nlev"=>20)
-lonlat("OSRA",dir,name,"min"=>-1000,"max"=>0)
-lonlat("OLRA",dir,name,"min"=>0,"max"=>300)
-lonlat("QVap",dir,name,"min"=>0,"max"=>2e-2)
+lonlat("EvapA",list,"max"=>500)
+lonlat("SensA",list,"max"=>200)
+lonlat("SSRA",list,"min"=>-1000)
+lonlat("SLRA",list,"min"=>0,"max"=>300)
+lonlat("Rain",list,"min"=>0,"max"=>600)
+lonlat("RainCumulus",list,"min"=>0,"max"=>300)
+lonlat("RainLsc",list,"min"=>0,"max"=>300)
+lonlat("SurfTemp",list,"min"=>220,"max"=>320)
+lonlat("Temp",list,"min"=>220,"max"=>300)
+lonlat("RH",list,"min"=>0,"max"=>100,"nlev"=>20)
+lonlat("OSRA",list,"min"=>-1000,"max"=>0)
+lonlat("OLRA",list,"min"=>0,"max"=>300)
+lonlat("QVap",list,"min"=>0,"max"=>2e-2)
+lonlat("QVap",list,"min"=>0,"max"=>2e-2)
+lonlat("H2OLiq",list)      
+lonlat("PrcWtr",list)      
+lonlat("U",list,"")      
+lonlat("V",list)      
 
 #=begin
-lonlat("DQVapDtDyn",dir,name)      
-lonlat("DQVapDtVDiff",dir,name)    
-lonlat("DQVapDtCond",dir,name,"min"=>-3e-7,"max"=>0)
-lonlat("DQVapDtCumulus",dir,name,"min"=>-3e-7,"max"=>0)  
-lonlat("DQVapDtLsc",dir,name,"min"=>-3e-7,"max"=>0)
-lonlat("DTempDtRadS",dir,name)
-lonlat("DTempDtRadL",dir,name)
-lonlat("DTempDtDyn",dir,name)   
-lonlat("DTempDtVDiff",dir,name)
-lonlat("DTempDtCond",dir,name)     
-lonlat("DTempDtCumulus",dir,name)  
-lonlat("DTempDtLsc",dir,name)   
-lonlat("DTempDtDryConv",dir,name)  
+lonlat("DQVapDtDyn",list)      
+lonlat("DQVapDtVDiff",list)    
+lonlat("DQVapDtCond",list,"min"=>-3e-7,"max"=>0)
+lonlat("DQVapDtCumulus",list,"min"=>-3e-7,"max"=>0)  
+lonlat("DQVapDtLsc",list,"min"=>-3e-7,"max"=>0)
+lonlat("DTempDtRadS",list)
+lonlat("DTempDtRadL",list)
+lonlat("DTempDtDyn",list)   
+lonlat("DTempDtVDiff",list)
+lonlat("DTempDtCond",list)     
+lonlat("DTempDtCumulus",list)  
+lonlat("DTempDtLsc",list)   
+lonlat("DTempDtDryConv",list)  
 #=end
 DCL.grcls
 

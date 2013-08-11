@@ -17,43 +17,30 @@ def calc_prcwtr(dir)
   begin
     gqv = gpopen(dir + "QVap.nc", "QVap")
     gps = gpopen(dir + "Ps.nc", "Ps")
-    sigm = gpopen(dir + "QVap.nc", "sigm")
+    sig_weight = gpopen(dir + "QVap.nc", "sig_weight")
   rescue
-    print "[#{data_name}](#{dir}) is not created \n"
+    print "NOT CREATED [#{data_name}](#{dir}) \n"
     return
   end
 
   # constant
   grav = UNumeric[9.8, "m.s-2"]
 
-  lon = gqv.axis("lon")
-  lat = gqv.axis("lat")
-
-  ofile2 = NetCDF.create( dir + data_name + '.nc')
-  GPhys::NetCDF_IO.each_along_dims_write([gqv,gps], ofile2, 'time') { 
+  ofile = NetCDF.create( dir + data_name + '.nc')
+  GPhys::NetCDF_IO.each_along_dims_write([gqv,gps], ofile, 'time') { 
     |qvap,ps|  
-    #
-    time = qvap.axis("time")    
 
-    qc_na = NArray.sfloat(lon.length,lat.length,time.length)
-    grid = Grid.new(lon,lat,time)
-    qc = GPhys.new(grid,VArray.new(qc_na))
+    qc = qvap * ps * sig_weight
+    qc = qc.sum("sig") / grav
     qc.units = 'kg.m-2'
     qc.long_name = 'precipitable water'
     qc.name = data_name
-    qc[false] = 0
 
-    alph = qvap * ps / grav 
-    kmax = 15
-    for i in 0..kmax
-      k = kmax-i
-      qc = qc + alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
-    end
     [qc]
    }
-  ofile2.close
-  print "[#{data_name}](#{dir}) is created \n"
+  ofile.close
+  print "CREATED [#{data_name}](#{dir}) \n"
 end
 
-list= Utiles_spe.explist(ARGV[0])
+list= Utiles_spe::Explist.new(ARGV[0])
 list.dir.each{|dir| calc_prcwtr(dir)}

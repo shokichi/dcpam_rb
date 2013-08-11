@@ -27,11 +27,7 @@ def anglmom(dir,name)
   RPlanet = UNumeric[6371000.0, "m"]     # 惑星半径
   sec_in_day = UNumeric[86400, "s"]  #<= 24 hrs/day
 
-  if time.get_att("hour_in_day") != nil then
-    hr_in_day = time.get_att("hour_in_day")
-  else
-    hr_in_day = 24.0 / omega_ratio(list.name[n])
-  end
+  hr_in_day = 24 / omega_ratio(list.name[n])
 
   omega = 2*PI/sec_in_day           # Earth
   omega = omega * 24.0 / hr_in_day
