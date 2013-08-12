@@ -22,7 +22,7 @@ def merid_fig(var_name,list,hash)
     elsif gp.rank == 3
       gp = gp.mean(0)
     end
-    fig_opt = {'color_bar'=>true,'title'=>gp.long_name + " " + lisr.name[n],'annotate'=>false,'nlev'=>20}
+    fig_opt = {'color_bar'=>true,'title'=>gp.long_name + " " + list.name[n],'annotate'=>false,'nlev'=>20}
     GGraph.tone_and_contour(gp, true,fig_opt.merge(hash))
   end
 end
@@ -46,7 +46,7 @@ def merid_fig_strm(list)
 end
 
 # 
-list = Utiles_spe::ExpList.new(ARGV[0])
+list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL open
 if ARGV.index("-ps")
@@ -77,7 +77,8 @@ merid_fig('V',list,"min"=>-8,"max"=>8)
 merid_fig('RH',list,"min"=>0,"max"=>100)
 merid_fig('SigDot',list,"min"=>-1.5e-6,"max"=>1.5e-6)
 merid_fig('QVap',list,"min"=>0,"max"=>0.015)
-merid_fig_strm(list)
+merid_fig('H2OLiq',list,"min"=>0,"max"=>5e-5)
+#merid_fig_strm(list)
 
 
 DCL.grcls

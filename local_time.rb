@@ -225,9 +225,8 @@ local_time_mean_rank("RadSUWFLXA",list)
 
 local_time_mean_rank("Ps",list)
 =end
-local_time_mean_rank("H2OLiq",list)
-
-#local_time_mean("QVapCulumu",list)
+#local_time_mean_rank("H2OLiq",list)
+local_time_mean_rank("PrcWtr",list)
 
 #local_time("DQVapDtCond",list)
 #local_time("DQVapDtVDiff",list)    
