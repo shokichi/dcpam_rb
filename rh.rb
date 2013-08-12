@@ -44,7 +44,7 @@ def calc_rh(dir) # 相対湿度の計算
 
   ofile = NetCDF.create( dir + data_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write([gqvap,gps,gtemp],ofile,'time'){ 
-    |qvap,ps,temp| 
+    |qvap,ps,temp|
 
     time = ps.axis('time')  
  
@@ -53,10 +53,14 @@ def calc_rh(dir) # 相対湿度の計算
     grid = Grid.new(lon,lat,sig.axis('sig'),time)
     press = GPhys.new(grid,VArray.new(press_na))
     press.units = 'Pa'
-
-    for k in 0..sig.length-1
-      press[false,k,true] = ps * sig[k].val
-    end
+    press[false] = 1.0
+    
+    press = press * ps
+    press = press * sig
+    
+#    for k in 0..sig.length-1
+#      press[false,k,true] = ps * sig[k].val
+#    end
 
     # 飽和水蒸気圧の計算
     es = es0 * ( latentheat / gasrwet * ( 1/273.0 - 1/temp ) ).exp
