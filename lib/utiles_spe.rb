@@ -175,6 +175,14 @@ def self.array2gp(x_var,y_var)  # 簡単GPhysオブジェクトの作成
   return gp
 end
 
+#-----------------------
+def calc_press(ps,sig)
+  press[false] = 1
+  press = press * ps
+  press = press * sig
+  return press
+end
+
 #----------------------------------------- 
 def sig2press_save(dir,var_name) # 鉛直座標変換(sig -> press)
   # ファイルオープン
