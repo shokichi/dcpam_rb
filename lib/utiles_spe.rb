@@ -177,6 +177,14 @@ end
 
 #-----------------------
 def calc_press(ps,sig)
+  lon = ps.axis("lon")
+  lat = ps.axis("lat")
+  time = ps.axis("time")
+  press_na = NArray.sfloat(lon.length,lat.length,sig.length,time.length)
+  grid = Grid.new(lon,lat,sig.axis(0),time)
+  press = GPhys.new(grid,VArray.new(press_na))
+  press.units = 'Pa'
+
   press[false] = 1
   press = press * ps
   press = press * sig
