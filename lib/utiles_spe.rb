@@ -409,7 +409,7 @@ def self.calc_prcwtr(dir) # 可降水量の計算
     qc[false] = 0
 
     alph = qvap * ps / Grav 
-    kmax = 15
+    kmax = 22
     for i in 0..kmax
       k = kmax-i
       qc = qc + alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
@@ -420,51 +420,35 @@ def self.calc_prcwtr(dir) # 可降水量の計算
   print "[#{data_name}](#{dir}) is created\n"
 end
 # ---------------------------------------
-def local_time(gp,hr_in_day)
+def local_time(gp,hr_in_day,nowtime=nil)
 
-  time = gp.axis("time").to_gphys
   lon = gp.axis('lon')
-
-  if time.units.to_s=='min' 
-    time = time / 60
-    time.units = 'hrs'
-  elsif time.units.to_s=='day'
-    time = time * 24
-    time.units = 'hrs'
-  end
-
-  local_time = lon.pos / 360 * hr_in_day
-  local_time.long_name = "local time"
-  local_time.units = "hrs"
-  lon = lon.to_gphys
-  dlon = lon[1].val-lon[0].val
+  local = lon.pos
+  local = lon.pos*hr_in_day/360
+  local.long_name = "local time"
   
-  gphys_local = GPhys.each_along_dims([gp,time],"time"){ 
-    |gphys,gtime|
+  lon = lon.to_gphys
+  local_time = lon.copy
+  nlon = lon.length
 
-    gp_local = gphys.copy
-    gp_local[false] = 0
+  nowtime = gphys.axis("time").to_gphys if nowtime.nil?
+  gp_local = gphys.copy
+  # 時間の単位を[day]に変更
+  nowtime.val = nowtime.val/hr_in_day    if nowtime.units.to_s == "hrs"
+  nowtime.val = nowtime.val/hr_in_day/60 if nowtime.units.to_s == "min"
+  # 日付が変わる経度を検出
+  local_time.val = nowtime.val + lon.val/360
+  local_time.val = (local_time.val - local_time.val.to_i)*hr_in_day
+  local_min_index = local_time.val.to_a.index(local_time.val.min)
+  # データの並び替え
+  if local_min_index != 0 then
+    gp_local[0..nlon-1-local_min_index,false].val = gphys[local_min_index..-1,false].val
+    gp_local[nlon-local_min_index..-1,false].val = gphys[0..local_min_index-1,false].val
+  end
+  # lon -> localtime 変換
+  gp_local.axis("lon").set_pos(local)
 
-    hr = gtime.val/hr_in_day
-    hr = hr - hr.to_i
-
-    eqtime = 360*hr
-    local = lon + eqtime
-    for i in 0..local.length-1
-      if local[i].val > 360 then
-        local[i].val = local[i].val-360.0
-      end
-    end
-    min = local.val.min
-    for i in 0..lon.length-1
-      n = local.to_a.index(min + dlon*i)
-      gp_local[i,false].val = gphys[n,false].val
-    end
-
-    gp_local.axis(0).set_pos(local_time)
-    return gp_local
-  }
-  return gphys_local
+  return gp_local
 end
 
 # ---------------------------------------
@@ -514,8 +498,10 @@ def gpopen(file,name)
     if !file.include?(name)
       gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
     else
-      rank = ["rank000006.nc","rank000004.nc","rank000002.nc","rank000000.nc",
-              "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
+      rank = ["rank000006.nc","rank000004.nc",
+              "rank000002.nc","rank000000.nc",
+              "rank000001.nc","rank000003.nc",
+              "rank000005.nc","rank000007.nc"]
       file = str_add(file.sub(".nc","_"), rank)
       gp = GPhys::IO.open file, name
     end
