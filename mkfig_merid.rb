@@ -10,18 +10,24 @@ include Utiles_spe
 include NumRu
 
 def merid_fig(var_name,list,hash)
-  for n in 0..list.dir.length-1
+  list.dir.each_index do |n|
     begin
       gp = gpopen(Utiles_spe.str_add(list.dir[n],var_name)+'.nc',var_name)
     rescue
       print "[#{var_name}](#{list.dir[n]}) is not exist\n"
       next
     end
-    if gp.rank == 4 
-      gp = gp.mean(0,-1)
-    elsif gp.rank == 3
-      gp = gp.mean(0)
+    # 時間平均
+    gp = gp.mean("time") if !gp.axnames.index("time").nil
+    # 経度平均
+    gp = gp.mean("lon") if !gp.axnames.index("lon").nil
+    
+    # 
+    if gp.max.to_f > 1e+10 then
+      gp = gp*1e-10
+      gp.units = "10^10 " + gp.units
     end
+
     fig_opt = {'color_bar'=>true,'title'=>gp.long_name + " " + list.name[n],'annotate'=>false,'nlev'=>20}
     GGraph.tone_and_contour(gp, true,fig_opt.merge(hash))
   end
