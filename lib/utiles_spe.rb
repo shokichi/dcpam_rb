@@ -304,11 +304,12 @@ def calc_msf(dir)  # 質量流線関数の計算
 end
 
 # -------------------------------------------
-def calc_rh(dir) # 相対湿度の計算
-  # file open
-  gqvap = gpopen(dir + "QVap.nc", "QVap")
-  gps = gpopen(dir + "Ps.nc", "Ps")
-  gtemp = gpopen(dir + "Temp.nc", "Temp")
+def calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
+  # file check
+  if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
+    print "Argument is not [QVap,Temp,Ps]"
+    return
+  end
 
   # 座標データの取得
   lon = gtemp.axis('lon')
@@ -316,8 +317,6 @@ def calc_rh(dir) # 相対湿度の計算
   sig = gtemp.axis('sig').to_gphys
 
   # 定数設定
-  grav = UNumeric[9.8, "m.s-2"]
-  round = UNumeric[6400000.0, "m"]
   qvapmol = UNumeric[18.01528e-3, "kg.mol-1"]
   drymol =UNumeric[28.964e-3,"kg.mol-1"]
   p0 = UNumeric[1.4e+11,"Pa"]
@@ -331,37 +330,30 @@ def calc_rh(dir) # 相対湿度の計算
   gasrwet = gasruniv / qvapmol
   epsv = qvapmol / drymol
 
-
+  # 
   data_name = 'RH'
-  ofile = NetCDF.create( dir + data_name + '.nc')
+  file = gqvap.data.file.path.sub("QVap",data_name)
+  ofile = NetCDF.create(file)
   GPhys::NetCDF_IO.each_along_dims_write([gqvap,gps,gtemp],ofile,'time'){ 
     |qvap,ps,temp| 
-
-    time = ps.axis('time')  
- 
     # 気圧の計算
-    press_na = NArray.sfloat(lon.length,lat.length,
-                             sig.length,time.length)
-    grid = Grid.new(lon,lat,sig.axis('sig'),time)
-    press = GPhys.new(grid,VArray.new(press_na))
-    press.units = 'Pa'
-
-    for k in 0..sig.length-1
-      press[false,k,true] = ps * sig[k].val
-    end
+    press = calc_press(ps,sig)    
+    
+#    for k in 0..sig.length-1
+#      press[false,k,true] = ps * sig[k].val
+#    end
 
     # 飽和水蒸気圧の計算
-    es = es0 * ( latentheat / gasrwet * ( 1/273.0 - 1/temp ) ).exp
+#    es = es0 * ( latentheat / gasrwet * ( 1/273.0 - 1/temp ) ).exp
+    # 水蒸気圧の計算
+#    e = qvap * press / epsv
+    # 相対湿度の計算
+#    rh = e / es * 100 # [%]
   
     # 飽和非湿の計算
-  #  qvap_sat = epsv * (p0 / press) * (-latheat / (gasruniv * temp) ).exp
-
-    # 水蒸気圧の計算
-    e = qvap * press / epsv
-
+    qvap_sat = epsv * (p0 / press) * (-latheat / (gasruniv * temp) ).exp
     # 相対湿度の計算
-    rh = e / es * 100 # [%]
-  #  rh = qvap / qvap_sat * 100 # [%]
+    rh = qvap / qvap_sat * 100 # [%]
 
     rh.units = '%'
     rh.long_name = 'relative humidity'
@@ -370,7 +362,7 @@ def calc_rh(dir) # 相対湿度の計算
     [rh]
     }
   ofile.close
-  print "[#{data_name}](#{dir}) is created\n"
+  print "[#{data_name}](#{file}) is created\n"
 end
 
 # --------------------------------------------

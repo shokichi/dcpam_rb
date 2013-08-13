@@ -28,8 +28,6 @@ def calc_rh(dir) # 相対湿度の計算
   sig = gtemp.axis('sig').to_gphys
 
   # 定数設定
-  grav = UNumeric[9.8, "m.s-2"]
-  round = UNumeric[6400000.0, "m"]
   qvapmol = UNumeric[18.01528e-3, "kg.mol-1"]
   drymol =UNumeric[28.964e-3,"kg.mol-1"]
   p0 = UNumeric[1.4e+11,"Pa"]
@@ -75,23 +73,25 @@ def calc_rh(dir) # 相対湿度の計算
   print "[#{data_name}](#{dir}) is created\n"
 end
 
-dir, name = Utiles_spe.explist(ARGV[0])
-dir.each{|dir| calc_rh(dir)}
+def calc_rh_rank(dir)
+  rank = ["rank000006.nc","rank000004.nc","rank000002.nc","rank000000.nc",
+          "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
+  rank.each do |footer|
+    begin 
+      ps = GPhys::IO.open(dir +"Ps"+"_"+footer,"Ps")
+      qvap = GPhys::IO.open(dir +"Qvap"+"_"+footer,"Qvap")
+      temp = GPhys::IO.open(dir +"Temp"+ "_"+footer,"Temp")
+    rescue 
+      print "[RH](#{dir[n]}) is not created\n"
+      next
+    end
+    Utiles_spe.calc_rh(qvap,temp,ps)
+  end
+end
 
-
-=begin
-#p es_t.val
-#p rh.max
-#p rh2.max
-#rh2 = GPhys.new(grid,VArray.new(rh2))
-# DCL
-DCL.gropn(1)
-DCL.sgpset('lcntl',false)
-DCL.uzfact(1.0)
-
-#GGraph.tone e.mean(0,-1),true,'color_bar'=>true
-GGraph.tone es.mean(0,-1),true,'color_bar'=>true#,'keep'=>true
-#GGraph.tone press.mean(0,-1), true,'color_bar'=>true
-GGraph.tone rh.mean(0,-1), true,'color_bar'=>true,'min'=>0,'max'=>100
-DCL.grcls
-=end
+list = Utiles_spe::Explist.new(ARGV[0])
+if ARGV.index("-rank") then
+  list.dir.each{ |dir| calc_rh_rank(dir) }
+else
+  list.dir.each{|dir| calc_rh(dir)}
+end

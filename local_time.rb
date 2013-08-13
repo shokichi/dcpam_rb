@@ -133,7 +133,6 @@ def local_time_mean_rank(var_name,list)
       begin 
         gp = GPhys::IO.open(file,var_name)
       rescue
-        p file 
         print "[#{var_name}](#{list.dir[n]}) is not exist\n"
         next
       end
