@@ -79,10 +79,10 @@ def calc_rh_rank(dir)
   rank.each do |footer|
     begin 
       ps = GPhys::IO.open(dir +"Ps"+"_"+footer,"Ps")
-      qvap = GPhys::IO.open(dir +"Qvap"+"_"+footer,"Qvap")
+      qvap = GPhys::IO.open(dir +"QVap"+"_"+footer,"QVap")
       temp = GPhys::IO.open(dir +"Temp"+ "_"+footer,"Temp")
     rescue 
-      print "[RH](#{dir[n]}) is not created\n"
+      print "[RH](#{dir}) is not created\n"
       next
     end
     Utiles_spe.calc_rh(qvap,temp,ps)

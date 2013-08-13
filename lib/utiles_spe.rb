@@ -262,7 +262,7 @@ def self.sig2press(gp,ps) # 鉛直座標変換(sig -> press)
 end
 
 #----------------------------------------- 
-def calc_msf(dir)  # 質量流線関数の計算
+def self.calc_msf(dir)  # 質量流線関数の計算
   # file open
   gv = gpopen(dir + "V.nc", "V")
   gps = gpopen(dir + "Ps.nc", "Ps")
@@ -304,7 +304,7 @@ def calc_msf(dir)  # 質量流線関数の計算
 end
 
 # -------------------------------------------
-def calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
+def self.calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
   # file check
   if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
     print "Argument is not [QVap,Temp,Ps]"
@@ -366,7 +366,7 @@ def calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
 end
 
 # --------------------------------------------
-def calc_prcwtr(dir) # 可降水量の計算
+def self.calc_prcwtr(dir) # 可降水量の計算
   # file open
   gqv = gpopen(dir + "QVap.nc", "QVap")
   gps = gpopen(dir + "Ps.nc", "Ps")
