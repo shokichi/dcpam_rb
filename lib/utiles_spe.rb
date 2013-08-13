@@ -122,6 +122,23 @@ def latmean(gp)  # 南北平均
   gp_mean = (gp * fact).mean("lat")
   return gp_mean
 end
+#------------------------
+def std_error(narray,blocknum=nil) # 標準偏差
+  blocknum = narray.length if blocknum.nil?
+  ave = narray.mean
+  var = NArray.sfloat(blocknum)
+  range1 = 0
+  delrange = narray.length/blocknum
+
+  for n in 0..blocknum-1 end
+    range2 = range2 + delrange.to_i
+    var[n] = narray[range1..range2-1].mean
+    range1 = range2
+  end
+
+  std = ((var-ave)**2).mean.sqrt
+  return std
+end
 
 #---------------------- 
 def virtical_integral(gp)  # 鉛直積分
@@ -177,13 +194,14 @@ end
 
 #-----------------------
 def calc_press(ps,sig)
-  lon = ps.axis("lon")
-  lat = ps.axis("lat")
-  time = ps.axis("time")
+  lon = ps.axis(0)
+  lat = ps.axis(1)
+  time = ps.axis(2)
   press_na = NArray.sfloat(lon.length,lat.length,sig.length,time.length)
   grid = Grid.new(lon,lat,sig.axis(0),time)
   press = GPhys.new(grid,VArray.new(press_na))
-  press.units = 'Pa'
+  press.units = "Pa"
+  press.name = "Press"
 
   press[false] = 1
   press = press * ps
