@@ -16,7 +16,9 @@ def lonlat_annomaly(var_name,list,hash={})
   begin
     gp_ref = GPhys::IO.open(list.dir[list.refnum]+var_name+".nc",var_name)
   rescue
-    print "Refarence file is not exist\n"
+p    list.dir
+p    list.refnum
+    print "Refarence file is not exist [#{list.dir[list.refnum]}](#{var_name})\n"
     return
   end
   gp_ref = cut_and_mean(gp_ref)
