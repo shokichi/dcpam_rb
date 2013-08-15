@@ -7,6 +7,7 @@ require 'numru/ggraph'
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
 require '/home/ishioka/ruby/lib/utiles_spe'
+require 'optparse'
 include Utiles_spe
 include NumRu
 include Math
@@ -91,8 +92,7 @@ def local_time_mean(var_name,list)
     nlon = lon.length
     
     ave = 0
-    ofile = NetCDF.create(list.dir[n] + data_name + '.nc')
-    GPhys::NetCDF_IO.each_along_dims([gp], 'time') { 
+    GPhys.each_along_dims(gp, 'time') { 
       |gphys|
 
       nowtime = gphys.axis("time").to_gphys
@@ -101,18 +101,21 @@ def local_time_mean(var_name,list)
       nowtime.val = nowtime.val/hr_in_day    if nowtime.units.to_s == "hrs"
       nowtime.val = nowtime.val/hr_in_day/60 if nowtime.units.to_s == "min"
       # 日付が変わる経度を検出
-      local_time = nowtime + lon/360
-      local_time = (local_time - local_time.to_i)*hr_in_day
+      local_time.val = nowtime.val + lon.val/360
+      local_time.val = (local_time.val - local_time.val.to_i)*hr_in_day
       local_min_index = local_time.val.to_a.index(local_time.val.min)
       # データの並び替え
-      gp_local[0..nlon-1-local_min_index,false] = gphys[local_min_index..-1,false]
-      gp_local[nlon-local_min_index..-1,false] = gphys[0..local_min_index-1,false]
+      if local_min_index != 0 then
+        gp_local[0..nlon-1-local_min_index,false].val = gphys[local_min_index..-1,false].val
+        gp_local[nlon-local_min_index..-1,false].val = gphys[0..local_min_index-1,false].val
+      end
       # lon -> localtime 変換
       gp_local.axis("lon").set_pos(local)
       ave = ave + gp_local      
     }
     ave = ave[false,0]/gp.axis("time").pos.length
     data_name = 'MTlocal_' + var_name
+    ofile = NetCDF.create(list.dir[n] + data_name + '.nc')
     GPhys::IO.write(ofile, ave)
     ofile.close
   end
@@ -195,53 +198,63 @@ def omega_ratio(name)# 名前解析 nameからomega/omega_Eを抽出
   return ratio
 end
 
+rank_flag = false
+varname = nil
+opt = OptionParser.new
+opt.on("-r","--rank") {rank_flag = true}
+opt.on("-n VAR") {|str| varname = str}
+opt.parse!(ARGV)
+
 list = Utiles_spe::Explist.new(ARGV[0])
-varname = ARGV[1]
 
-local_time(varname,list) if varname != nil
-#local_time("OSRA",list)
+
+if !varname.nil? then
+  local_time_mean_rank(varname,list) if rank_flag
+  local_time_mean(varname,list) if !rank_flag
+end
+  #local_time("OSRA",list)
 =begin
-local_time_mean_rank('Rain',list)
-local_time_mean_rank('RainCumulus',list)
-local_time_mean_rank('RainLsc',list)
-local_time_mean_rank('EvapA',list)
-local_time_mean_rank('SensA',list)
-local_time_mean_rank('SSRA',list)
-local_time_mean_rank('SLRA',list)
-local_time_mean_rank('OSRA',list)
-local_time_mean_rank('OLRA',list)
-local_time_mean_rank('SurfTemp',list)
-local_time_mean_rank('Temp',list)
-#local_time_mean_rank('RH',list,name)
-local_time_mean_rank("QVap",list)
-local_time_mean_rank("SigDot",list)
-local_time_mean_rank("U",list)
-local_time_mean_rank("V",list)
-local_time_mean_rank("RadLDWFLXA",list)
-local_time_mean_rank("RadSDWFLXA",list)
-local_time_mean_rank("RadLUWFLXA",list)
-local_time_mean_rank("RadSUWFLXA",list)
-
-local_time_mean_rank("Ps",list)
+  local_time_mean_rank('Rain',list)
+  local_time_mean_rank('RainCumulus',list)
+  local_time_mean_rank('RainLsc',list)
+  local_time_mean_rank('EvapA',list)
+  local_time_mean_rank('SensA',list)
+  local_time_mean_rank('SSRA',list)
+  local_time_mean_rank('SLRA',list)
+  local_time_mean_rank('OSRA',list)
+  local_time_mean_rank('OLRA',list)
+  local_time_mean_rank('SurfTemp',list)
+  local_time_mean_rank('Temp',list)
+  #local_time_mean_rank("QVap",list)
+  local_time_mean_rank("SigDot",list)
+  local_time_mean_rank("U",list)
+  local_time_mean_rank("V",list)
+  local_time_mean_rank("RadLDWFLXA",list)
+  local_time_mean_rank("RadSDWFLXA",list)
+  local_time_mean_rank("RadLUWFLXA",list)
+  local_time_mean_rank("RadSUWFLXA",list)
+  
+  local_time_mean_rank("Ps",list)
+  #=end
+  #local_time_mean_rank("H2OLiq",list)
+  #local_time_mean_rank("PrcWtr",list)
+  local_time_mean_rank('RH',list)
+  
+  local_time_mean_rank("DQVapDtCond",list)
+  local_time_mean_rank("DQVapDtVDiff",list)    
+  local_time_mean_rank("DTempDtDyn",list)   
+  local_time_mean_rank("DTempDtVDiff",list)
+  local_time_mean_rank("DQVapDtCumulus",list)  
+  local_time_mean_rank("DTempDtCond",list)     
+  local_time_mean_rank("DTempDtLsc",list)   
+  local_time_mean_rank("DQVapDtDyn",list)      
+  local_time_mean_rank("DTempDtCumulus",list)  
+  local_time_mean_rank("DTempDtRadL",list)
+  local_time_mean_rank("DQVapDtLsc",list)      
+  local_time_mean_rank("DTempDtDryConv",list)  
+  local_time_mean_rank("DTempDtRadS",list)
+  print `date`
 =end
-#local_time_mean_rank("H2OLiq",list)
-local_time_mean_rank("PrcWtr",list)
-
-#local_time("DQVapDtCond",list)
-#local_time("DQVapDtVDiff",list)    
-#local_time("DTempDtDyn",list)   
-#local_time("DTempDtVDiff",list)
-#local_time("DQVapDtCumulus",list)  
-#local_time("DTempDtCond",list)     
-#local_time("DTempDtLsc",list)   
-#local_time("DQVapDtDyn",list)      
-#local_time("DTempDtCumulus",list)  
-#local_time("DTempDtRadL",list)
-#local_time("DQVapDtLsc",list)      
-#local_time("DTempDtDryConv",list)  
-#local_time("DTempDtRadS",list)
-print `date`
-
 =begin
 DCL.gropn(1)
 DCL.sgpset('lcntl',true)
@@ -250,4 +263,46 @@ DCL.uzfact(1.0)
 GGraph.tone gp_local.mean(-1)
 DCL.grcls
 =end 
+=begin
+var_list = 
+[ 
+  'Rain',
+  'RainCumulus',
+  'RainLsc',
+  'EvapA',
+  'SensA',
+  'SSRA',
+  'SLRA',
+  'OSRA',
+  'OLRA',
+  'SurfTemp',
+  'Temp',
+  "QVap",
+  "SigDot",
+  "U",
+  "V",
+  "RadLDWFLXA",
+  "RadSDWFLXA",
+  "RadLUWFLXA",
+  "RadSUWFLXA",
+  "Ps",
+  "H2OLiq",
+  "PrcWtr",
+  'RH',
+  "DQVapDtCond",
+  "DQVapDtVDiff",    
+  "DTempDtDyn",   
+  "DTempDtVDiff",
+  "DQVapDtCumulus",  
+  "DTempDtCond",     
+  "DTempDtLsc",   
+  "DQVapDtDyn",      
+  "DTempDtCumulus",  
+  "DTempDtRadL",
+  "DQVapDtLsc",      
+  "DTempDtDryConv",  
+  "DTempDtRadS"
+]
 
+var_list.each{ |var| local_time_mean_rank(var,list) } 
+=end

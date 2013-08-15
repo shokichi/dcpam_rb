@@ -130,7 +130,7 @@ def std_error(narray,blocknum=nil) # 標準偏差
   range1 = 0
   delrange = narray.length/blocknum
 
-  for n in 0..blocknum-1 end
+  for n in 0..blocknum-1 
     range2 = range2 + delrange.to_i
     var[n] = narray[range1..range2-1].mean
     range1 = range2
