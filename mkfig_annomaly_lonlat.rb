@@ -16,8 +16,6 @@ def lonlat_annomaly(var_name,list,hash={})
   begin
     gp_ref = GPhys::IO.open(list.dir[list.refnum]+var_name+".nc",var_name)
   rescue
-p    list.dir
-p    list.refnum
     print "Refarence file is not exist [#{list.dir[list.refnum]}](#{var_name})\n"
     return
   end
@@ -83,21 +81,21 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonlat_annomaly("OSRA",list,"min"=>-100,"max"=>100)
-lonlat_annomaly("OLRA",list,"min"=>-50,"max"=>50,"nlev"=>20)
-lonlat_annomaly("EvapA",list,"min"=>-50,"max"=>50)
-lonlat_annomaly("SensA",list,"min"=>50,"max"=>50,"nlev"=>20)
-lonlat_annomaly("SSRA",list,"min"=>-100,"max"=>100)
-lonlat_annomaly("SLRA",list,"min"=>-50,"max"=>50,"nlev"=>20)
-lonlat_annomaly("Rain",list,"min"=>100,"max"=>100,"nlev"=>20)
+lonlat_annomaly("OSRA",list,"min"=>-250,"max"=>250,"nlev"=>20)
+lonlat_annomaly("OLRA",list,"min"=>-100,"max"=>100,"nlev"=>20)
+lonlat_annomaly("EvapA",list,"min"=>-150,"max"=>150)
+lonlat_annomaly("SensA",list,"min"=>-100,"max"=>100,"nlev"=>20)
+lonlat_annomaly("SSRA",list,"min"=>-200,"max"=>200,"nlev"=>20)
+lonlat_annomaly("SLRA",list,"min"=>-60,"max"=>60,"nlev"=>12)
+lonlat_annomaly("Rain",list,"min"=>-800,"max"=>800,"nlev"=>16)
 lonlat_annomaly("RainCumulus",list,"min"=>50,"max"=>50)
 lonlat_annomaly("RainLsc",list,"min"=>50,"max"=>50)
-lonlat_annomaly("SurfTemp",list,"min"=>-20,"max"=>20)
+lonlat_annomaly("SurfTemp",list,"min"=>-30,"max"=>30,"nlev"=>12)
 lonlat_annomaly("Temp",list,"min"=>-20,"max"=>20)
 lonlat_annomaly("RH",list,"min"=>-10,"max"=>10)
-lonlat_annomaly("H2OLiq",list,"min"=>-1e-5,"max"=>1e-5)
-lonlat_annomaly("PrcWtr",list,"min"=>-20,"max"=>20,"nlev"=>20)      
-lonlat_annomaly("U",list,"min"=>-10,"max"=>10,"nlev"=>20)      
+lonlat_annomaly("H2OLiq",list,"min"=>-5e-5,"max"=>5e-5)
+lonlat_annomaly("PrcWtr",list,"min"=>-50,"max"=>50,"nlev"=>20)      
+lonlat_annomaly("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
 lonlat_annomaly("V",list,"min"=>-10,"max"=>10)      
 
 =begin
