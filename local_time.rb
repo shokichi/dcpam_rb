@@ -211,7 +211,52 @@ list = Utiles_spe::Explist.new(ARGV[0])
 if !varname.nil? then
   local_time_mean_rank(varname,list) if rank_flag
   local_time_mean(varname,list) if !rank_flag
+else
+var_list = 
+[ 
+  'Rain',
+  'RainCumulus',
+  'RainLsc',
+  'EvapA',
+  'SensA',
+  'SSRA',
+  'SLRA',
+  'OSRA',
+  'OLRA',
+  'SurfTemp',
+  'Temp',
+  "QVap",
+  "SigDot",
+  "U",
+  "V",
+  "RadLDWFLXA",
+  "RadSDWFLXA",
+  "RadLUWFLXA",
+  "RadSUWFLXA",
+  "Ps",
+  "H2OLiq",
+  "PrcWtr",
+  'RH',
+  "DQVapDtCond",
+  "DQVapDtVDiff",    
+  "DTempDtDyn",   
+  "DTempDtVDiff",
+  "DQVapDtCumulus",  
+  "DTempDtCond",     
+  "DTempDtLsc",   
+  "DQVapDtDyn",      
+  "DTempDtCumulus",  
+  "DTempDtRadL",
+  "DQVapDtLsc",      
+  "DTempDtDryConv",  
+  "DTempDtRadS"
+]
+
+var_list.each{ |var| local_time_mean_rank(var,list) } 
+
 end
+
+
   #local_time("OSRA",list)
 =begin
   local_time_mean_rank('Rain',list)
@@ -263,45 +308,3 @@ DCL.uzfact(1.0)
 GGraph.tone gp_local.mean(-1)
 DCL.grcls
 =end 
-var_list = 
-[ 
-  'Rain',
-  'RainCumulus',
-  'RainLsc',
-  'EvapA',
-  'SensA',
-  'SSRA',
-  'SLRA',
-  'OSRA',
-  'OLRA',
-  'SurfTemp',
-  'Temp',
-  "QVap",
-  "SigDot",
-  "U",
-  "V",
-  "RadLDWFLXA",
-  "RadSDWFLXA",
-  "RadLUWFLXA",
-  "RadSUWFLXA",
-  "Ps",
-  "H2OLiq",
-  "PrcWtr",
-  'RH',
-  "DQVapDtCond",
-  "DQVapDtVDiff",    
-  "DTempDtDyn",   
-  "DTempDtVDiff",
-  "DQVapDtCumulus",  
-  "DTempDtCond",     
-  "DTempDtLsc",   
-  "DQVapDtDyn",      
-  "DTempDtCumulus",  
-  "DTempDtRadL",
-  "DQVapDtLsc",      
-  "DTempDtDryConv",  
-  "DTempDtRadS"
-]
-
-var_list.each{ |var| local_time_mean_rank(var,list) } 
-
