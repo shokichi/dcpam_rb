@@ -48,6 +48,44 @@ def lonlat_annomaly(var_name,list,hash={})
   end
 end
 
+def lonlat_annomaly_fix(var_name,list,hash={})
+  # 基準データ
+  begin
+    gp_ref = GPhys::IO.open(list.dir[list.refnum]+var_name+".nc",var_name)
+  rescue
+    print "Refarence file is not exist [#{list.dir[list.refnum]}](#{var_name})\n"
+    return
+  end
+  gp_ref = cut_and_mean(gp_ref)
+
+  # 比較データ
+  list.dir.each_index do |n|
+    begin
+      gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
+    rescue
+      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
+      next
+    end
+    gp = cut_and_mean(gp)
+
+    # 横軸最大値
+    xcoord = gp.axis(0).to_gphys.val
+    xmax = (xcoord[1]-xcoord[0])*xcoord.length
+
+    # 偏差の計算
+    annml = gp.copy
+    annml.val = gp.val-gp_ref.val* glmean(gp).val/glmean(gp_ref).val
+
+    # 描画
+    fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+               'annotate'=>false,'color_bar'=>true}
+    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+    GGraph.set_fig('window'=>[0,xmax,-90,90])
+    GGraph.tone_and_contour( annml ,true, fig_opt.merge(hash))
+  end
+end
+
+
 def cut_and_mean(gp)
   # 時間平均
   gp = gp.mean("time") if gp.axnames.index("time") != nil

@@ -49,11 +49,6 @@ def lon_sig(gp,min,max,int,t)
 end
 
 
-dir=ARGV[0]
-data_name=ARGV[1]
-
-if dir == nil then dir = './' end
-if data_name == nil then data_name = 'Rain' end
 
 # file open
 rain = GPhys::IO.open( dir +"local_" + data_name + ".nc",data_name)

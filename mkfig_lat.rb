@@ -10,7 +10,7 @@ include NumRu
 
 
 def lat_fig(var_name,list,hash||{nil})
-  for n in 0..list.dir.length-1
+  list.dir.each_index do |n|
     # データの取得
     begin
       gp = gpopen(dir[n] + var_name + ".nc",var_name)
@@ -61,7 +61,7 @@ end
 
 
 # 
-list = Utiles_spe.Explist.new(ARGV[0])
+list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL open
 if ARGV.index("-ps")
