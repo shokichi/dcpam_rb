@@ -59,5 +59,26 @@ def calc_msf(dir)
   print "[#{data_name}](#{dir}) is created \n"
 end
 
+def calc_msf_rank(dir)
+  rank = ["rank000006.nc","rank000004.nc","rank000002.nc","rank000000.nc",
+          "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
+  rank.each do |footer|
+    begin 
+      ps = GPhys::IO.open(dir +"Ps"+"_"+footer,"Ps")
+      qvap = GPhys::IO.open(dir +"QVap"+"_"+footer,"QVap")
+      temp = GPhys::IO.open(dir +"Temp"+ "_"+footer,"Temp")
+    rescue 
+      print "[RH](#{dir}) is not created\n"
+      next
+    end
+    Utiles_spe.calc_msf(qvap,temp,ps)
+  end
+end
+
+
 list = Utiles_spe::Explist.new(ARGV[0])
-list.dir.each{|dir| calc_msf(dir)}
+if ARGV.index("-rank") then
+  list.dir.each{ |dir| calc_msf_rank(dir) }
+else
+  list.dir.each{|dir| calc_msf(dir)}
+end

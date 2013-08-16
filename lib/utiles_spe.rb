@@ -33,7 +33,8 @@ class Explist
   end
 
   def refnum
-    return @name.index(@ref)
+   result = @name.index(@ref)
+   return result
   end
 
   private
@@ -85,7 +86,7 @@ class Explist
   end
 
   public  
-  attr_reader :dir, :name, :id, :ref, :refnum
+  attr_reader :dir, :name, :id, :ref
 end
 
 #----------------------
@@ -280,14 +281,12 @@ def self.sig2press(gp,ps) # 鉛直座標変換(sig -> press)
 end
 
 #----------------------------------------- 
-def self.calc_msf(dir)  # 質量流線関数の計算
+def self.calc_msf(gv,gps,sigm)  # 質量流線関数の計算
   # file open
-  gv = gpopen(dir + "V.nc", "V")
-  gps = gpopen(dir + "Ps.nc", "Ps")
-  sigm = gpopen(dir + "V.nc", "sigm")
-
-  # 定数設定
-
+  if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
+    print "Argument is not [QVap,Temp,Ps]"
+    return
+  end
   # 座標データの取得
   lon = gv.axis("lon")
   lat = gv.axis("lat")

@@ -263,7 +263,6 @@ DCL.uzfact(1.0)
 GGraph.tone gp_local.mean(-1)
 DCL.grcls
 =end 
-=begin
 var_list = 
 [ 
   'Rain',
@@ -305,4 +304,4 @@ var_list =
 ]
 
 var_list.each{ |var| local_time_mean_rank(var,list) } 
-=end
+
