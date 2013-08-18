@@ -6,6 +6,7 @@
 require "numru/ggraph"
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require 'optparse'
 include Utiles_spe
 include NumRu
 include Math
@@ -116,6 +117,12 @@ def error_sd(gp)
   return std
 end
 
+opt = OptionParser.new
+opt.on("-a") {type = "a"}
+opt.on("-b") {type = "b"}
+opt.on("-c") {type = "c"}
+opt.parse!(ARGV)
+
 def drawfig(file,chpt)
   # DCL open
   if ARGV.index("-ps")
@@ -175,7 +182,7 @@ def drawfig(file,chpt)
     omega.name = "omega"
     omega.long_name = "Rotation rate"
     albedo.axis("noname").set_pos(omega)
-
+    error = std_error(albedo.val,360)
 
     if n == 0 then
       GGraph.scatter albedo.axis("noname").to_gphys,albedo, true,"size"=>size,"index"=>12,"type"=>type-1,"title"=>subname+" "+long_name 
@@ -245,14 +252,14 @@ def drawclm(file)
  
 end 
 
+
+
 file_all = "/home/ishioka/link/all/fig/list/omega_all-1440.list"
 file_coriolis = "/home/ishioka/link/coriolis/fig/list/omega_coriolis-1440.list"
 file_diurnal = "/home/ishioka/link/diurnal/fig/list/omega_diurnal-1440.list"
 
 
-#drawfig([file_all,file_coriolis,file_diurnal],"a")
-#drawfig([file_all,file_coriolis,file_diurnal],"b")
-drawfig([file_all,file_coriolis,file_diurnal],"c")
+drawfig([file_all,file_coriolis,file_diurnal],type)
 #drawclm([file_all,file_coriolis,file_diurnal])
 #list = Utiles_spe::Explist.new(file_all)
 #albedo = Utiles_spe.array2gp(get_omega(list),get_albedo(list))
