@@ -342,9 +342,9 @@ def self.calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
 
   es0 = UNumeric[611,"Pa"]
   latentheat = UNumeric[2.5e+6,"J.kg-1"]
-  latheat = LatentHeat * MolWtWet
+#  latheat = LatentHeat * MolWtWet
 
-  gasrwet = gasruniv / qvapmol
+#  gasrwet = gasruniv / qvapmol
   epsv = qvapmol / drymol
 
   # 

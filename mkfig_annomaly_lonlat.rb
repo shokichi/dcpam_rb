@@ -89,13 +89,15 @@ end
 def cut_and_mean(gp)
   # 時間平均
   gp = gp.mean("time") if gp.axnames.index("time") != nil
-  ps = GPhys::IO.open gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
-  sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
 
   # 高さ方向の次元をカット
-  gp = (gp * ps * sig_weight).sum("sig")/Grav
-#  gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
-#  gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
+  if gp.name == "H2OLiq"
+    ps = GPhys::IO.open gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
+    sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+    gp = (gp * ps * sig_weight).sum("sig")/Grav 
+  end
+  gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
+  gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
 
   return gp
 end
@@ -122,25 +124,24 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonlat_annomaly("H2OLiq",list,"min"=>-0.5,"max"=>0.5,"nlev"=>20)
-=begin
-lonlat_annomaly("OSRA",list,"min"=>-250,"max"=>250,"nlev"=>20)
-lonlat_annomaly("OLRA",list,"min"=>-100,"max"=>100,"nlev"=>20)
+#=begin
+lonlat_annomaly("OSRA",list,"min"=>-250,"max"=>250,"nlev"=>20,"clr_min"=>99,"clr_max"=>13)
+lonlat_annomaly("OLRA",list,"min"=>-100,"max"=>100,"nlev"=>20,"clr_min"=>99,"clr_max"=>13)
 lonlat_annomaly("EvapA",list,"min"=>-150,"max"=>150)
 lonlat_annomaly("SensA",list,"min"=>-100,"max"=>100,"nlev"=>20)
 lonlat_annomaly("SSRA",list,"min"=>-200,"max"=>200,"nlev"=>20)
 lonlat_annomaly("SLRA",list,"min"=>-60,"max"=>60,"nlev"=>12)
 lonlat_annomaly("Rain",list,"min"=>-800,"max"=>800,"nlev"=>16)
-#lonlat_annomaly("RainCumulus",list,"min"=>-50,"max"=>50)
-#lonlat_annomaly("RainLsc",list,"min"=>-50,"max"=>50)
+lonlat_annomaly("RainCumulus",list,"min"=>-500,"max"=>500,"nlev"=>20)
+lonlat_annomaly("RainLsc",list,"min"=>-500,"max"=>500,"nlev"=>20)
 lonlat_annomaly("SurfTemp",list,"min"=>-30,"max"=>30,"nlev"=>12)
 lonlat_annomaly("Temp",list,"min"=>-20,"max"=>20)
-lonlat_annomaly("RH",list,"min"=>-50,"max"=>50)
-lonlat_annomaly("H2OLiq",list,"min"=>-5e-5,"max"=>5e-5)
+#lonlat_annomaly("RH",list,"min"=>-50,"max"=>50)
+lonlat_annomaly("H2OLiq",list,"min"=>-0.5,"max"=>0.5)
 lonlat_annomaly("PrcWtr",list,"min"=>-50,"max"=>50,"nlev"=>20)      
 lonlat_annomaly("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
 lonlat_annomaly("V",list,"min"=>-10,"max"=>10)      
-=end
+#=end
 =begin
 lonlat_annomaly_fix("OSRA",list,"min"=>-250,"max"=>250,"nlev"=>20)
 lonlat_annomaly_fix("OLRA",list,"min"=>-100,"max"=>100,"nlev"=>20)
@@ -179,6 +180,6 @@ DCL.grcls
 if ARGV.index("-ps") 
   system("mv dcl.ps #{list.id}_lonlat-annml.ps")
 elsif ARGV.index("-png")
-#  system("rename 's/dcl_/#{list.id}_lonlat-annml_/' dcl_*.png")
+  system("rename 's/dcl_/#{list.id}_lonlat-annml_/' dcl_*.png")
 #  system("rename 's/dcl_/#{list.id}_lonlat-annml-fix_/' dcl_*.png")
 end
