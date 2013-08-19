@@ -11,7 +11,7 @@ include Utiles_spe
 include NumRu
 
 
-def lonlat_annomaly(var_name,list,hash={})
+def lat_annomaly(var_name,list,hash={})
   # 基準データ
   begin
     gp_ref = GPhys::IO.open(list.dir[list.refnum]+var_name+".nc",var_name)
@@ -20,6 +20,9 @@ def lonlat_annomaly(var_name,list,hash={})
     return
   end
   gp_ref = cut_and_mean(gp_ref)
+
+  # 降水量の単位変換
+#  gp = Utiles_spe.wm2mmyr(gp) if var_name[0..3]=="Rain" 
 
   # 比較データ
   list.dir.each_index do |n|
@@ -30,60 +33,42 @@ def lonlat_annomaly(var_name,list,hash={})
       next
     end
     gp = cut_and_mean(gp)
-
-    # 横軸最大値
-    xcoord = gp.axis(0).to_gphys.val
-    xmax = (xcoord[1]-xcoord[0])*xcoord.length
 
     #
     annml = gp.copy
     annml.val = gp.val-gp_ref.val
 
     # 描画
-    fig_opt = {'title'=>gp.long_name + " " + list.name[n],
-               'annotate'=>false,'color_bar'=>true}
-    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-    GGraph.set_fig('window'=>[0,xmax,-90,90])
-    GGraph.tone_and_contour( annml ,true, fig_opt.merge(hash))
+    if n == 0 then
+      lc = 23 if list.ref != nil
+      vx = 0.82
+      vy = 0.8
+      fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
+      GGraph.line( annml ,true ,fig_opt.merge(hash))
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+    elsif n == list.refnum
+      lc_ref = 13
+      vx = 0.82
+      vy = 0.8 - 0.025*n
+      fig_opt = {'index'=>lc_ref}      
+      GGraph.line( annml ,false ,fig_opt.merge(hash))
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
+    else
+      lc = 23 + 10*n
+      vx = 0.82
+      vy = 0.8 - 0.025*n
+      fig_opt = {'index'=>lc}      
+      GGraph.line( annml ,false ,fig_opt.merge(hash))
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+    end 
+
+
   end
 end
 
-def lonlat_annomaly_fix(var_name,list,hash={})
-  # 基準データ
-  begin
-    gp_ref = GPhys::IO.open(list.dir[list.refnum]+var_name+".nc",var_name)
-  rescue
-    print "Refarence file is not exist [#{list.dir[list.refnum]}](#{var_name})\n"
-    return
-  end
-  gp_ref = cut_and_mean(gp_ref)
-
-  # 比較データ
-  list.dir.each_index do |n|
-    begin
-      gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
-    rescue
-      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-      next
-    end
-    gp = cut_and_mean(gp)
-
-    # 横軸最大値
-    xcoord = gp.axis(0).to_gphys.val
-    xmax = (xcoord[1]-xcoord[0])*xcoord.length
-
-    # 偏差の計算
-    annml = gp.copy
-    annml.val = gp.val-gp_ref.val* glmean(gp).val/glmean(gp_ref).val
-
-    # 描画
-    fig_opt = {'title'=>gp.long_name + " " + list.name[n],
-               'annotate'=>false,'color_bar'=>true}
-    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-    GGraph.set_fig('window'=>[0,xmax,-90,90])
-    GGraph.tone_and_contour( annml ,true, fig_opt.merge(hash))
-  end
-end
 
 
 def cut_and_mean(gp)
@@ -94,7 +79,7 @@ def cut_and_mean(gp)
   gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
   gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
 
-  return gp
+  return gp.mean(0)
 end
 
 #
@@ -111,30 +96,28 @@ else
 end
 
 # DCL set
-clrmp = 14  # カラーマップ
-DCL.sgscmn(clrmp)
 DCL.gropn(iws)
 #DCL.sldiv('Y',2,1)
 DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonlat_annomaly("OSRA",list,"min"=>-250,"max"=>250,"nlev"=>20)
-lonlat_annomaly("OLRA",list,"min"=>-100,"max"=>100,"nlev"=>20)
-lonlat_annomaly("EvapA",list,"min"=>-150,"max"=>150)
-lonlat_annomaly("SensA",list,"min"=>-100,"max"=>100,"nlev"=>20)
-lonlat_annomaly("SSRA",list,"min"=>-200,"max"=>200,"nlev"=>20)
-lonlat_annomaly("SLRA",list,"min"=>-60,"max"=>60,"nlev"=>12)
-lonlat_annomaly("Rain",list,"min"=>-800,"max"=>800,"nlev"=>16)
-lonlat_annomaly("RainCumulus",list,"min"=>50,"max"=>50)
-lonlat_annomaly("RainLsc",list,"min"=>50,"max"=>50)
-lonlat_annomaly("SurfTemp",list,"min"=>-30,"max"=>30,"nlev"=>12)
-lonlat_annomaly("Temp",list,"min"=>-20,"max"=>20)
-lonlat_annomaly("RH",list,"min"=>-10,"max"=>10)
-lonlat_annomaly("H2OLiq",list,"min"=>-5e-5,"max"=>5e-5)
-lonlat_annomaly("PrcWtr",list,"min"=>-50,"max"=>50,"nlev"=>20)      
-lonlat_annomaly("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
-lonlat_annomaly("V",list,"min"=>-10,"max"=>10)      
+lat_annomaly("OSRA",list,"min"=>-250,"max"=>250)
+lat_annomaly("OLRA",list,"min"=>-100,"max"=>100)
+lat_annomaly("EvapA",list,"min"=>-150,"max"=>150)
+lat_annomaly("SensA",list,"min"=>-100,"max"=>100)
+lat_annomaly("SSRA",list,"min"=>-200,"max"=>200)
+lat_annomaly("SLRA",list,"min"=>-60,"max"=>60)
+lat_annomaly("Rain",list,"min"=>-800,"max"=>800)
+lat_annomaly("RainCumulus",list,"min"=>50,"max"=>50)
+lat_annomaly("RainLsc",list,"min"=>50,"max"=>50)
+lat_annomaly("SurfTemp",list,"min"=>-30,"max"=>30)
+lat_annomaly("Temp",list,"min"=>-20,"max"=>20)
+lat_annomaly("RH",list,"min"=>-10,"max"=>10)
+lat_annomaly("H2OLiq",list,"min"=>-5e-5,"max"=>5e-5)
+lat_annomaly("PrcWtr",list,"min"=>-50,"max"=>50)      
+lat_annomaly("U",list,"min"=>-20,"max"=>20)      
+lat_annomaly("V",list,"min"=>-10,"max"=>10)      
 
 =begin
 lonlat_annomaly("DQVapDtDyn",list)      

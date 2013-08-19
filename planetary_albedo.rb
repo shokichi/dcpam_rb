@@ -18,55 +18,60 @@ StB = UNumeric[5.67e-8, "W.m-2.K-4"]
 
 def get_albedo(list)
   albedo = []
+  error = []
   list.dir.each_index{ |n| 
     osr = GPhys::IO.open(list.dir[n] + "OSRA.nc","OSRA")
     if list.id.include?("diurnal") then    
-      osr = time_range2(osr,list.name[n]).mean("time")
+      osr = time_range2(osr,list.name[n])
     else
-      osr = time_range(osr,list.name[n]).mean("time")
+      osr = time_range(osr,list.name[n])
     end
-    albedo << (1.0 + Utiles_spe.glmean(osr)/(SolarConst/4)).val 
+    alb = 1.0 + Utiles_spe.glmean(osr)/(SolarConst/4) 
+    albedo << alb.mean("time").val
+    error << std_error(alb.val)
   }
-  return albedo
+  return albedo, error
 end
 
 def get_surftemp(list)
   stemp = []
+  error = []
   list.dir.each_index{ |n| 
     temp = GPhys::IO.open(list.dir[n] + "SurfTemp.nc","SurfTemp")
     if list.id.include?("diurnal") then    
-      temp = time_range2(temp,list.name[n]).mean("time")
+      temp = time_range2(temp,list.name[n])
     else
-      temp = time_range(temp,list.name[n]).mean("time")
+      temp = time_range(temp,list.name[n])
     end
-    stemp << Utiles_spe.glmean(temp).val
+    st = Utiles_spe.glmean(temp)
+    stemp << st.mean("time").val
+    error << std_error(st.val)    
   }
-  return stemp
+  return stemp, error
 end
 
 def get_greenhouse(list)
-  stemp = []
-#  print "--- #{list.id} ---\n"
+  green = []
+  error = []
   list.dir.each_index{ |n| 
     temp = GPhys::IO.open(list.dir[n] + "SurfTemp.nc","SurfTemp")
     osr = GPhys::IO.open(list.dir[n] + "OSRA.nc","OSRA")
     if list.id.include?("diurnal") then    
-      osr = time_range2(osr,list.name[n]).mean("time")
-      temp = time_range2(temp,list.name[n]).mean("time")
+      osr = time_range2(osr,list.name[n])
+      temp = time_range2(temp,list.name[n])
     else
-      osr = time_range(osr,list.name[n]).mean("time")
-      temp = time_range(temp,list.name[n]).mean("time")
+      osr = time_range(osr,list.name[n])
+      temp = time_range(temp,list.name[n])
     end
     factor= (Utiles_spe.glmean(temp)/
               (SolarConst*
                 (1.0-(1.0 + Utiles_spe.glmean(osr)/(SolarConst/4)))/
                 (4*5.67e-8)
-              )**(1.0/4)).val
-#    print list.name[n],"\t"
-#    print factor,"\n"
-    stemp << factor
+              )**(1.0/4))
+    green << factor.mean("time").val
+    error << std_error(factor.val)
   }
-  return stemp
+  return green, error
 end
 
 def get_omega(list)
@@ -123,7 +128,7 @@ opt.on("-b") {type = "b"}
 opt.on("-c") {type = "c"}
 opt.parse!(ARGV)
 
-def drawfig(file,chpt)
+def drawfig(file,chpt="a")
   # DCL open
   if ARGV.index("-ps")
     iws = 2
@@ -182,7 +187,8 @@ def drawfig(file,chpt)
     omega.name = "omega"
     omega.long_name = "Rotation rate"
     albedo.axis("noname").set_pos(omega)
-    error = std_error(albedo.val,360)
+    error = std_error(albedo.val,4)
+    p error
 
     if n == 0 then
       GGraph.scatter albedo.axis("noname").to_gphys,albedo, true,"size"=>size,"index"=>12,"type"=>type-1,"title"=>subname+" "+long_name 
@@ -209,7 +215,7 @@ def drawfig(file,chpt)
   end
 end 
 
-def drawclm(file)
+def drawclm_deltemp(file)
   stemp_name = "surface temperature"
   albedo_name = "planetary albedo"
   green_name = "factor g"
@@ -240,6 +246,10 @@ def drawclm(file)
     delalbedo = albedo.val - albedo.cut("noname"=>1).val
     delgreen = green.val - green.cut("noname"=>1).val
 
+    albedo_error = std_error(albedo.val,4)
+    stemp_error = std_error(stemp.val,4)
+    green_error = std_error(green.val,4)
+
     fin.print "--- #{file[n].split("/")[-1].sub(".list","").sub("omega_","")} ---\n"
     omega.val.to_a.each_index do |m|
       fin.print omega[m].val, "\t"
@@ -252,6 +262,47 @@ def drawclm(file)
  
 end 
 
+def drawclm(file)
+  stemp_name = "surface temperature"
+  albedo_name = "planetary albedo"
+  green_name = "factor g"
+
+  file.each_index do |n|
+    list = Utiles_spe::Explist.new(file[n])
+    fin = File.open("omega_deltemp_clm_#{list.id}.dat","w")
+    stemp, stemp_error = get_surftemp(list)
+    albedo, albedo_error = get_albedo(list)  
+    green, green_error = get_greenhouse(list)
+
+    stemp = Utiles_spe.array2gp(get_omega(list),stemp)  
+    albedo = Utiles_spe.array2gp(get_omega(list),albedo)  
+    green = Utiles_spe.array2gp(get_omega(list),green)
+
+    omega = albedo.axis("noname").pos
+    omega.name = "omega"
+    omega.long_name = "Rotation rate"
+    stemp.axis("noname").set_pos(omega)
+    albedo.axis("noname").set_pos(omega)
+    green.axis("noname").set_pos(omega)
+
+    fin.print "# Omega\t"
+    fin.print "Surftemp\t error\t"
+    fin.print "Albedo\t error\t"
+    fin.print "Green\t error\n"
+    omega.val.to_a.each_index do |m|
+      fin.print omega[m].val, "\t"
+      fin.print stemp[m].val, "\t"
+      fin.print stemp_error[m], "\t"
+      fin.print albedo[m].val, "\t"
+      fin.print albedo_error[m], "\t"
+      fin.print green[m].val, "\t"
+      fin.print green_error[m], "\n"
+    end
+    fin.close
+  end
+ 
+end 
+
 
 
 file_all = "/home/ishioka/link/all/fig/list/omega_all-1440.list"
@@ -259,8 +310,8 @@ file_coriolis = "/home/ishioka/link/coriolis/fig/list/omega_coriolis-1440.list"
 file_diurnal = "/home/ishioka/link/diurnal/fig/list/omega_diurnal-1440.list"
 
 
-drawfig([file_all,file_coriolis,file_diurnal],type)
-#drawclm([file_all,file_coriolis,file_diurnal])
+#drawfig([file_all,file_coriolis,file_diurnal],type)
+drawclm([file_all,file_coriolis,file_diurnal])
 #list = Utiles_spe::Explist.new(file_all)
 #albedo = Utiles_spe.array2gp(get_omega(list),get_albedo(list))
 #GGraph.scatter albedo.axis("noname").to_gphys,albedo, false
