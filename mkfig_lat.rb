@@ -18,7 +18,7 @@ def lat_fig(var_name,list,hash={})
     begin
       gp = gpopen(dir[n] + var_name + ".nc",var_name)
     rescue
-      print "[#{var_name}.nc](#{dir[n]}) is not exist\n"
+      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
       next
     end
 
@@ -30,7 +30,7 @@ def lat_fig(var_name,list,hash={})
     gp = gp.mean('lon') if gp.axnames.include?("time")
 
     # 降水量の単位変換
-    gp = Utiles_spe.wm2mmyr(gp) if var_name[0..3]=="Rain" 
+    gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
 
     # 描画
     vy = vy - 0.025
@@ -50,7 +50,7 @@ def lat_fig(var_name,list,hash={})
       lc = lc + 10
       fig_opt = {'index'=>lc}      
       GGraph.line( gp ,false ,fig_opt.merge(hash))
-      DCL.sgtxzv(vx+0.05,vy,name[n],0.015,0,-1,3)
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
       DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
     end 
   end
