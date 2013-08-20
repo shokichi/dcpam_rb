@@ -9,7 +9,10 @@ include Utiles_spe
 include NumRu
 
 
-def lat_fig(var_name,list,hash||{nil})
+def lat_fig(var_name,list,hash={})
+  lc = 23
+  vx = 0.82
+  vy = 0.8
   list.dir.each_index do |n|
     # データの取得
     begin
@@ -20,37 +23,31 @@ def lat_fig(var_name,list,hash||{nil})
     end
 
     # 高さ方向にデータがある場合は最下層を取り出す
-    gp = gp.cut("sig"=>1) if gp.axnames.index("sig") != nil then
+    gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
 
     # 時間平均経度平均
-    if gp.rank == 3 
-      gp = gp.mean('lon','time')
-    elsif gp.rank == 2
-      gp = gp.mean('lon')
-    end
+    gp = gp.mean('time') if gp.axnames.include?("time")
+    gp = gp.mean('lon') if gp.axnames.include?("time")
 
     # 降水量の単位変換
     gp = Utiles_spe.wm2mmyr(gp) if var_name[0..3]=="Rain" 
 
     # 描画
+    vy = vy - 0.025
     if n == 0 then
-      lc = 13 + 10 if list.ref != nil
-      vx = 0.82
-      vy = 0.8
+      lc = 13 if list.ref.nil?
       fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
       GGraph.line( gp ,true ,fig_opt.merge(hash))
       DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
       DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
     elsif n == list.refnum
       lc_ref = 13
-      vy = vy - 0.025
       fig_opt = {'index'=>lc_ref}      
       GGraph.line( gp ,false ,fig_opt.merge(hash))
       DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
       DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
     else
       lc = lc + 10
-      vy = vy - 0.025
       fig_opt = {'index'=>lc}      
       GGraph.line( gp ,false ,fig_opt.merge(hash))
       DCL.sgtxzv(vx+0.05,vy,name[n],0.015,0,-1,3)
