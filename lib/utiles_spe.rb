@@ -167,14 +167,14 @@ end
 #----------------------
 def self.wm2mmyr(gp)  # 降水量の単位変換(W.m-2 -> mm.yr-1)
 # if gp.units.to_s == "W.m-2" then
-  gp = gp*(3600 * 24 * 360) * 1000 / LetentHeat / WtWet 
+  gp = gp*(3600 * 24 * 360) * 1000 / LatentHeat / WtWet 
   gp.units = Units["mm.yr-1"]
 #  end
  return gp
 end
 #----------------------
 def self.wm2mmhr(gp)  # 降水量の単位変換(W.m-2 -> mm.hr-1)
-  gp = gp* 3600 * 1000 / LetentHeat / WtWet 
+  gp = gp* 3600 * 1000 / LatentHeat / WtWet 
   gp.units = Units["mm.hr-1"]
  return gp
 end
