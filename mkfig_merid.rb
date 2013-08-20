@@ -18,9 +18,9 @@ def merid_fig(var_name,list,hash)
       next
     end
     # 時間平均
-    gp = gp.mean("time") if !gp.axnames.index("time").nil
+    gp = gp.mean("time") if gp.axnames.include?("time")
     # 経度平均
-    gp = gp.mean("lon") if !gp.axnames.index("lon").nil
+    gp = gp.mean("lon") if gp.axnames.include?("lon")
     
     # 
     if gp.max.to_f > 1e+10 then
