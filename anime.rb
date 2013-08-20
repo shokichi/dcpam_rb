@@ -52,7 +52,7 @@ DCL.uzfact(0.7)
 
 # GGraph
 draw(gp,"min"=>0,"max"=>2000,"nlev"=>40)
-
+p "dcl files created\n"
 DCL.grcls
 
 if save then
