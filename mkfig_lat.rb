@@ -16,7 +16,7 @@ def lat_fig(var_name,list,hash={})
   list.dir.each_index do |n|
     # データの取得
     begin
-      gp = gpopen(dir[n] + var_name + ".nc",var_name)
+      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
     rescue
       print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
       next
