@@ -27,16 +27,13 @@ def lonlat(var_name,list,hash={})
     gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
     gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
  
-    # 
-#    if gp.axis(0).to_gphys.long_name == "local time" then
-#      max = 24
-#    else
-#      max = 360
-#    end
+    # 横軸最大値
+    xcoord = gp.axis(0).to_gphys.val
+    xmax = (xcoord[1]-xcoord[0])*xcoord.length
 
     # 描画
-#    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-    GGraph.set_fig('window'=>[0,nil,-90,90])
+    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+    GGraph.set_fig('window'=>[0,xmax,-90,90])
 
     fig_opt = {'title'=>gp.long_name + " " + list.name[n],'annotate'=>false,'color_bar'=>true}
     GGraph.tone_and_contour gp ,true, fig_opt.merge(hash)

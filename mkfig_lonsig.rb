@@ -11,7 +11,7 @@ include Utiles_spe
 include NumRu
 
 
-def lonlat(var_name,list,hash={})
+def lonsig(var_name,list,hash={})
   list.dir.each_index do |n|
     begin
       gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
@@ -24,10 +24,11 @@ def lonlat(var_name,list,hash={})
     gp = gp.mean("time") if !gp.axnames.index("time").nil?
 
     # 緯度方向の次元をカット
-    if hash["lat"].nil? then
+    if !hash.include?("lat") then
       lat = 0 
     else
       lat = hash["lat"]
+      hash.delete("lat")
     end
     gp = gp.cut("lat"=>lat)
  
@@ -37,7 +38,7 @@ def lonlat(var_name,list,hash={})
     xmax = (xcoord[1]-xcoord[0])*xcoord.length
 
     # 描画
-#    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
     GGraph.set_fig('window'=>[0,xmax,nil,nil])
 
     fig_opt = {'title'=>gp.long_name + " " + list.name[n],'annotate'=>false,'color_bar'=>true}
@@ -68,29 +69,18 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonlat("OSRA",list,"min"=>-1200,"max"=>0)
-lonlat("OLRA",list,"min"=>0,"max"=>500,"nlev"=>20)
-lonlat("EvapA",list,"max"=>1000)
-lonlat("SensA",list,"max"=>200,"nlev"=>20)
-lonlat("SSRA",list,"min"=>-1000)
-lonlat("SLRA",list,"min"=>0,"max"=>200,"nlev"=>20)
-lonlat("Rain",list,"min"=>0,"max"=>1000,"nlev"=>20)
-lonlat("RainCumulus",list,"min"=>0,"max"=>500)
-lonlat("RainLsc",list,"min"=>0,"max"=>500)
-lonlat("SurfTemp",list,"min"=>220,"max"=>360)
-lonlat("Temp",list,"min"=>220,"max"=>320)
-lonlat("RH",list,"min"=>0,"max"=>100)
-lonlat("H2OLiq",list,"min"=>0,"max"=>4e-5)
-lonlat("PrcWtr",list,"min"=>0,"max"=>100,"nlev"=>20)      
-lonlat("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
-lonlat("V",list,"min"=>-10,"max"=>10)      
+lonsig("Temp",list,"min"=>220,"max"=>320,"nlev"=>20)
+lonlat("DQVapDtCond",list,"min"=>-3e-7,"max"=>0,"nlev"=>20)
+lonlat("DQVapDtCumulus",list,"min"=>-3e-7,"max"=>0,"nlev"=>20)  
+lonlat("DQVapDtLsc",list,"min"=>-3e-7,"max"=>0,"nlev"=>20)
+lonsig("RH",list,"min"=>0,"max"=>100)
+lonsig("H2OLiq",list,"min"=>0,"max"=>4e-5)
+lonsig("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
+lonsig("V",list,"min"=>-10,"max"=>10)      
 
 =begin
-lonlat("DQVapDtDyn",list)      
-lonlat("DQVapDtVDiff",list)    
-lonlat("DQVapDtCond",list,"min"=>-3e-7,"max"=>0)
-lonlat("DQVapDtCumulus",list,"min"=>-3e-7,"max"=>0)  
-lonlat("DQVapDtLsc",list,"min"=>-3e-7,"max"=>0)
+lonlat("DQVapDtDyn",list)
+lonlat("DQVapDtVDiff",list)
 lonlat("DTempDtRadS",list)
 lonlat("DTempDtRadL",list)
 lonlat("DTempDtDyn",list)   
@@ -103,7 +93,7 @@ lonlat("DTempDtDryConv",list)
 DCL.grcls
 
 if ARGV.index("-ps") 
-  system("mv dcl.ps #{list.id}_lonlat.ps")
+  system("mv dcl.ps #{list.id}_lonsig.ps")
 elsif ARGV.index("-png")
-  system("rename 's/dcl_/#{list.id}_lonlat_/' dcl_*.png")
+  system("rename 's/dcl_/#{list.id}_lonsig_/' dcl_*.png")
 end
