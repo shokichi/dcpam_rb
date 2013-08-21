@@ -20,6 +20,11 @@ def lonlat(var_name,list,hash={})
       next
     end
 
+    if gp.name == "H2OLiq" then
+      ps = GPhys::IO.open gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
+      sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+      gp = (gp * ps * sig_weight).sum("sig")/Grav 
+    end
     # 時間平均
     gp = gp.mean("time") if gp.axnames.index("time") != nil
 
@@ -39,7 +44,6 @@ def lonlat(var_name,list,hash={})
     GGraph.tone_and_contour gp ,true, fig_opt.merge(hash)
   end
 end
-
 
 #
 list = Utiles_spe::Explist.new(ARGV[0])
@@ -63,19 +67,19 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonlat("OSRA",list,"min"=>-1200,"max"=>1200,"nlev"=>20,"clr_min"=>99,"clr_max"=>13)
-lonlat("OLRA",list,"min"=>-500,"max"=>500,"nlev"=>20,"clr_min"=>99,"clr_max"=>13)
-lonlat("EvapA",list,"max"=>1000)
-lonlat("SensA",list,"max"=>200,"nlev"=>20)
-lonlat("SSRA",list,"min"=>-1000)
-lonlat("SLRA",list,"min"=>0,"max"=>200,"nlev"=>20)
+lonlat("OSRA",list,"min"=>-1200,"max"=>0,"nlev"=>20,"clr_min"=>99,"clr_max"=>56)
+lonlat("OLRA",list,"min"=>0,"max"=>300,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
+lonlat("EvapA",list,"max"=>1000,"clr_min"=>56,"clr_max"=>13)
+lonlat("SensA",list,"max"=>200,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
+lonlat("SSRA",list,"min"=>-1000,"max"=>0,"clr_min"=>99,"clr_max"=>56)
+lonlat("SLRA",list,"min"=>0,"max"=>200,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
 lonlat("Rain",list,"min"=>0,"max"=>1000,"nlev"=>20)
 lonlat("RainCumulus",list,"min"=>0,"max"=>500)
 lonlat("RainLsc",list,"min"=>0,"max"=>500,"nlev"=>20)
 lonlat("SurfTemp",list,"min"=>220,"max"=>360)
 lonlat("Temp",list,"min"=>220,"max"=>320)
 #lonlat("RH",list,"min"=>0,"max"=>100)
-lonlat("H2OLiq",list,"min"=>0,"max"=>4e-5)
+lonlat("H2OLiq",list,"min"=>0,"max"=>0.1)
 lonlat("PrcWtr",list,"min"=>0,"max"=>100,"nlev"=>20)      
 lonlat("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
 lonlat("V",list,"min"=>-10,"max"=>10)      
