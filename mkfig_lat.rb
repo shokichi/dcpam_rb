@@ -27,7 +27,7 @@ def lat_fig(var_name,list,hash={})
 
     # 時間平均経度平均
     gp = gp.mean('time') if gp.axnames.include?("time")
-    gp = gp.mean('lon') if gp.axnames.include?("time")
+    gp = gp.mean(0) if gp.axnames[0] != "lat"
 
     # 降水量の単位変換
     gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
