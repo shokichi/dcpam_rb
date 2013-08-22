@@ -52,16 +52,18 @@ def calc_rh(dir) # 相対湿度の計算
 #    end
 
     # 飽和水蒸気圧の計算
-#    es = es0 * ( latentheat / gasrwet * ( 1/273.0 - 1/temp ) ).exp
+    es = es0 * ( latentheat / gasrwet * ( 1/273.0 - 1/temp ) ).exp
     # 水蒸気圧の計算
-#    e = qvap * press / epsv
+    e = qvap * press / epsv
     # 相対湿度の計算
-#    rh = e / es * 100 # [%]
-  
+    rh = e / es * 100 # [%] 
+
+#    xyz_QVapSat = EpsV * ( P0 / xyz_Press ) * exp ( - LatHeat / ( GasRUniv * xyz_Temp ) )
+
     # 飽和非湿の計算
-    qvap_sat = epsv * (p0 / press) * (-latheat / (gasruniv * temp) ).exp
+#    qvap_sat = epsv * (p0 / press) * (-latheat / (gasruniv * temp) ).exp
     # 相対湿度の計算
-    rh = qvap / qvap_sat * 100 # [%]
+#    rh = qvap / qvap_sat * 100 # [%]
 
     rh.units = '%'
     rh.long_name = 'relative humidity'
