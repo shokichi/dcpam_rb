@@ -125,12 +125,16 @@ def local_time_mean_rank(var_name,list)
   rank = ["rank000006.nc","rank000004.nc","rank000002.nc","rank000000.nc",
           "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
   list.dir.each_index do |n|
-    begin
-      rst_file = list.dir[n].sub("data/","rst_data/rst1800.nc").sub("data1400/","rst_data/rst1440.nc")
-      hr_in_day = gpopen(rst_file,'time').get_att("hour_in_day")
-    rescue
-      hr_in_day = 24 / omega_ratio(list.name[n])
-      hr_in_day = 24 if list.id.include?("coriolis")
+    if !HrInDay.nil?
+      hr_in_day = HrInDay 
+    else
+      begin
+        rst_file = list.dir[n].sub("data/","rst_data/rst1800.nc").sub("data1400/","rst_data/rst1440.nc")
+        hr_in_day = gpopen(rst_file,'time').get_att("hour_in_day")
+      rescue
+        hr_in_day = 24 / omega_ratio(list.name[n])
+        hr_in_day = 24 if list.id.include?("coriolis")
+      end
     end
     str_add(list.dir[n]+var_name.sub(".nc","")+ "_",rank).each do |file|
       begin 
@@ -203,6 +207,7 @@ varname = nil
 opt = OptionParser.new
 opt.on("-r","--rank") {rank_flag = true}
 opt.on("-n VAR") {|str| varname = str}
+opt.on("-n hr_in_day") {|hr_in_day| HrInDay = hr_in_day}
 opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
