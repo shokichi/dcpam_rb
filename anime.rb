@@ -60,7 +60,6 @@ if save then
   Dir::mkdir("movie") if !Dir::entries("./").include?("movie")
   dt = 8.8
   `mv dc_*.png movie/`
-  `cd movie/`
   `mogrify -format gif *.png`
   `convert -delay #{dt} dcl_*.gif output.gif`
   `rm dcl_*.gif`
