@@ -5,7 +5,8 @@
 
 require 'numru/ggraph'
 require 'numru/gphys'
-require '/home/ishioka/ruby/lib/utiles_spe'
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require 'optparse'
 include Utiles_spe
 include NumRu
 include Math
@@ -25,7 +26,11 @@ def anglmom(dir,name)
   # constants
   sec_in_day = UNumeric[86400, "s"]  #<= 24 hrs/day
 
-  hr_in_day = 24 / omega_ratio(list.name[n])
+  if defined?(HrInDay).nil?
+    hr_in_day = 24 / omega_ratio(list.name[n])
+  else
+    hr_in_day = HrInDay 
+  end
 
   omega = 2*PI/sec_in_day           # Earth
   omega = omega * 24.0 / hr_in_day
@@ -52,6 +57,8 @@ def anglmom(dir,name)
   print "[#{data_name}](#{dir}) is created \n"
 end
 
+opt.on("-n VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
+opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
 list.dir.length.each_index{|n| anglmom(list.dir[n],list.name[n])} 
