@@ -23,8 +23,6 @@ def anglmom(dir,name)
     return
   end
   # constants
-  Grav    = UNumeric[9.8, "m.s-2"]       # 重力加速度
-  RPlanet = UNumeric[6371000.0, "m"]     # 惑星半径
   sec_in_day = UNumeric[86400, "s"]  #<= 24 hrs/day
 
   hr_in_day = 24 / omega_ratio(list.name[n])
