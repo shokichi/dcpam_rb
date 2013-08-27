@@ -24,19 +24,23 @@
   * GPhys
 
 * 以下の場所から資源をダウンロード
+ https://github.com/shokichi/dcpam_rb
 
-* 展開
- $ tar xvzf hogehoge.tar.gz
+#* 展開
+# $ tar xvzf hogehoge.tar.gz
 
 * toolsにパスを通す
 
 
 == 使い方
 === 描画
+* 基本的な使い方
 NetCDFファイルが置いてあるディレクトリで
  $ mkfig_hoge.rb
 と入力すると図が表示される. 
-(時間・経度平均の処理が行われている) 
+(描画と同時に時間・経度平均の処理が行われる.
+大きなデータの平均処理はメモリに負担をかけやすいので, 
+事前にmean4big.rbなどで平均したデータを作っておくことをすすめる. ) 
 
 
 ==== 子午面の図を作成
@@ -59,10 +63,10 @@ NetCDFファイルが置いてあるディレクトリで
 
 === 図の保存
 描いた図を保存したい場合は以下のオプションをつける
-* ps で保存
+* -ps: ps で保存
  $ mkfig_merid.rb -ps
 
-* png で保存
+* -png: png で保存
  $ mkfig_merid.rb -png
 
 === 各種物理量の計算
