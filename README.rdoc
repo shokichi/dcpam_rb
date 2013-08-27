@@ -9,6 +9,8 @@
 * anime:アニメーション作成
 
 === 解析
+* albedo.rb:惑星アルベド
+* anglmom.rb:絶対角運動量
 * msf.rb:質量流線関数
 * rh.rb:相対湿度
 * prcwtr.rb:可降水量
@@ -25,8 +27,6 @@
 
 * 以下の場所から資源をダウンロード
  https://github.com/shokichi/dcpam_rb
-
-* toolsにパスを通す
 
 
 == 使い方
