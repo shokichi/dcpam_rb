@@ -5,6 +5,8 @@
 * mkfig_lat.rb:時間・経度平均した緯度分布の図を作成
 * mkfig_lonlat.rb:水平面分布(lon-lat)の図を作成
 * mkfig_gave.rb:全球平均値の表を作成
+* mkfig_latsig.rb:赤道断面の図を作成
+* anime:アニメーション作成
 
 === 解析
 * msf.rb:質量流線関数
@@ -15,7 +17,6 @@
 
 === ライブラリ
 * lib/utiles_spe.rb
-
 
 == 準備
 * 依存ライブラリ
@@ -41,10 +42,6 @@ NetCDFファイルが置いてあるディレクトリで
 ==== 子午面の図を作成
  $ mkfig_merid.rb
 
-デフォルトでは
-
-の図が表示される
-
 ==== 緯度分布の図を作成
  $ mkfig_lat.rb
 
@@ -52,6 +49,8 @@ NetCDFファイルが置いてあるディレクトリで
  $ mkfig_lonlat.rb
 (高さ方向にデータがある場合は大気最下層が選ばれる)
 
+==== 赤道断面の図を作成
+ $ mkfig_latsig.rb
 
 ==== 全球平均
 全球平均値の一覧を作成する場合は mkfig_ave.rb を使用する
@@ -91,9 +90,12 @@ NetCDFファイルが置いてあるディレクトリで
 * オプション
 
 ==== 地方時変換
- $ local_time.rb [変数名]
+ $ local_time.rb
 
 * オプション
+ -n               変数名を指定
+ -h, --hr_in_day  1日の長さを指定
+
 
 ==== 鉛直座標変換
 鉛直座標を Sigma から Pressure に変換する
@@ -105,13 +107,21 @@ NetCDFファイルが置いてあるディレクトリで
 ika.listには以下のようにデータの置いてあるディレクトリを書いておく
  [データの名前],[ディレクトリ]
 
-行の先頭に#を書くとその行はコメントアウトされる
+* 
+* 行の先頭に# を付けるとその行はコメントアウトされる
+* 行の先頭に! を付けると標準実験として認識される
 
 * 例:ika.listの中身
  Test1,/home/foo/dcpam-exp/test1/data/
  Test2,/home/foo/dcpam-exp/test2/data/
- Test3,/home/foo/dcpam-exp/test3/data/
+ !Test3,/home/foo/dcpam-exp/test3/data/ #<=標準実験(偏差を取るときの基準となる)
  #Tes4,/home/foo/dcpam-exp/test4/data/ #<=コメントアウトされる
 
 
 == 使用例 
+* 子午面断面の図を作成する
+ $ mkfig_merid.rb list/hoge_exp.list -png
+
+* 地方時変換
+ $ local_time.rb -n RH -h 24
+
