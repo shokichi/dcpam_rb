@@ -26,9 +26,6 @@
 * 以下の場所から資源をダウンロード
  https://github.com/shokichi/dcpam_rb
 
-#* 展開
-# $ tar xvzf hogehoge.tar.gz
-
 * toolsにパスを通す
 
 
