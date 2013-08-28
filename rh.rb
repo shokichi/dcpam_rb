@@ -47,10 +47,10 @@ def calc_rh(dir) # 相対湿度の計算
     # 気圧の計算
     press = calc_press(ps,sig)    
     
-#    for k in 0..sig.length-1
-#      press[false,k,true] = ps * sig[k].val
-#    end
 
+    # dcpamのデフォルトでは飽和比湿の計算で 
+    # saturate_t1930.f90 が使われている
+    #
     # 飽和水蒸気圧の計算
     es = es0 * ( latentheat / gasrwet * ( 1/273.0 - 1/temp ) ).exp
     # 水蒸気圧の計算
@@ -58,7 +58,6 @@ def calc_rh(dir) # 相対湿度の計算
     # 相対湿度の計算
     rh = e / es * 100 # [%] 
 
-#    xyz_QVapSat = EpsV * ( P0 / xyz_Press ) * exp ( - LatHeat / ( GasRUniv * xyz_Temp ) )
 
     # 飽和非湿の計算
 #    qvap_sat = epsv * (p0 / press) * (-latheat / (gasruniv * temp) ).exp

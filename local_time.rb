@@ -6,7 +6,6 @@
 require 'numru/ggraph'
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-require '/home/ishioka/ruby/lib/utiles_spe'
 require 'optparse'
 include Utiles_spe
 include NumRu
@@ -125,7 +124,7 @@ def local_time_mean_rank(var_name,list)
   rank = ["rank000006.nc","rank000004.nc","rank000002.nc","rank000000.nc",
           "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
   list.dir.each_index do |n|
-    if !HrInDay.nil?
+    if !defined?(HrInDay).nil?
       hr_in_day = HrInDay 
     else
       begin
@@ -207,7 +206,7 @@ varname = nil
 opt = OptionParser.new
 opt.on("-r","--rank") {rank_flag = true}
 opt.on("-n VAR") {|str| varname = str}
-opt.on("-n hr_in_day") {|hr_in_day| HrInDay = hr_in_day}
+opt.on("-n VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
 opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])

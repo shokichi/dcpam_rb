@@ -11,41 +11,6 @@ include Utiles_spe
 include NumRu
 
 
-def lonsig(var_name,list,hash={})
-  list.dir.each_index do |n|
-    begin
-      gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
-    rescue
-      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-      next
-    end
-
-    # 時間平均
-    gp = gp.mean("time") if !gp.axnames.index("time").nil?
-
-    # 緯度方向の次元をカット
-    if !hash.include?("lat") then
-      lat = 0 
-    else
-      lat = hash["lat"]
-      hash.delete("lat")
-    end
-    gp = gp.cut("lat"=>lat)
- 
-    # 
-    # 横軸最大値
-    xcoord = gp.axis(0).to_gphys.val
-    xmax = (xcoord[1]-xcoord[0])*xcoord.length
-
-    # 描画
-    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-    GGraph.set_fig('window'=>[0,xmax,nil,nil])
-
-    fig_opt = {'title'=>gp.long_name + " " + list.name[n],'annotate'=>false,'color_bar'=>true}
-    GGraph.tone_and_contour gp ,true, fig_opt.merge(hash)
-  end
-end
-
 
 #
 list = Utiles_spe::Explist.new(ARGV[0])
@@ -92,8 +57,11 @@ lonlat("DTempDtDryConv",list)
 =end
 DCL.grcls
 
+
+img_lg = list.id+"_lonsig"
 if ARGV.index("-ps") 
-  system("mv dcl.ps #{list.id}_lonsig.ps")
+  File.rename("dcl.ps","#{img_lg}.ps")
 elsif ARGV.index("-png")
-  system("rename 's/dcl_/#{list.id}_lonsig_/' dcl_*.png")
+  Dir.glob("dcl_*.png").each{ |filename|
+    File.rename(filename,filename.sub("dcl",img_lg)) }
 end

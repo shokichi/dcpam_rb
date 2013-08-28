@@ -4,73 +4,26 @@
 # 
 
 require "numru/ggraph"
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/make_figure.rb")
+include MKfig
 include NumRu
-
-
-def lat_fig(var_name,list,hash={})
-  lc = 23
-  vx = 0.82
-  vy = 0.8
-  list.dir.each_index do |n|
-    # データの取得
-    begin
-      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
-    rescue
-      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-      next
-    end
-
-    # 高さ方向にデータがある場合は最下層を取り出す
-    gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
-
-    # 時間平均経度平均
-    gp = gp.mean('time') if gp.axnames.include?("time")
-    gp = gp.mean(0) if gp.axnames[0] != "lat"
-
-    # 降水量の単位変換
-    gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
-
-    # 描画
-    vy = vy - 0.025
-    if n == 0 then
-      lc = 13 if list.ref.nil?
-      fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
-      GGraph.line( gp ,true ,fig_opt.merge(hash))
-      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
-      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
-    elsif n == list.refnum
-      lc_ref = 13
-      fig_opt = {'index'=>lc_ref}      
-      GGraph.line( gp ,false ,fig_opt.merge(hash))
-      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
-      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
-    else
-      lc = lc + 10
-      fig_opt = {'index'=>lc}      
-      GGraph.line( gp ,false ,fig_opt.merge(hash))
-      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
-      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
-    end 
-  end
-end
-
 
 # 
 list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL open
+# DCL open
 if ARGV.index("-ps")
-  DCL.gropn(2)
+  iws = 2
 elsif ARGV.index("-png")
   DCL::swlset('lwnd',false)
-  DCL.gropn(4)
+  iws = 4
 else
-  DCL.gropn(1)
+  iws = 1
 end
 
 # DCL set
+DCL.gropn(iws)
 # DCL.sldiv('Y',2,1)
 DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
@@ -97,8 +50,10 @@ lat_fig("PrcWtr",list,"min"=>0,"max"=>50)
 
 DCL.grcls
 
+img_lg = list.id+"_lat"
 if ARGV.index("-ps") 
-  system("mv dcl.ps #{list.id}_lat.ps")
-elsif ARGV.index("-png") 
-  system("rename 's/dcl_/#{list.id}_lat_/' dcl_*.png")
+  File.rename("dcl.ps","#{img_lg}.ps")
+elsif ARGV.index("-png")
+  Dir.glob("dcl_*.png").each{ |filename|
+    File.rename(filename,filename.sub("dcl",img_lg)) }
 end

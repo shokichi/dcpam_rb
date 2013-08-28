@@ -11,39 +11,6 @@ include Utiles_spe
 include NumRu
 
 
-def lonlat(var_name,list,hash={})
-  list.dir.each_index do |n|
-    begin
-      gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
-    rescue
-      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-      next
-    end
-
-    if gp.name == "H2OLiq" then
-      ps = GPhys::IO.open gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
-      sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
-      gp = (gp * ps * sig_weight).sum("sig")/Grav 
-    end
-    # 時間平均
-    gp = gp.mean("time") if gp.axnames.index("time") != nil
-
-    # 高さ方向の次元をカット
-    gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
-    gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
- 
-    # 横軸最大値
-    xcoord = gp.axis(0).to_gphys.val
-    xmax = (xcoord[1]-xcoord[0])*xcoord.length
-
-    # 描画
-    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-    GGraph.set_fig('window'=>[0,xmax,-90,90])
-
-    fig_opt = {'title'=>gp.long_name + " " + list.name[n],'annotate'=>false,'color_bar'=>true}
-    GGraph.tone_and_contour gp ,true, fig_opt.merge(hash)
-  end
-end
 
 #
 list = Utiles_spe::Explist.new(ARGV[0])
@@ -101,8 +68,10 @@ lonlat("DTempDtDryConv",list)
 =end
 DCL.grcls
 
+img_lg = list.id+"_lonlat"
 if ARGV.index("-ps") 
-  system("mv dcl.ps #{list.id}_lonlat.ps")
+  File.rename("dcl.ps","#{img_lg}.ps")
 elsif ARGV.index("-png")
-  system("rename 's/dcl_/#{list.id}_lonlat_/' dcl_*.png")
+  Dir.glob("dcl_*.png").each{ |filename|
+    File.rename(filename,filename.sub("dcl",img_lg)) }
 end
