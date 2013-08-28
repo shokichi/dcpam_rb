@@ -6,13 +6,17 @@
 
 # 
 require "numru/ggraph"
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
+require 'optparse'
+include MKfig
 include NumRu
 
 
 
 #
+opt.on("-n VAR","--name=VAR") {|name| varname = name}
+opt.on("-o OPT","--figopt=OPT") {|hash| figopt = hash}
+opt.parse!(ARGV)
 list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL open
@@ -34,38 +38,27 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonlat("OSRA",list,"min"=>-1200,"max"=>0,"nlev"=>20,"clr_min"=>99,"clr_max"=>56)
-lonlat("OLRA",list,"min"=>0,"max"=>300,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
-lonlat("EvapA",list,"max"=>1000,"clr_min"=>56,"clr_max"=>13)
-lonlat("SensA",list,"max"=>200,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
-lonlat("SSRA",list,"min"=>-1000,"max"=>0,"clr_min"=>99,"clr_max"=>56)
-lonlat("SLRA",list,"min"=>0,"max"=>200,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
-lonlat("Rain",list,"min"=>0,"max"=>1000,"nlev"=>20)
-lonlat("RainCumulus",list,"min"=>0,"max"=>500)
-lonlat("RainLsc",list,"min"=>0,"max"=>500,"nlev"=>20)
-lonlat("SurfTemp",list,"min"=>220,"max"=>360)
-lonlat("Temp",list,"min"=>220,"max"=>320)
-lonlat("RH",list,"min"=>0,"max"=>100)
-lonlat("H2OLiq",list,"min"=>0,"max"=>0.1)
-lonlat("PrcWtr",list,"min"=>0,"max"=>100,"nlev"=>20)      
-lonlat("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
-lonlat("V",list,"min"=>-10,"max"=>10)      
-
-=begin
-lonlat("DQVapDtDyn",list)      
-lonlat("DQVapDtVDiff",list)    
-lonlat("DQVapDtCond",list,"min"=>-3e-7,"max"=>0)
-lonlat("DQVapDtCumulus",list,"min"=>-3e-7,"max"=>0)  
-lonlat("DQVapDtLsc",list,"min"=>-3e-7,"max"=>0)
-lonlat("DTempDtRadS",list)
-lonlat("DTempDtRadL",list)
-lonlat("DTempDtDyn",list)   
-lonlat("DTempDtVDiff",list)
-lonlat("DTempDtCond",list)     
-lonlat("DTempDtCumulus",list)  
-lonlat("DTempDtLsc",list)   
-lonlat("DTempDtDryConv",list)  
-=end
+if defined?(varname) then
+  figopt = {} if !defined?(figopt)
+  lonlat("varname",list,figopt)
+else
+  lonlat("OSRA",list,"min"=>-1200,"max"=>0,"nlev"=>20,"clr_min"=>99,"clr_max"=>56)
+  lonlat("OLRA",list,"min"=>0,"max"=>300,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
+  lonlat("EvapA",list,"max"=>1000,"clr_min"=>56,"clr_max"=>13)
+  lonlat("SensA",list,"max"=>200,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
+  lonlat("SSRA",list,"min"=>-1000,"max"=>0,"clr_min"=>99,"clr_max"=>56)
+  lonlat("SLRA",list,"min"=>0,"max"=>200,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
+  lonlat("Rain",list,"min"=>0,"max"=>1000,"nlev"=>20)
+  lonlat("RainCumulus",list,"min"=>0,"max"=>500)
+  lonlat("RainLsc",list,"min"=>0,"max"=>500,"nlev"=>20)
+  lonlat("SurfTemp",list,"min"=>220,"max"=>360)
+  lonlat("Temp",list,"min"=>220,"max"=>320)
+  lonlat("RH",list,"min"=>0,"max"=>100)
+  lonlat("H2OLiq",list,"min"=>0,"max"=>0.1)
+  lonlat("PrcWtr",list,"min"=>0,"max"=>100,"nlev"=>20)      
+  lonlat("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
+  lonlat("V",list,"min"=>-10,"max"=>10)      
+end  
 DCL.grcls
 
 img_lg = list.id+"_lonlat"

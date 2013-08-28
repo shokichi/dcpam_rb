@@ -15,7 +15,7 @@ module MKfig
   def merid_fig(var_name,list,hash={}) # 子午面断面
     list.dir.each_index do |n|
       gp = gpopen(Utiles_spe.str_add(list.dir[n],var_name)+'.nc',var_name)
-      next if gpopen.nil?
+      next if gp.nil?
       # 時間平均
       gp = gp.mean("time") if gp.axnames.include?("time")
       # 経度平均
@@ -24,7 +24,7 @@ module MKfig
       # 
       if gp.max.to_f > 1e+10 then
         gp = gp*1e-10
-        gp.units = "10^10 " + gp.units
+        gp.units = "10^10 " + gp.units.to_s
       end
   
       fig_opt = {'color_bar'=>true,

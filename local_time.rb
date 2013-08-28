@@ -202,17 +202,16 @@ def omega_ratio(name)# 名前解析 nameからomega/omega_Eを抽出
 end
 
 rank_flag = false
-varname = nil
 opt = OptionParser.new
 opt.on("-r","--rank") {rank_flag = true}
 opt.on("-n VAR") {|str| varname = str}
-opt.on("-n VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
+opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
 opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
 
 
-if !varname.nil? then
+if defined?(varname) and !varname.nil? then
   local_time_mean_rank(varname,list) if rank_flag
   local_time_mean(varname,list) if !rank_flag
 else

@@ -6,13 +6,15 @@
 
 # 
 require "numru/ggraph"
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
+require 'optparse'
+include MKfig
 include NumRu
 
-
-
-#
+# option
+opt.on("-n VAR","--name=VAR") {|name| varname = name}
+opt.on("-o OPT","--figopt=OPT") {|hash| figopt = hash}
+opt.parse!(ARGV)
 list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL open
@@ -34,31 +36,23 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-lonsig("Temp",list,"min"=>120,"max"=>320,"nlev"=>20)
-lonsig("DQVapDtCond",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)
-lonsig("DQVapDtCumulus",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)  
-lonsig("DQVapDtLsc",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>40)
-lonsig("RH",list,"min"=>0,"max"=>100)
-lonsig("H2OLiq",list,"min"=>0,"max"=>1e-4)
-lonsig("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
-lonsig("V",list,"min"=>-10,"max"=>10)      
+if defined?(varname) then
+  figopt = {} if !defined?(figopt)
+  lonsig("varname",list,figopt)
+else
+  lonsig("Temp",list,"min"=>120,"max"=>320,"nlev"=>20)
+  lonsig("DQVapDtCond",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)
+  lonsig("DQVapDtCumulus",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)  
+  lonsig("DQVapDtLsc",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>40)
+  lonsig("RH",list,"min"=>0,"max"=>100)
+  lonsig("H2OLiq",list,"min"=>0,"max"=>1e-4)
+  lonsig("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
+  lonsig("V",list,"min"=>-10,"max"=>10)      
+end
 
-=begin
-lonlat("DQVapDtDyn",list)
-lonlat("DQVapDtVDiff",list)
-lonlat("DTempDtRadS",list)
-lonlat("DTempDtRadL",list)
-lonlat("DTempDtDyn",list)   
-lonlat("DTempDtVDiff",list)
-lonlat("DTempDtCond",list)     
-lonlat("DTempDtCumulus",list)  
-lonlat("DTempDtLsc",list)   
-lonlat("DTempDtDryConv",list)  
-=end
 DCL.grcls
 
-
-img_lg = list.id+"_lonsig"
+img_lg = list.id+File.basename(__FILE__,"rb").sub("mkfig")
 if ARGV.index("-ps") 
   File.rename("dcl.ps","#{img_lg}.ps")
 elsif ARGV.index("-png")
