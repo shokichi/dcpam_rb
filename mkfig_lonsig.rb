@@ -12,9 +12,11 @@ include MKfig
 include NumRu
 
 # option
-opt.on("-n VAR","--name=VAR") {|name| varname = name}
-opt.on("-o OPT","--figopt=OPT") {|hash| figopt = hash}
+opt = OptionParser.new
+opt.on("-n VAR","--name=VAR") {|name| VarName = name}
+opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
 opt.parse!(ARGV)
+varname = VarName if defined?(VarName)
 list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL open
@@ -37,8 +39,8 @@ DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
 if defined?(varname) then
-  figopt = {} if !defined?(figopt)
-  lonsig("varname",list,figopt)
+  Figopt ||= {}
+  lonsig("varname",list,Figopt)
 else
   lonsig("Temp",list,"min"=>120,"max"=>320,"nlev"=>20)
   lonsig("DQVapDtCond",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)

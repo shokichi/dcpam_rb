@@ -14,9 +14,11 @@ include NumRu
 
 
 #
-opt.on("-n VAR","--name=VAR") {|name| varname = name}
-opt.on("-o OPT","--figopt=OPT") {|hash| figopt = hash}
+opt = OptionParser.new
+opt.on("-n VAR","--name=VAR") {|name| VarName = name}
+opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
 opt.parse!(ARGV)
+varname = VarName if defined?(VarName)
 list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL open
@@ -39,8 +41,8 @@ DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
 if defined?(varname) then
-  figopt = {} if !defined?(figopt)
-  lonlat("varname",list,figopt)
+  Figopt ||= {}
+  lonlat("varname",list,Figopt)
 else
   lonlat("OSRA",list,"min"=>-1200,"max"=>0,"nlev"=>20,"clr_min"=>99,"clr_max"=>56)
   lonlat("OLRA",list,"min"=>0,"max"=>300,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)

@@ -6,6 +6,7 @@
 require 'numru/ggraph'
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require 'optparse'
 include Utiles_spe
 include NumRu
 include Math
@@ -14,11 +15,10 @@ include NMath
 def calc_rh(dir) # 相対湿度の計算
   # file open
   data_name = 'RH'
-  begin
-    gqvap = gpopen(dir + "QVap.nc", "QVap")
-    gps = gpopen(dir + "Ps.nc", "Ps")
-    gtemp = gpopen(dir + "Temp.nc", "Temp")
-  rescue
+  gqvap = gpopen(dir + "QVap.nc", "QVap")
+  gps = gpopen(dir + "Ps.nc", "Ps")
+  gtemp = gpopen(dir + "Temp.nc", "Temp")
+  if gqvap.nil? or gps.nil? or gtemp.nil? then 
     print "[#{data_name}](#{dir}) is not created \n"
     return
   end
@@ -90,9 +90,12 @@ def calc_rh_rank(dir)
   end
 end
 
+# option
+opt = OptionParser.new
+opt.on('-r','--rank'){Frag_rank = true}
+opt.parse!(ARGV) 
 list = Utiles_spe::Explist.new(ARGV[0])
-if ARGV.index("-rank") then
-  list.dir.each{ |dir| calc_rh_rank(dir) }
-else
-  list.dir.each{|dir| calc_rh(dir)}
-end
+
+list.dir.each{ |dir| calc_rh_rank(dir) } if defined?(Frag_rank)
+list.dir.each{|dir| calc_rh(dir)} if !defined?(Frag_rank)
+

@@ -11,10 +11,12 @@ include MKfig
 include NumRu
 
 # option
-opt.on("-n VAR","--name=VAR") {|name| varname = name}
-opt.on("-o OPT","--figopt=OPT") {|hash| figopt = hash}
+opt = OptionParser.new
+opt.on("-n VAR","--name=VAR") {|name| VarName = name}
+opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
 opt.parse!(ARGV)
 list = Utiles_spe::Explist.new(ARGV[0])
+varname = VarName if defined?(VarName)
 
 # DCL open
 if ARGV.index("-ps")
@@ -39,8 +41,8 @@ GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
 if defined?(varname) then
-  figopt = {} if !defined?(figopt)
-  merid_fig("varname",list,figopt)
+  Figopt ||= {}
+  merid_fig("varname",list,Figopt)
 else
   merid_fig('Temp',list,"min"=>120,"max"=>320,"interval"=>10)
   merid_fig('U',list,"min"=>-80,"max"=>80,"interval"=>5)

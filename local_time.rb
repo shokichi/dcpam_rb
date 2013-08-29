@@ -203,17 +203,16 @@ end
 
 rank_flag = false
 opt = OptionParser.new
-opt.on("-r","--rank") {rank_flag = true}
-opt.on("-n VAR") {|str| varname = str}
+opt.on("-r","--rank") {Flag_rank = true}
+opt.on("-n VAR") {|str| VarName = str}
 opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
 opt.parse!(ARGV)
-
 list = Utiles_spe::Explist.new(ARGV[0])
-
+varname = VarName if defined?(VarName)
 
 if defined?(varname) and !varname.nil? then
-  local_time_mean_rank(varname,list) if rank_flag
-  local_time_mean(varname,list) if !rank_flag
+  local_time_mean_rank(varname,list) if Frag_rank
+  local_time_mean(varname,list) if !Frag_rank
 else
 var_list = 
 [ 
