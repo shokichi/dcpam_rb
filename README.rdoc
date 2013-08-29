@@ -19,6 +19,7 @@
 
 === ライブラリ
 * lib/utiles_spe.rb
+* lib/make_figure.rb
 
 == 準備
 * 依存ライブラリ
