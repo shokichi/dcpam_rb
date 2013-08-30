@@ -32,6 +32,9 @@
 
 * ダウンロード
  https://github.com/shokichi/dcpam_rb
+ 
+gitが入っている場合は以下のコマンドを実行
+ $ git clone https://github.com/shokichi/dcpam_rb
 
 
 == 使い方
