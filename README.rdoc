@@ -8,6 +8,7 @@
 * mkfig_latsig.rb:赤道断面の図を作成
 * anime:アニメーション作成
 
+
 === 解析
 * albedo.rb:惑星アルベド
 * anglmom.rb:絶対角運動量
@@ -17,16 +18,19 @@
 * mean4big.rb:時間平均・経度平均
 * local_time.rb:地方時変換
 
+=== おまけ
+* run_mang.rb: dcpamの連続ジョブ投入用スクリプト
+
 === ライブラリ
 * lib/utiles_spe.rb
 * lib/make_figure.rb
 
 == 準備
 * 依存ライブラリ
-  * Ruby
-  * GPhys
+  * Ruby1.9 以上
+  * GPhys1.3.1 以上
 
-* 以下の場所から資源をダウンロード
+* ダウンロード
  https://github.com/shokichi/dcpam_rb
 
 
@@ -36,9 +40,6 @@
 NetCDFファイルが置いてあるディレクトリで
  $ mkfig_hoge.rb
 と入力すると図が表示される. 
-(描画と同時に時間・経度平均の処理が行われる.
-大きなデータの平均処理はメモリに負担をかけやすいので, 
-事前にmean4big.rbなどで平均したデータを作っておくことをすすめる. ) 
 
 
 ==== 子午面の図を作成
