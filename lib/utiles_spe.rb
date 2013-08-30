@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 # 
 # 
+require "numru/ggraph"
+require 'numru/gphys'
 include NumRu
 include Math
 include NMath
-require "numru/ggraph"
-require 'numru/gphys'
 
 module Utiles_spe 
 # 定数
@@ -490,21 +490,21 @@ def day2hrs(gp,name)
   return gp
 end
 #---------------------------------------
-def gpopen(file,name)
+def gpopen(file,name=nil)
+  name = File.basename(file,".nc").gsub("_","").sub("MT","").sub("local","") if name.nil?
   begin
     gp = GPhys::IO.open file, name
   rescue
-    print "Can not open[#{name}](#{file})\n"
-#    if !file.include?(name)
-#      gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
-#    else
-#      rank = ["rank000006.nc","rank000004.nc",
-#              "rank000002.nc","rank000000.nc",
-#              "rank000001.nc","rank000003.nc",
-#              "rank000005.nc","rank000007.nc"]
-#      file = str_add(file.sub(".nc","_"), rank)
-#      gp = GPhys::IO.open file, name
-#    end
+    begin
+      if !file.include?(name)
+        gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
+      else
+        gp = GPhys::IO.open Dir.glob(file+"_rank*.nc"), name     #<=読み込みに時間がかかりすぎる
+      end
+    rescue
+      print "[#{name}](#{File.dirname(file)}) is not exist \n"
+      return nil
+    end
   end
   return gp
 end
