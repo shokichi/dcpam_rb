@@ -12,6 +12,7 @@ include NumRu
 
 # option
 opt = OptionParser.new
+opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR","--name=VAR") {|name| VarName = name}
 opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
 opt.parse!(ARGV)

@@ -492,7 +492,7 @@ end
 #---------------------------------------
 def gpopen(file,name=nil)
   name = File.basename(file,".nc").gsub("_","").sub("MT","").sub("local","") if name.nil?
-  if Flag_rank then
+  if defined?(Flag_rank) then
     gp = gpopen_rank(file,name)
     gp = gpopen_nomal(file,name) if gp.nil?
   else
