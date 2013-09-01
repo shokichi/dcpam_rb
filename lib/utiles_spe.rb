@@ -492,20 +492,37 @@ end
 #---------------------------------------
 def gpopen(file,name=nil)
   name = File.basename(file,".nc").gsub("_","").sub("MT","").sub("local","") if name.nil?
-  begin
-    gp = GPhys::IO.open file, name
-  rescue
-    begin
-      if !file.include?(name)
-        gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
-      else
-        gp = GPhys::IO.open Dir.glob(file+"_rank*.nc"), name     #<=読み込みに時間がかかりすぎる
-      end
-    rescue
-      print "[#{name}](#{File.dirname(file)}) is not exist \n"
-      return nil
-    end
+  if Flag_rank then
+    gp = gpopen_rank(file,name)
+    gp = gpopen_nomal(file,name) if gp.nil?
+  else
+    gp = gpopen_nomal(file,name)
+    gp = gpopen_rank(file,name) if gp.nil?
   end
+
+  print "[#{name}](#{File.dirname(file)}) is not exist \n" if gp.nil?
+  return gp
+end
+# ---------------------------------------
+def gpopen_nomal(file,name)
+  begin
+    gp = GPhys::IO.open file,name
+  rescue
+    gp = nil
+  end
+  return gp
+end
+# ---------------------------------------
+def gpopen_rank(file,name)
+  begin
+    if !file.include?(name)
+      gp = GPhys::IO.open file.sub(".nc","_rank000000.nc"), name
+    else
+      gp = GPhys::IO.open Dir.glob(file+"_rank*.nc"), name     #<=読み込みに時間がかかりすぎる
+    end
+  rescue
+    gp = nil
+  end 
   return gp
 end
 # ---------------------------------------
