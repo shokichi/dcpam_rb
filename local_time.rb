@@ -201,7 +201,6 @@ def omega_ratio(name)# 名前解析 nameからomega/omega_Eを抽出
   return ratio
 end
 
-rank_flag = false
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR") {|str| VarName = str}
@@ -211,8 +210,8 @@ list = Utiles_spe::Explist.new(ARGV[0])
 varname = VarName if defined?(VarName)
 
 if defined?(varname) and !varname.nil? then
-  local_time_mean_rank(varname,list) if Frag_rank
-  local_time_mean(varname,list) if !Frag_rank
+  local_time_mean_rank(varname,list) if defined?(Flag_rank)
+  local_time_mean(varname,list) if !defined?(Flag_rank)
 else
 var_list = 
 [ 
