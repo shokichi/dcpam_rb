@@ -38,9 +38,9 @@ DCL.uzfact(0.9) # 文字の大きさ
 GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
-if defined?(varname) then
+if !varname.nil? then
   Figopt ||= {}
-  merid_fig("varname",list,Figopt)
+  merid_fig(varname,list,Figopt)
 else
   merid_fig('Temp',list,"min"=>120,"max"=>320,"interval"=>10)
   merid_fig('U',list,"min"=>-80,"max"=>80,"interval"=>5)
@@ -55,7 +55,7 @@ end
 DCL.grcls
 
 
-img_lg = list.id+"_merid"
+img_lg = list.id+File.basename(__FILE__,"rb").sub("mkfig","")
 if IWS == 2 
   File.rename("dcl.ps","#{img_lg}.ps")
 elsif IWS == 4

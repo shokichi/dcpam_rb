@@ -23,7 +23,7 @@ opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
 varname = VarName if defined?(VarName)
-IWS = 1 if !defined?(IWS)
+IWS = 1 if !defined?(IWS) or IWS.nil?
 
 # DCL set
 DCL.gropn(IWS)
@@ -35,7 +35,7 @@ DCL.uzfact(1.0)
 GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
-if defined?(varname) then
+if !varname.nil? then
   Figopt ||= {}
   lat_fig("varname",list,Figopt)
 else
@@ -56,7 +56,7 @@ end
 
 DCL.grcls
 
-img_lg = list.id+"_lat"
+img_lg = list.id+File.basename(__FILE__,"rb").sub("mkfig","")
 if IWS == 2 
   File.rename("dcl.ps","#{img_lg}.ps")
 elsif IWS == 4

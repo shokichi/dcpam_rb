@@ -27,7 +27,7 @@ opt.on("--png") {
 opt.parse!(ARGV)
 varname = VarName if defined?(VarName)
 list = Utiles_spe::Explist.new(ARGV[0])
-IWS = 1 if !defined?(IWS)
+IWS = 1 if !defined?(IWS) or IWS.nil?
 
 # DCL set
 clrmp = 14  # カラーマップ
@@ -38,9 +38,9 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-if defined?(varname) then
+if !varname.nil? then
   Figopt ||= {}
-  lonlat("varname",list,Figopt)
+  lonlat(varname,list,Figopt)
 else
   lonlat("OSRA",list,"min"=>-1200,"max"=>0,"nlev"=>20,"clr_min"=>99,"clr_max"=>56)
   lonlat("OLRA",list,"min"=>0,"max"=>300,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)
@@ -61,7 +61,7 @@ else
 end  
 DCL.grcls
 
-img_lg = list.id+"_lonlat"
+img_lg = list.id+File.basename(__FILE__,"rb").sub("mkfig","")
 if IWS == 2 
   File.rename("dcl.ps","#{img_lg}.ps")
 elsif IWS == 4

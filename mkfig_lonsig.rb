@@ -25,7 +25,7 @@ opt.parse!(ARGV)
 
 varname = VarName if defined?(VarName)
 list = Utiles_spe::Explist.new(ARGV[0])
-IWS = 1 if !defined?(IWS)
+IWS = 1 if !defined?(IWS) or IWS.nil?
 
 
 # DCL set
@@ -37,7 +37,7 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-if defined?(varname) then
+if !varname.nil? then
   Figopt ||= {}
   lonsig("varname",list,Figopt)
 else
@@ -53,7 +53,7 @@ end
 
 DCL.grcls
 
-img_lg = list.id+File.basename(__FILE__,"rb").sub("mkfig")
+img_lg = list.id+File.basename(__FILE__,"rb").sub("mkfig","")
 if IWS == 2 
   File.rename("dcl.ps","#{img_lg}.ps")
 elsif IWS == 4
