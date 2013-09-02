@@ -16,24 +16,22 @@ opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR","--name=VAR") {|name| VarName = name}
 opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
+opt.on("--ps") { IWS = 2}
+opt.on("--png") { 
+  DCL::swlset('lwnd',false)
+  IWS = 4
+}
 opt.parse!(ARGV)
+
 varname = VarName if defined?(VarName)
 list = Utiles_spe::Explist.new(ARGV[0])
+IWS = 1 if !defined?(IWS)
 
-# DCL open
-if ARGV.index("-ps")
-  iws = 2
-elsif ARGV.index("-png")
-  DCL::swlset('lwnd',false)
-  iws = 4
-else
-  iws = 1
-end
 
 # DCL set
 clrmp = 14  # カラーマップ
 DCL.sgscmn(clrmp)
-DCL.gropn(iws)
+DCL.gropn(IWS)
 #DCL.sldiv('Y',2,1)
 DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
@@ -56,9 +54,9 @@ end
 DCL.grcls
 
 img_lg = list.id+File.basename(__FILE__,"rb").sub("mkfig")
-if ARGV.index("-ps") 
+if IWS == 2 
   File.rename("dcl.ps","#{img_lg}.ps")
-elsif ARGV.index("-png")
+elsif IWS == 4
   Dir.glob("dcl_*.png").each{ |filename|
     File.rename(filename,filename.sub("dcl",img_lg)) }
 end
