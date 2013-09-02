@@ -66,10 +66,10 @@ NetCDFファイルが置いてあるディレクトリで
 === 図の保存
 描いた図を保存したい場合は以下のオプションをつける
 * -ps: ps で保存
- $ mkfig_merid.rb -ps
+ $ mkfig_merid.rb --ps
 
 * -png: png で保存
- $ mkfig_merid.rb -png
+ $ mkfig_merid.rb --png
 
 === 各種物理量の計算
 ==== 質量流線関数
