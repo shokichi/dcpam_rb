@@ -57,8 +57,10 @@ def anglmom(dir,name)
   print "[#{data_name}](#{dir}) is created \n"
 end
 
-opt.on("-n VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
+opt = OptionParser.new
+opt.on("-r","--rank") {Flag_rank = true}
+opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
-list.dir.length.each_index{|n| anglmom(list.dir[n],list.name[n])} 
+list.dir.each_index{|n| anglmom(list.dir[n],list.name[n])} 

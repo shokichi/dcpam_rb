@@ -10,6 +10,7 @@ include NMath
 
 module Utiles_spe 
 # 定数
+SolarConst = UNumeric[1366.0, "W.m-2"]
 Grav    = UNumeric[9.8, "m.s-2"]       # 重力加速度
 RPlanet = UNumeric[6371000.0, "m"]     # 惑星半径
 RefPrs  = UNumeric[100000, "Pa"]       # 基準気圧
@@ -430,8 +431,8 @@ def local_time(gp,hr_in_day,nowtime=nil)
   local_time = lon.copy
   nlon = lon.length
 
-  nowtime = gphys.axis("time").to_gphys if nowtime.nil?
-  gp_local = gphys.copy
+  nowtime = gp.axis("time").to_gphys if nowtime.nil?
+  gp_local = gp.copy
   # 時間の単位を[day]に変更
   nowtime.val = nowtime.val/hr_in_day    if nowtime.units.to_s == "hrs"
   nowtime.val = nowtime.val/hr_in_day/60 if nowtime.units.to_s == "min"
@@ -441,8 +442,8 @@ def local_time(gp,hr_in_day,nowtime=nil)
   local_min_index = local_time.val.to_a.index(local_time.val.min)
   # データの並び替え
   if local_min_index != 0 then
-    gp_local[0..nlon-1-local_min_index,false].val = gphys[local_min_index..-1,false].val
-    gp_local[nlon-local_min_index..-1,false].val = gphys[0..local_min_index-1,false].val
+    gp_local[0..nlon-1-local_min_index,false].val = gp[local_min_index..-1,false].val
+    gp_local[nlon-local_min_index..-1,false].val = gp[0..local_min_index-1,false].val
   end
   # lon -> localtime 変換
   gp_local.axis("lon").set_pos(local)

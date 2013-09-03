@@ -15,18 +15,20 @@ def albedo(dir,name)
 #  data_name = "Albedo"
   data_name = "RadSDWFLX"
   # file open
-  osr = GPhys::IO.open(dir+"OSRA.nc","OSRA")
+  osr = gpopen(dir+"OSRA.nc","OSRA")
   return if osr.nil?
 
   if defined?(HrInDay) and !HrInDay.nil? then
     hr_in_day = HrInDay
+  else
     hr_in_day = 24 / Utiles_spe.omega_ratio(name)
   end
 
   nlon = osr.axis("lon").length
   # 太陽直下点の計算
-  time = hrs2day(sw,hr_in_day).to_gphys.val[0]
-  slon = (time - time.to_i)*360
+#  time = hrs2day(sw,hr_in_day).to_gphys.val[0]
+#  slon = (time - time.to_i)*360
+  slon = 0
   slon = UNumeric[slon,"degree"]    # 太陽直下点経度
 
   # 大気上端下向きのSW
@@ -34,7 +36,7 @@ def albedo(dir,name)
   tsw[false] = -1.0
   tsw = tsw*SolarConst*((slon-tsw.axis("lon").to_gphys)*PI/180.0).cos
   tsw = tsw*(tsw.axis("lat").to_gphys*PI/180.0).cos
-
+  tsw = tsw[nlon/4..nlon*3/4-1,false]
 
   # 計算
   ofile = NetCDF.create( dir + data_name + '.nc')
@@ -69,7 +71,7 @@ end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
-opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
+opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.parse!(ARGV)
 list = Utiles_spe::Explist.new(ARGV[0])
 
