@@ -5,44 +5,46 @@
 
 require 'numru/ggraph'
 require 'numru/gphys'
-require '/home/ishioka/ruby/lib/utiles_spe'
+require 'optparse'
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
 include Utiles_spe
 include NumRu
 include Math
 
-
-
 def albedo(dir,name)
-  # 定数
-  SolarConst = UNumeric[1366.0, "W.m-2"]
-
 #  data_name = "Albedo"
   data_name = "RadSDWFLX"
   # file open
-  begin
-    osr = GPhys::IO.open(dir+"OSRA.nc","OSRA")
-  rescue
-    print "[#{data_name}](#{dir}) is not created \n"
-    return
+  osr = GPhys::IO.open(dir+"OSRA.nc","OSRA")
+  return if osr.nil?
+
+  if defined?(HrInDay) and !HrInDay.nil? then
+    hr_in_day = HrInDay
+    hr_in_day = 24 / Utiles_spe.omega_ratio(name)
   end
 
-  hr_in_day = 24 / Utiles_spe.omega_ratio(name)
+  nlon = osr.axis("lon").length
+  # 太陽直下点の計算
+  time = hrs2day(sw,hr_in_day).to_gphys.val[0]
+  slon = (time - time.to_i)*360
+  slon = UNumeric[slon,"degree"]    # 太陽直下点経度
+
+  # 大気上端下向きのSW
+  tsw = osr[false,0].copy
+  tsw[false] = -1.0
+  tsw = tsw*SolarConst*((slon-tsw.axis("lon").to_gphys)*PI/180.0).cos
+  tsw = tsw*(tsw.axis("lat").to_gphys*PI/180.0).cos
+
 
   # 計算
   ofile = NetCDF.create( dir + data_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write(osr, ofile,'time') { 
     |sw|
-    # 太陽直下点の計算
-    time = hrs2day(sw,hr_in_day).to_gphys.val[0]
-    slon = (time - time.to_i)*360
-    slon = UNumeric[slon,"degree"]    # 太陽直下点経度
 
-    # 大気上端下向きのSW
-    tsw = sw[false,0].copy
-#    tsw = sw.copy
-    tsw[false] = -1.0
-    tsw = tsw*SolarConst*((slon-tsw.axis("lon").to_gphys)*PI/180.0).cos
-    tsw = tsw*(tsw.axis("lat").to_gphys*PI/180.0).cos
+    # OSRの地方時変換
+    sw = local_time(sw,hr_in_day)
+    sw = sw[nlon/4..nlon*3/4-1,false]
+    
     # albedo
     albedo = sw.copy
     albedo.val = 1.0 + sw.val/tsw.val.abs
@@ -65,5 +67,10 @@ def hrs2day(gp,hr_in_day)
   return gp.axis("time").set_pos(time) 
 end
 
+opt = OptionParser.new
+opt.on("-r","--rank") {Flag_rank = true}
+opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
+opt.parse!(ARGV)
 list = Utiles_spe::Explist.new(ARGV[0])
+
 list.dir.each_index{|n| albedo(list.dir[n],list.name[n]) } 
