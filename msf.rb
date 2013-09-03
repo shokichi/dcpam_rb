@@ -64,9 +64,9 @@ def calc_msf_rank(dir)
           "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
   rank.each do |footer|
     begin 
-      ps = GPhys::IO.open(dir +"Ps"+"_"+footer,"Ps")
-      qvap = GPhys::IO.open(dir +"QVap"+"_"+footer,"QVap")
-      temp = GPhys::IO.open(dir +"Temp"+ "_"+footer,"Temp")
+      ps = gpopen(dir +"Ps"+"_"+footer,"Ps")
+      qvap = gpopen(dir +"QVap"+"_"+footer,"QVap")
+      temp = gpopen(dir +"Temp"+ "_"+footer,"Temp")
     rescue 
       print "[RH](#{dir}) is not created\n"
       next

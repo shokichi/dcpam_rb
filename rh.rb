@@ -79,9 +79,9 @@ def calc_rh_rank(dir)
           "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
   rank.each do |footer|
     begin 
-      ps = GPhys::IO.open(dir +"Ps"+"_"+footer,"Ps")
-      qvap = GPhys::IO.open(dir +"QVap"+"_"+footer,"QVap")
-      temp = GPhys::IO.open(dir +"Temp"+ "_"+footer,"Temp")
+      ps = gpopen(dir +"Ps"+"_"+footer,"Ps")
+      qvap = gpopen(dir +"QVap"+"_"+footer,"QVap")
+      temp = gpopen(dir +"Temp"+ "_"+footer,"Temp")
     rescue 
       print "[RH](#{dir}) is not created\n"
       next
@@ -92,10 +92,10 @@ end
 
 # option
 opt = OptionParser.new
-opt.on('-r','--rank'){Frag_rank = true}
+opt.on('-r','--rank'){Flag_rank = true}
 opt.parse!(ARGV) 
 list = Utiles_spe::Explist.new(ARGV[0])
 
-list.dir.each{ |dir| calc_rh_rank(dir) } if defined?(Frag_rank)
-list.dir.each{|dir| calc_rh(dir)} if !defined?(Frag_rank)
+list.dir.each{ |dir| calc_rh_rank(dir) } if defined?(Flag_rank)
+list.dir.each{|dir| calc_rh(dir)} if !defined?(Flag_rank)
 

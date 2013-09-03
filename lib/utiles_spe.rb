@@ -145,16 +145,16 @@ end
 def virtical_integral(gp)  # 鉛直積分
   begin
     if gp.data.file.class == NArray then
-      sig_weight = GPhys::IO.open(gp.data.file[0].path, "sig_weight")
+      sig_weight = gpopen(gp.data.file[0].path, "sig_weight")
     else
-      sig_weight = GPhys::IO.open(gp.data.file.path, "sig_weight")    
+      sig_weight = gpopen(gp.data.file.path, "sig_weight")    
     end
   rescue
     if gp.data.file == nil then
-      sig_weight = GPhys::IO.open("./Temp.nc","sig_weight")
+      sig_weight = gpopen("./Temp.nc","sig_weight")
     else
       tmp = gp.data.file.path.split("/")
-      sig_weight = GPhys::IO.open(gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight")
+      sig_weight = gpopen(gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight")
     end
   end
   gp_vintg = GPhys.each_along_dims(gp,"time"){ |gphys|
@@ -387,7 +387,7 @@ def self.calc_prcwtr(dir) # 可降水量の計算
   # file open
   gqv = gpopen(dir + "QVap.nc", "QVap")
   gps = gpopen(dir + "Ps.nc", "Ps")
-  sigm = GPhys::IO.open(dir + "QVap.nc", "sigm")
+  sigm = gpopen(dir + "QVap.nc", "sigm")
 
   lon = gqv.axis("lon")
   lat = gqv.axis("lat")

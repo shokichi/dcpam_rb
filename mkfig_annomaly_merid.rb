@@ -13,9 +13,8 @@ include NumRu
 
 def merid_annomaly(var_name,list,hash={})
   # 基準データ
-  begin
-    gp_ref = GPhys::IO.open(list.dir[list.refnum]+var_name+".nc",var_name)
-  rescue
+  gp_ref = gpopen(list.dir[list.refnum]+var_name+".nc",var_name)
+  if gp_ref.nil? then
     print "Refarence file is not exist\n"
     return
   end
@@ -23,12 +22,9 @@ def merid_annomaly(var_name,list,hash={})
 
   # 比較データ
   list.dir.each_index do |n|
-    begin
-      gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
-    rescue
-      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-      next
-    end
+    gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
+    next if gp.nil?
+
     gp = cut_and_mean(gp)
 
     # 偏差の計算
@@ -46,9 +42,8 @@ end
 
 def merid_annomaly(var_name,list,hash={})
   # 基準データ
-  begin
-    gp_ref = GPhys::IO.open(list.dir[list.refnum]+var_name+".nc",var_name)
-  rescue
+  gp_ref = gpopen(list.dir[list.refnum]+var_name+".nc",var_name)
+  if gp_ref.nil? then
     print "Refarence file is not exist\n"
     return
   end
@@ -56,12 +51,9 @@ def merid_annomaly(var_name,list,hash={})
 
   # 比較データ
   list.dir.each_index do |n|
-    begin
-      gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
-    rescue
-      print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-      next
-    end
+    gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
+    next if gp.nil?
+
     gp = cut_and_mean(gp)
 
     # 偏差の計算
@@ -86,23 +78,26 @@ def cut_and_mean(gp)
   return gp
 end
 
-#
-list = Utiles_spe::Explist.new(ARGV[0])
-
-# DCL open
-if ARGV.index("-ps")
-  iws = 2
-elsif ARGV.index("-png")
+# option
+opt = OptionParser.new
+opt.on("-r","--rank") {Flag_rank = true}
+opt.on("-n VAR","--name=VAR") {|name| VarName = name}
+opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
+opt.on("--ps") { IWS = 1}
+opt.on("--png") { 
   DCL::swlset('lwnd',false)
-  iws = 4
-else
-  iws = 1
-end
+  IWS = 4
+}
+opt.parse!(ARGV) 
+
+list = Utiles_spe::Explist.new(ARGV[0])
+varname = VarName if defined?(VarName)
+IWS = 1 if !defined?(IWS) or IWS.nil?
 
 # DCL set
 clrmp = 14  # カラーマップ
 DCL.sgscmn(clrmp)
-DCL.gropn(iws)
+DCL.gropn(IWS)
 #DCL.sldiv('Y',2,1)
 DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
@@ -132,8 +127,4 @@ merid_annomaly("DTempDtDryConv",list)
 =end
 DCL.grcls
 
-if ARGV.index("-ps") 
-  system("mv dcl.ps #{list.id}_merid-annml.ps")
-elsif ARGV.index("-png")
-  system("rename 's/dcl_/#{list.id}_merid-annml_/' dcl_*.png")
-end
+rename_img_file(list,__FILE__)

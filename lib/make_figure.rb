@@ -41,12 +41,8 @@ module MKfig
     vy = 0.8
     list.dir.each_index do |n|
       # データの取得
-      begin
-        gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
-      rescue
-        print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-        next
-      end
+      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
+      next if gp.nil?
   
       # 高さ方向にデータがある場合は最下層を取り出す
       gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
@@ -84,12 +80,8 @@ module MKfig
 #------------------------------------------------
   def lonlat(var_name,list,hash={}) #水平断面
     list.dir.each_index do |n|
-      begin
-        gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
-      rescue
-        print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-        next
-      end
+      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
+      next if gp.nil?
   
       if gp.name == "H2OLiq" then
         ps = GPhys::IO.open gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
@@ -120,12 +112,8 @@ module MKfig
 #---------------------------------------------
   def lonsig(var_name,list,hash={}) # 赤道断面
     list.dir.each_index do |n|
-      begin
-        gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
-      rescue
-        print "[#{var_name}.nc](#{list.dir[n]}) is not exist\n"
-        next
-      end
+      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
+      next if gp.nil?
   
       # 時間平均
       gp = gp.mean("time") if !gp.axnames.index("time").nil?
