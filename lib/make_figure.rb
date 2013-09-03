@@ -154,5 +154,15 @@ module MKfig
       GGraph.tone_and_contour gp ,true, fig_opt
     end
   end
+# -------------------------------------------
+  def rename_img_file(list,scrfile) 
+    img_lg = list.id+File.basename(scrfile,".rb").sub("mkfig","")
+    if IWS == 2 
+      File.rename("dcl.ps","#{img_lg}.ps")
+    elsif IWS == 4
+      Dir.glob("dcl_*.png").each{ |filename|
+        File.rename(filename,filename.sub("dcl",img_lg)) }
+    end
+  end  
 #--------------------------------------------      
 end
