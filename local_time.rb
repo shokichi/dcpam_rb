@@ -55,8 +55,10 @@ def local_time(var_name,list)
       local_time = (local_time - local_time.to_i)*hr_in_day
       local_min_index = local_time.val.to_a.index(local_time.val.min)
       # データの並び替え
-      gp_local[0..nlon-1-local_min_index,false] = gphys[local_min_index..-1,false]
-      gp_local[nlon-local_min_index..-1,false] = gphys[0..local_min_index-1,false]
+      if local_min_index != 0 then
+        gp_local[0..nlon-1-local_min_index,false] = gphys[local_min_index..-1,false]
+        gp_local[nlon-local_min_index..-1,false] = gphys[0..local_min_index-1,false]
+      end
       # lon -> localtime 変換
       gp_local.axis("lon").set_pos(local)
       [gp_local]
@@ -67,24 +69,22 @@ end
 
 def local_time_mean(var_name,list)
   list.dir.each_index do |n|
-    begin 
-      gp = GPhys::IO.open(list.dir[n] + var_name + '.nc',var_name)
-    rescue
-      print "[#{var_name}](#{list.dir[n]}) is not exist\n"
-      next
-    end
- 
-    begin
-      rst_file = list.dir[n].sub("data/","rst_data/rst1800.nc").sub("data1400/","rst_data/rst1440.nc")
-      hr_in_day = gpopen(rst_file,'time').get_att("hour_in_day")
-    rescue
-      hr_in_day = 24 / omega_ratio(list.name[n])
-    end
+    gp = gpopen(list.dir[n] + var_name + '.nc',var_name)
+    next if gp.nil? 
 
+
+    rst_file = list.dir[n].sub("data/","rst_data/rst1800.nc").sub("data1400/","rst_data/rst1440.nc")
+    hr_in_day = gpopen(rst_file,'time').get_att("hour_in_day")
+
+    if HrInDay.nil? and hr_in_day.nil? 
+      hr_in_day = 24/omega_ratio(list.name[n])
+      hr_in_day = 24 if list.id.include?("coriolis")
+    end
     lon = gp.axis('lon')
 
     local = lon.pos
     local = lon.pos*hr_in_day/360
+    local.long_name = "local time"
 
     lon = lon.to_gphys
     local_time = lon.copy
@@ -113,73 +113,9 @@ def local_time_mean(var_name,list)
       ave = ave + gp_local      
     }
     ave = ave[false,0]/gp.axis("time").pos.length
-    data_name = 'MTlocal_' + var_name
-    ofile = NetCDF.create(list.dir[n] + data_name + '.nc')
+    ofile = NetCDF.create(file.sub(var_name,"MTlocal_" + var_name))
     GPhys::IO.write(ofile, ave)
     ofile.close
-  end
-end
-
-def local_time_mean_rank(var_name,list)
-  rank = ["rank000006.nc","rank000004.nc","rank000002.nc","rank000000.nc",
-          "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
-  list.dir.each_index do |n|
-    if !defined?(HrInDay).nil?
-      hr_in_day = HrInDay 
-    else
-      begin
-        rst_file = list.dir[n].sub("data/","rst_data/rst1800.nc").sub("data1400/","rst_data/rst1440.nc")
-        hr_in_day = gpopen(rst_file,'time').get_att("hour_in_day")
-      rescue
-        hr_in_day = 24 / omega_ratio(list.name[n])
-        hr_in_day = 24 if list.id.include?("coriolis")
-      end
-    end
-    str_add(list.dir[n]+var_name.sub(".nc","")+ "_",rank).each do |file|
-      begin 
-        gp = GPhys::IO.open(file,var_name)
-      rescue
-        print "[#{var_name}](#{list.dir[n]}) is not exist\n"
-        next
-      end
-  
-      lon = gp.axis('lon')
-  
-      local = lon.pos
-      local = lon.pos*hr_in_day/360
-      local.long_name = "local time"
-  
-      lon = lon.to_gphys
-      local_time = lon.copy
-      nlon = lon.length
-      
-      ave = 0
-      GPhys.each_along_dims(gp,'time') do 
-        |gphys|
-  
-        nowtime = gphys.axis("time").to_gphys
-        gp_local = gphys.copy
-        # 時間の単位を[day]に変更
-        nowtime.val = nowtime.val/hr_in_day    if nowtime.units.to_s == "hrs"
-        nowtime.val = nowtime.val/hr_in_day/60 if nowtime.units.to_s == "min"
-        # 日付が変わる経度を検出
-        local_time.val = nowtime.val + lon.val/360
-        local_time.val = (local_time.val - local_time.val.to_i)*hr_in_day
-        local_min_index = local_time.val.to_a.index(local_time.val.min)
-        # データの並び替え
-        if local_min_index != 0 then
-          gp_local[0..nlon-1-local_min_index,false].val = gphys[local_min_index..-1,false].val
-          gp_local[nlon-local_min_index..-1,false].val = gphys[0..local_min_index-1,false].val
-        end
-        # lon -> localtime 変換
-        gp_local.axis("lon").set_pos(local)
-        ave = ave + gp_local      
-      end
-      ave = ave[false,0]/gp.axis("time").pos.length
-      ofile = NetCDF.create(file.sub(var_name,"MTlocal_" + var_name))
-      GPhys::IO.write(ofile, ave)
-      ofile.close
-    end
   end
 end
   
@@ -210,8 +146,7 @@ list = Utiles_spe::Explist.new(ARGV[0])
 varname = VarName if defined?(VarName)
 
 if defined?(varname) and !varname.nil? then
-  local_time_mean_rank(varname,list) if defined?(Flag_rank)
-  local_time_mean(varname,list) if !defined?(Flag_rank)
+  local_time_mean(varname,list)
 else
 var_list = 
 [ 
@@ -253,7 +188,7 @@ var_list =
   "DTempDtRadS"
 ]
 
-var_list.each{ |var| local_time_mean_rank(var,list) } 
+var_list.each{ |var| local_time_mean(var,list) } 
 
 end
 

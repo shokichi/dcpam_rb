@@ -420,9 +420,9 @@ def self.calc_prcwtr(dir) # 可降水量の計算
   print "[#{data_name}](#{dir}) is created\n"
 end
 # ---------------------------------------
-def local_time(gp,hr_in_day,nowtime=nil)
+def local_time(gphys,hr_in_day)
 
-  lon = gp.axis('lon')
+  lon = gphys.axis('lon')
   local = lon.pos
   local = lon.pos*hr_in_day/360
   local.long_name = "local time"
@@ -431,24 +431,26 @@ def local_time(gp,hr_in_day,nowtime=nil)
   local_time = lon.copy
   nlon = lon.length
 
-  nowtime = gp.axis("time").to_gphys if nowtime.nil?
-  gp_local = gp.copy
-  # 時間の単位を[day]に変更
-  nowtime.val = nowtime.val/hr_in_day    if nowtime.units.to_s == "hrs"
-  nowtime.val = nowtime.val/hr_in_day/60 if nowtime.units.to_s == "min"
-  # 日付が変わる経度を検出
-  local_time.val = nowtime.val + lon.val/360
-  local_time.val = (local_time.val - local_time.val.to_i)*hr_in_day
-  local_min_index = local_time.val.to_a.index(local_time.val.min)
-  # データの並び替え
-  if local_min_index != 0 then
-    gp_local[0..nlon-1-local_min_index,false].val = gp[local_min_index..-1,false].val
-    gp_local[nlon-local_min_index..-1,false].val = gp[0..local_min_index-1,false].val
-  end
-  # lon -> localtime 変換
-  gp_local.axis("lon").set_pos(local)
-
-  return gp_local
+  gp_local_converted = GPhys.each_along_dims(gphys,"time"){ |gp|
+    nowtime = gp.axis("time").to_gphys
+    gp_local = gp.copy
+    # 時間の単位を[day]に変更
+    nowtime.val = nowtime.val/hr_in_day    if nowtime.units.to_s == "hrs"
+    nowtime.val = nowtime.val/hr_in_day/60 if nowtime.units.to_s == "min"
+    # 日付が変わる経度を検出
+    local_time.val = nowtime.val + lon.val/360
+    local_time.val = (local_time.val - local_time.val.to_i)*hr_in_day
+    local_min_index = local_time.val.to_a.index(local_time.val.min)
+    # データの並び替え
+    if local_min_index != 0 then
+      gp_local[0..nlon-1-local_min_index,false].val = gp[local_min_index..-1,false].val
+      gp_local[nlon-local_min_index..-1,false].val = gp[0..local_min_index-1,false].val
+    end
+    # lon -> localtime 変換
+    gp_local.axis("lon").set_pos(local)
+    return gp_local 
+    }  
+  return gp_local_converted
 end
 
 # ---------------------------------------
