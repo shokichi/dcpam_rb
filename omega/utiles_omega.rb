@@ -5,9 +5,10 @@
 
 require "numru/ggraph"
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/make_figure.rb")
 require 'optparse'
 include Utiles_spe
+include MKfig
 include NumRu
 include Math
 include NMath
@@ -16,286 +17,80 @@ module Omega
   # 定数
   SolarConst = UNumeric[1366.0, "W.m-2"]
   StB = UNumeric[5.67e-8, "W.m-2.K-4"]
+# -------------------------------------------
+def lat_fig(gata,list,hash={}) # 緯度分布
+  lc = 23
+  vx = 0.82
+  vy = 0.8
+  list.dir.each_index do |n|
+    # データの取得
+    gp = data[n]
 
-  def get_albedo(list)
-    albedo = []
-    error = []
-    list.dir.each_index{ |n| 
-      osr = GPhys::IO.open(list.dir[n] + "OSRA.nc","OSRA")
-      if list.id.include?("diurnal") then    
-        osr = time_range2(osr,list.name[n])
-      else
-        osr = time_range(osr,list.name[n])
-      end
-      alb = 1.0 + Utiles_spe.glmean(osr)/(SolarConst/4) 
-      albedo << alb.mean("time").val
-      error << std_error(alb.val)
-    }
-    return albedo, error
-  end
+    # 高さ方向にデータがある場合は最下層を取り出す
+    gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
   
-  def get_surftemp(list)
-    stemp = []
-    error = []
-    list.dir.each_index{ |n| 
-      temp = GPhys::IO.open(list.dir[n] + "SurfTemp.nc","SurfTemp")
-      if list.id.include?("diurnal") then    
-        temp = time_range2(temp,list.name[n])
-      else
-        temp = time_range(temp,list.name[n])
-      end
-      st = Utiles_spe.glmean(temp)
-      stemp << st.mean("time").val
-      error << std_error(st.val)    
-    }
-    return stemp, error
-  end
+    # 時間平均経度平均
+    gp = gp.mean('time') if gp.axnames.include?("time")
+    gp = gp.mean(0) if gp.axnames[0] != "lat"
   
-  def get_greenhouse(list)
-    green = []
-    error = []
-    list.dir.each_index{ |n| 
-      temp = GPhys::IO.open(list.dir[n] + "SurfTemp.nc","SurfTemp")
-      osr = GPhys::IO.open(list.dir[n] + "OSRA.nc","OSRA")
-      if list.id.include?("diurnal") then    
-        osr = time_range2(osr,list.name[n])
-        temp = time_range2(temp,list.name[n])
-      else
-        osr = time_range(osr,list.name[n])
-        temp = time_range(temp,list.name[n])
-      end
-      factor= (Utiles_spe.glmean(temp)/
-                (SolarConst*
-                  (1.0-(1.0 + Utiles_spe.glmean(osr)/(SolarConst/4)))/
-                  (4*5.67e-8)
-                )**(1.0/4))
-      green << factor.mean("time").val
-      error << std_error(factor.val)
-    }
-    return green, error
-  end
+    # 降水量の単位変換
+    gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
   
-  def get_omega(list)
-    omega = []
-    list.name.each{ |nm|
-      omega << Utiles_spe.omega_ratio(nm)
-    }
-    return omega
-  end
-  
-  def time_range(gp,name)
-    if gp.axis("time").length == 1441 or 1440
-      result = gp[false,-360..-1]
-    elsif gp.axis("time").pos.units.to_s == "day"
-      gp = Utiles_spe.day2hrs(gp,name)
-      result = gp.cut("time"=>1080*24..1440*24)
-    elsif gp.axis("time").pos.units.to_s == "hrs"
-      result = gp.cut("time"=>1080*24..1440*24)
-    end
-    return result
-  end
-  
-  def time_range2(gp,name)
-    if gp.axis("time").length == 1441 
-      result = gp[false,-360..-1]
-    elsif gp.axis("time").pos.units.to_s == "day"
-      gp = Utiles_spe.day2hrs(gp,name)
-      result = gp.cut("time"=>1080*24..1440*24)
-    elsif gp.axis("time").pos.units.to_s == "hrs"
-      result = gp.cut("time"=>1080*24..1440*24)
-    end
-    return result
-  end
-  
-  def error_sd(gp)
-    tmax = gp.axis("time").length
-    g = []
-    g[0] = gp[0..tmax/4-1].mean("time")
-    g[1] = gp[tmax/4..tmax/2-1].mean("time")
-    g[2] = gp[tmax/2..tmax*3/4-1].mean("time")
-    g[3] = gp[tmax*3/4..-1].mean("time")
-    gpmean = gp.mean("time") 
-    std = 0
-    g.each_index{ |n|
-      std = std + (g[n]-gpmean)**2  
-    }
-    std = (std/g.length).sqrt
-    return std
-  end
-#---------------------------------------------
-  def drawfig(file,chpt="a")
-    # DCL open
-    if ARGV.index("-ps")
-      iws = 2
-    elsif ARGV.index("-png")
-      DCL::swlset('lwnd',false)
-      iws = 4
+    # 描画
+    vy = vy - 0.025
+    if n == 0 then
+      lc = 13 if list.ref.nil?
+      fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
+      GGraph.line( gp ,true ,fig_opt.merge(hash))
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+    elsif n == list.refnum
+      lc_ref = 13
+      fig_opt = {'index'=>lc_ref}      
+      GGraph.line( gp ,false ,fig_opt.merge(hash))
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
     else
-      iws = 1
+      lc = lc + 10
+      fig_opt = {'index'=>lc}      
+      GGraph.line( gp ,false ,fig_opt.merge(hash))
+      DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+      DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+    end 
+  end
+end
+#------------------------------------------------
+def lonlat(data,list,hash={}) #水平断面
+  list.dir.each_index do |n|
+    gp = data[n]
+    next if gp.nil?
+
+    if gp.name == "H2OLiq" then
+      ps = GPhys::IO.open gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
+      sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+      gp = (gp * ps * sig_weight).sum("sig")/Grav 
     end
-    
-    # DCL set
-    clrmp = 5  # カラーマップ
-    DCL.sgscmn(clrmp)
-    DCL.gropn(iws)
-    # DCL.sldiv('Y',2,1)
-    DCL.sgpset('lcntl',true)
-    DCL.sgpset('isub', 96)
-    DCL.uzfact(0.9) # 文字の大きさ
+    # 時間平均
+    gp = gp.mean("time") if gp.axnames.include?("time")
   
-    type = 5
-    index = 102
-    size = 0.02
-    lc = 130
-    vx = 0.82
-    vy = 0.8
-  
-    case chpt
-    when "a"
-      subname= "(a)"
-      GGraph.set_fig "itr"=>3, "window"=>[0.05,10.0,255,310]
-      long_name = "surface temperature"
-    when "b"
-      subname= "(b)"
-      GGraph.set_fig "itr"=>3, "window"=>[0.05,10.0,0,0.5]
-      long_name = "planetary albedo"
-    when "c"
-      subname= "(c)"
-      GGraph.set_fig "itr"=>3, "window"=>[0.05,10.0,1.0,1.18]
-      long_name = "factor G"
-    end
-    name = ["Series A","Series C","Series D"]
-    file.each_index{ |n|
-      list = Utiles_spe::Explist.new(file[n])
-  
-      case chpt
-      when "a"
-        albedo = Utiles_spe.array2gp(get_omega(list),get_surftemp(list))  
-      when "b"
-        albedo = Utiles_spe.array2gp(get_omega(list),get_albedo(list))  
-      when "c"
-        albedo = Utiles_spe.array2gp(get_omega(list),get_greenhouse(list))
-      end
-      albedo.long_name = long_name
-      albedo.name = "Albedo"  
-      omega = albedo.axis("noname").pos
-      omega.name = "omega"
-      omega.long_name = "Rotation rate"
-      albedo.axis("noname").set_pos(omega)
-      error = std_error(albedo.val,4)
-      p error
-  
-      if n == 0 then
-        GGraph.scatter albedo.axis("noname").to_gphys,albedo, true,"size"=>size,"index"=>12,"type"=>type-1,"title"=>subname+" "+long_name 
-        DCL.sgtxzv(vx+0.03,vy,name[n],size,0,-1,3)
-        DCL::sgpmzv([vx],[vy],type-1,lc,size)
-      else
-        type += 1
-        index += 200
-        lc = lc + 100
-        vy = vy - 0.035
-  
-        GGraph.scatter albedo.axis("noname").to_gphys,albedo, false,"size"=>size,"index"=>index,"type"=>type
-        DCL.sgtxzv(vx+0.03,vy,name[n],size,0,-1,3)
-        DCL::sgpmzv([vx],[vy],type,lc,size)
-  
-      end
-    }
-    DCL.grcls
-    
-    if ARGV.index("-ps") 
-      system("mv dcl.ps omega_plnt-alb.ps")
-    elsif ARGV.index("-png")
-      system("rename 's/dcl_/omega_stemp-plntalb-g_#{chpt}_/' dcl_*.png")
-    end
-  end 
-  
-  def drawclm_deltemp(file)
-    stemp_name = "surface temperature"
-    albedo_name = "planetary albedo"
-    green_name = "factor g"
-  
-    fin = File.open("omega_deltemp_clm.dat","w")
-    fin.print  "Rotation rate","\t"
-    fin.print  stemp_name,"\t"
-    fin.print  albedo_name,"\t"
-    fin.print  green_name,"\n"
-  
-    file.each_index do |n|
-      list = Utiles_spe::Explist.new(file[n])
-  
-      stemp = Utiles_spe.array2gp(get_omega(list),get_surftemp(list))  
-      albedo = Utiles_spe.array2gp(get_omega(list),get_albedo(list))  
-      green = Utiles_spe.array2gp(get_omega(list),get_greenhouse(list))
-  
-      omega = albedo.axis("noname").pos
-      omega.name = "omega"
-      omega.long_name = "Rotation rate"
-      stemp.axis("noname").set_pos(omega)
-      albedo.axis("noname").set_pos(omega)
-      green.axis("noname").set_pos(omega)
-  
-      radtemp = (SolarConst*(1-albedo.cut("noname"=>1).val)/(4*StB))**0.25
-  
-      delstemp = stemp.val - stemp.cut("noname"=>1).val
-      delalbedo = albedo.val - albedo.cut("noname"=>1).val
-      delgreen = green.val - green.cut("noname"=>1).val
-  
-      albedo_error = std_error(albedo.val,4)
-      stemp_error = std_error(stemp.val,4)
-      green_error = std_error(green.val,4)
-  
-      fin.print "--- #{file[n].split("/")[-1].sub(".list","").sub("omega_","")} ---\n"
-      omega.val.to_a.each_index do |m|
-        fin.print omega[m].val, "\t"
-        fin.print delstemp[m], "\t"
-        fin.print -radtemp.val * delalbedo[m]/(4*(1-albedo.cut("noname"=>1).val)), "\t"
-        fin.print radtemp.val * delgreen[m], "\n"
-      end
-    end
-    fin.close
+    # 高さ方向の次元をカット
+    gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
+    gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
    
-  end 
+    # 横軸最大値
+    xcoord = gp.axis(0).to_gphys.val
+    xmax = (xcoord[1]-xcoord[0])*xcoord.length
   
-  def drawclm(file)
-    stemp_name = "surface temperature"
-    albedo_name = "planetary albedo"
-    green_name = "factor g"
-  
-    file.each_index do |n|
-      list = Utiles_spe::Explist.new(file[n])
-      fin = File.open("omega_deltemp_clm_#{list.id}.dat","w")
-      stemp, stemp_error = get_surftemp(list)
-      albedo, albedo_error = get_albedo(list)  
-      green, green_error = get_greenhouse(list)
-  
-      stemp = Utiles_spe.array2gp(get_omega(list),stemp)  
-      albedo = Utiles_spe.array2gp(get_omega(list),albedo)  
-      green = Utiles_spe.array2gp(get_omega(list),green)
-  
-      omega = albedo.axis("noname").pos
-      omega.name = "omega"
-      omega.long_name = "Rotation rate"
-      stemp.axis("noname").set_pos(omega)
-      albedo.axis("noname").set_pos(omega)
-      green.axis("noname").set_pos(omega)
-  
-      fin.print "# Omega\t"
-      fin.print "Surftemp\t error\t"
-      fin.print "Albedo\t error\t"
-      fin.print "Green\t error\n"
-      omega.val.to_a.each_index do |m|
-        fin.print omega[m].val, "\t"
-        fin.print stemp[m].val, "\t"
-        fin.print stemp_error[m], "\t"
-        fin.print albedo[m].val, "\t"
-        fin.print albedo_error[m], "\t"
-        fin.print green[m].val, "\t"
-        fin.print green_error[m], "\n"
-      end
-      fin.close
-    end
-   
-  end 
+    # 描画
+    GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+    GGraph.set_fig('window'=>[0,xmax,-90,90])
+
+    fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+               'annotate'=>false,
+               'color_bar'=>true}.merge(hash)
+    GGraph.tone_and_contour gp ,true, fig_opt
+  end
+end
+#------------------------------------------- 
 end
    
