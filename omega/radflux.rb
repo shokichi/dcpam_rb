@@ -15,6 +15,7 @@ def heart_flux(dir)
   # file open
   gsw = gpopen(dir + "OSRA.nc", "OSRA")
   glw = gpopen(dir + "OLRA.nc", "OLRA")
+
   gsw = gsw.mean(0,-1)
   glw = glw.mean(0,-1)   
   
