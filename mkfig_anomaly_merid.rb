@@ -11,7 +11,7 @@ include Utiles_spe
 include NumRu
 
 
-def merid_annomaly(var_name,list,hash={})
+def merid_anomaly(var_name,list,hash={})
   # 基準データ
   gp_ref = gpopen(list.dir[list.refnum]+var_name+".nc",var_name)
   if gp_ref.nil? then
@@ -40,7 +40,7 @@ def merid_annomaly(var_name,list,hash={})
   end
 end
 
-def merid_annomaly(var_name,list,hash={})
+def merid_anomaly(var_name,list,hash={})
   # 基準データ
   gp_ref = gpopen(list.dir[list.refnum]+var_name+".nc",var_name)
   if gp_ref.nil? then
@@ -103,27 +103,27 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-merid_annomaly("Temp",list,"min"=>220,"max"=>320)
-merid_annomaly("RH",list,"min"=>0,"max"=>100)
-merid_annomaly("H2OLiq",list,"min"=>0,"max"=>4e-5)
+merid_anomaly("Temp",list,"min"=>220,"max"=>320)
+merid_anomaly("RH",list,"min"=>0,"max"=>100)
+merid_anomaly("H2OLiq",list,"min"=>0,"max"=>4e-5)
 
-merid_annomaly("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
-merid_annomaly("V",list,"min"=>-10,"max"=>10)      
+merid_anomaly("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
+merid_anomaly("V",list,"min"=>-10,"max"=>10)      
 
 =begin
-merid_annomaly("DQVapDtDyn",list)      
-merid_annomaly("DQVapDtVDiff",list)    
-merid_annomaly("DQVapDtCond",list,"min"=>-3e-7,"max"=>0)
-merid_annomaly("DQVapDtCumulus",list,"min"=>-3e-7,"max"=>0)  
-merid_annomaly("DQVapDtLsc",list,"min"=>-3e-7,"max"=>0)
-merid_annomaly("DTempDtRadS",list)
-merid_annomaly("DTempDtRadL",list)
-merid_annomaly("DTempDtDyn",list)   
-merid_annomaly("DTempDtVDiff",list)
-merid_annomaly("DTempDtCond",list)     
-merid_annomaly("DTempDtCumulus",list)  
-merid_annomaly("DTempDtLsc",list)   
-merid_annomaly("DTempDtDryConv",list)  
+merid_anomaly("DQVapDtDyn",list)      
+merid_anomaly("DQVapDtVDiff",list)    
+merid_anomaly("DQVapDtCond",list,"min"=>-3e-7,"max"=>0)
+merid_anomaly("DQVapDtCumulus",list,"min"=>-3e-7,"max"=>0)  
+merid_anomaly("DQVapDtLsc",list,"min"=>-3e-7,"max"=>0)
+merid_anomaly("DTempDtRadS",list)
+merid_anomaly("DTempDtRadL",list)
+merid_anomaly("DTempDtDyn",list)   
+merid_anomaly("DTempDtVDiff",list)
+merid_anomaly("DTempDtCond",list)     
+merid_anomaly("DTempDtCumulus",list)  
+merid_anomaly("DTempDtLsc",list)   
+merid_anomaly("DTempDtDryConv",list)  
 =end
 DCL.grcls
 

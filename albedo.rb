@@ -39,8 +39,9 @@ def albedo(dir,name)
 #    tsw[false] = -1.0
 #    tsw = tsw*SolarConst*((slon-tsw.axis("lon").to_gphys)*PI/180.0).cos
 #    tsw = tsw*(tsw.axis("lat").to_gphys*PI/180.0).cos
-  tsw = tsw[nlon/4..nlon*3/4-1,true,-1,true]
+#  tsw = tsw[nlon/4..nlon*3/4-1,true,-1,true]
 #  else
+  tsw = tsw[true,true,-1,true]
 
 #  end
 
