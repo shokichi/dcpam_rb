@@ -4,7 +4,7 @@
 #
 require "numru/ggraph"
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/../lib/make_figure.rb")
+require File.expand_path(File.dirname(__FILE__)+"/utiles_omega.rb")
 require 'optparse'
 include MKfig
 include Utiles_spe
