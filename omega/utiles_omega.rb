@@ -5,7 +5,7 @@
 
 require "numru/ggraph"
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/make_figure.rb")
+require File.expand_path(File.dirname(__FILE__)+"/../lib/make_figure.rb")
 require 'optparse'
 include Utiles_spe
 include MKfig
@@ -18,7 +18,7 @@ module Omega
   SolarConst = UNumeric[1366.0, "W.m-2"]
   StB = UNumeric[5.67e-8, "W.m-2.K-4"]
 # -------------------------------------------
-def lat_fig(gata,list,hash={}) # 緯度分布
+def lat_fig2(gata,list,hash={}) # 緯度分布
   lc = 23
   vx = 0.82
   vy = 0.8
@@ -60,7 +60,7 @@ def lat_fig(gata,list,hash={}) # 緯度分布
   end
 end
 #------------------------------------------------
-def lonlat(data,list,hash={}) #水平断面
+def lonlat2(data,list,hash={}) #水平断面
   list.dir.each_index do |n|
     gp = data[n]
     next if gp.nil?

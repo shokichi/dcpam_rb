@@ -14,15 +14,16 @@ include Math
 
 def rain_evap(dir)
   rain = gpopen dir + "Rain.nc"
-  evap = gpopen dir + "Evap.nc"
-  
-  return evap-rain  
+  evap = gpopen dir + "EvapA.nc"
+  result = evap - rain 
+  return result
 end
 # ---------------------------------------
 
 
 
 opt = OptionParser.new
+opt.on("-r","--rank") {Flag_rank = true}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)
@@ -45,9 +46,9 @@ DCL.uzfact(1.0)
 
 list = Utiles_spe::Explist.new(ARGV[0])
 data = []
-list.dir.each{|dir| |data << rain_evap(dir)}
-Omega.lat_fig(data,list,"min"=>-300,"max"=>300)
-Omega.lonlat(data,list,"min"=>-300,"max"=>300)
+list.dir.each{|dir| data << rain_evap(dir)}
+Omega.lat_fig2(data,list,"min"=>-300,"max"=>300)
+Omega.lonlat2(data,list,"min"=>-300,"max"=>300)
 
 DCL.grcls
 rename_img_file(list,__FILE__)

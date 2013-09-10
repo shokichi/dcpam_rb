@@ -6,14 +6,16 @@
 
 # 
 require "numru/ggraph"
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require 'optparse'
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/make_figure.rb")
+include MKfig
 include Utiles_spe
 include NumRu
 
 
 def lonlat_anomaly(var_name,list,hash={})
   # 基準データ
-  gp_ref =gp.open(list.dir[list.refnum]+var_name+".nc",var_name)
+  gp_ref =gpopen(list.dir[list.refnum]+var_name+".nc",var_name)
   if gp_ref.nil?
     print "Refarence file is not exist [#{list.dir[list.refnum]}](#{var_name})\n"
     return
@@ -23,7 +25,7 @@ def lonlat_anomaly(var_name,list,hash={})
 
   # 比較データ
   list.dir.each_index do |n|
-    gp = GPhys::IO.open(list.dir[n] + var_name + ".nc",var_name)
+    gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
     next if gp.nil?
     gp = cut_and_mean(gp)
 

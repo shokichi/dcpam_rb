@@ -6,7 +6,9 @@
 
 # 
 require "numru/ggraph"
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require 'optparse'
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/make_figure.rb")
+include MKfig
 include Utiles_spe
 include NumRu
 

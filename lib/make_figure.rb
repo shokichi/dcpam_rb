@@ -84,8 +84,8 @@ module MKfig
       next if gp.nil?
   
       if gp.name == "H2OLiq" then
-        ps = GPhys::IO.open gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
-        sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+        ps = gpopen(list.dir[n] + "Ps.nc","Ps")
+        sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
         gp = (gp * ps * sig_weight).sum("sig")/Grav 
       end
       # 時間平均

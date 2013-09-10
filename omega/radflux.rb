@@ -16,9 +16,12 @@ def heart_flux(dir)
   gsw = gpopen(dir + "OSRA.nc", "OSRA")
   glw = gpopen(dir + "OLRA.nc", "OLRA")
 
-  gsw = gsw.mean(0,-1)
-  glw = glw.mean(0,-1)   
-  
+  gsw = gsw.mean("lon") if gsw.axnames.include?("lon")
+  glw = glw.mean("lon") if gsw.axnames.include?("lon")  
+
+  gsw = gsw.mean("time") if gsw.axnames.include?("time")
+  glw = glw.mean("time") if gsw.axnames.include?("time")  
+
   round = UNumeric[6371000, "m"]
 #  lat = lat.sin
 #  cos_phi = lat.cos
@@ -77,6 +80,7 @@ end
 
 
 opt = OptionParser.new
+opt.on("-r","--rank") {Flag_rank = true}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)
@@ -100,6 +104,6 @@ data=[]
 
 
 list.dir.each{|dir| data << heart_flux(dir)}
-Omega.lat_fig(data,list)
+Omega.lat_fig2(data,list)
 DCL.grcls
 rename_img_file(list,__FILE__)

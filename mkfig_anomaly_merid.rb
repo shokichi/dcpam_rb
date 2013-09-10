@@ -6,7 +6,9 @@
 
 # 
 require "numru/ggraph"
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/make_figure.rb")
+require 'optparse'
+include MKfig
 include Utiles_spe
 include NumRu
 
@@ -40,7 +42,7 @@ def merid_anomaly(var_name,list,hash={})
   end
 end
 
-def merid_anomaly(var_name,list,hash={})
+def merid_anomaly_fixed(var_name,list,hash={})
   # 基準データ
   gp_ref = gpopen(list.dir[list.refnum]+var_name+".nc",var_name)
   if gp_ref.nil? then
@@ -71,9 +73,9 @@ end
 
 def cut_and_mean(gp)
   # 時間平均
-  gp = gp.mean("time") if !gp.axnames.index("time").nil
+  gp = gp.mean("time") if !gp.axnames.index("time").nil?
   # 経度平均
-  gp = gp.mean("lon") if !gp.axnames.index("lon").nil
+  gp = gp.mean("lon") if !gp.axnames.index("lon").nil?
 
   return gp
 end
