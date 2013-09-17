@@ -46,6 +46,9 @@ def heart_flux(dir)
   alph = -(gsw + glw ) * 2.0 * PI * round * round  
   #北半球
   i = lat.length/2
+  p flux
+  p alph
+
   flux[i] = alph[i].val * sin(r_lat[i].val)  
   for i in lat.length/2+1..lat.length-2
     flux[i] = flux[i-1].val + alph[i].val * \

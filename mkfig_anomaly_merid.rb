@@ -105,9 +105,9 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
-merid_anomaly("Temp",list,"min"=>220,"max"=>320)
-merid_anomaly("RH",list,"min"=>0,"max"=>100)
-merid_anomaly("H2OLiq",list,"min"=>0,"max"=>4e-5)
+merid_anomaly("Temp",list,"min"=>-20,"max"=>20)
+merid_anomaly("RH",list,"min"=>-50,"max"=>50)
+merid_anomaly("H2OLiq",list,"min"=>-1e-4,"max"=>1e-4)
 
 merid_anomaly("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
 merid_anomaly("V",list,"min"=>-10,"max"=>10)      

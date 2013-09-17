@@ -18,7 +18,7 @@ module Omega
   SolarConst = UNumeric[1366.0, "W.m-2"]
   StB = UNumeric[5.67e-8, "W.m-2.K-4"]
 # -------------------------------------------
-def lat_fig2(gata,list,hash={}) # 緯度分布
+def self.lat_fig2(data,list,hash={}) # 緯度分布
   lc = 23
   vx = 0.82
   vy = 0.8
@@ -34,7 +34,7 @@ def lat_fig2(gata,list,hash={}) # 緯度分布
     gp = gp.mean(0) if gp.axnames[0] != "lat"
   
     # 降水量の単位変換
-    gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
+    gp = Utiles_spe.wm2mmyr(gp) if gp.name.include?("Rain") 
   
     # 描画
     vy = vy - 0.025
@@ -59,8 +59,8 @@ def lat_fig2(gata,list,hash={}) # 緯度分布
     end 
   end
 end
-#------------------------------------------------
-def lonlat2(data,list,hash={}) #水平断面
+#---------------------------------------------
+def self.lonlat2(data,list,hash={}) #水平断面
   list.dir.each_index do |n|
     gp = data[n]
     next if gp.nil?

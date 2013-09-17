@@ -21,13 +21,13 @@ def lonlat_anomaly(var_name,list,hash={})
     return
   end
 
-  gp_ref = cut_and_mean(gp_ref)
+  gp_ref = cut_and_mean(gp_ref,list.dir[list.refnum])
 
   # 比較データ
   list.dir.each_index do |n|
     gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
     next if gp.nil?
-    gp = cut_and_mean(gp)
+    gp = cut_and_mean(gp,list.dir[n])
 
     # 横軸最大値
     xcoord = gp.axis(0).to_gphys.val
@@ -80,16 +80,16 @@ def lonlat_anomaly_fix(var_name,list,hash={})
 end
 
 
-def cut_and_mean(gp)
+def cut_and_mean(gp,dir)
   # 時間平均
   gp = gp.mean("time") if gp.axnames.index("time") != nil
-
-  # 高さ方向の次元をカット
   if gp.name == "H2OLiq"
-    ps = gpopen gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
+    ps = gpopen dir+"Ps.nc","Ps"
     sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
     gp = (gp * ps * sig_weight).sum("sig")/Grav 
   end
+
+  # 高さ方向の次元をカット
   gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
   gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
 
