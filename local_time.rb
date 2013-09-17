@@ -60,7 +60,7 @@ def local_time(var_name,list)
         gp_local[nlon-local_min_index..-1,false] = gphys[0..local_min_index-1,false]
       end
       # lon -> localtime 変換
-      gp_local.axis("lon").set_pos(local)
+#      gp_local.axis("lon").set_pos(local)
       [gp_local]
     }
     ofile.close
