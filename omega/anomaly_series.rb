@@ -12,21 +12,26 @@ include Utiles_spe
 include NumRu
 include Math
 
-class anomaly
-  def del(data_name,list)
-    gp_ref = gpopen list.dir[list.refnum]+data_name+".nc",data_name
-    if gp_ref.nil?
+class Anomaly << Explist
+  def ref_data
+    @ref_data = gpopen list.dir[list.refnum]+data_name+".nc",data_name
+    if @result.nil?
       print "Refarence file is not exist [#{list.dir[list.refnum]}](#{var_name})\n"
-      return
     end
+  end
+
+  def sample_data
+    @sample_data = gpopen list.dir + data_name + ".nc", data_name
+  end
+
+  def del(data_name,list)
     anomaly = []
     list.dir.each do |n|
-      gp = gpopen list.dir + data_name + ".nc", data_name
-      next if gp.nil?
-      anomaly << gp_ref - gp
+      anomaly << @ref_data - @gp
     end
     return anomaly
   end
+
 end
 
 
