@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 # 自転角速度変更実験用スクリプト
 #
