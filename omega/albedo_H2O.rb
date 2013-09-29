@@ -25,11 +25,10 @@ def draw_scatter(prc,qvap,hash={})
   h2o = gpopen list.dir+"H2O.nc"
   albedo = cut_and_mean(albedo)
   h2o = cut_and_mean(h2o)
-
-  skip = 6
-
-  time.length/skip.times{ |t|
-    GGraph.scatter albedo[false,t*skip],h2o[false,t*skip],true,hash  
+  skip = 6*6
+  (time.length/skip).times{ |t|
+    time = t*skip 
+    GGraph.scatter albedo[false,time],h2o[false,time],true,hash  
   }
 end
 
@@ -40,6 +39,7 @@ def ang_slr_znt(gp)
   time = gp.axis("time").to_gphys if gp.axnames.include?("time")
   cos_phi = lon.cos * lat.sin
 end
+
 
 def cut_and_mean(gp)
   return gp

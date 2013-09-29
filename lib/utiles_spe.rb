@@ -492,6 +492,27 @@ def day2hrs(gp,name)
   gp.axis("time").set_pos(time)  
   return gp
 end
+#----------------------------------------
+def hrs2day(gp,hr_in_day)
+  time =  gp.axis("time").pos / hr_in_day
+  gp.axis("time").set_pos(time)  
+  return gp
+end
+#----------------------------------------
+def min2day(gp,hr_in_day)
+  time =  gp.axis("time").pos / hr_in_day / 60
+  gp.axis("time").set_pos(time)
+  return gp
+end
+#----------------------------------------
+def thinout(gp,delnum)
+  time = 0
+  result = GPhys.each_along_dims(gp,"time"){ |gphys|
+    return gphys if time%delnum == 0
+    time += 1
+  }
+  result
+end
 #---------------------------------------
 def gpopen(file,name=nil)
   name = File.basename(file,".nc").gsub("_","").sub("MT","").sub("local","") if name.nil?

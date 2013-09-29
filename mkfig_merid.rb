@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 # make standerd figure 
 # 子午面断面
