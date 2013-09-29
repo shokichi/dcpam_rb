@@ -13,6 +13,7 @@ include Math
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
+opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)
@@ -20,29 +21,56 @@ opt.on("--png") {
 }
 
 
-def draw_scatter(prc,qvap,hash={})
+def draw_scatter(dir,name,hash={})
   albedo = gpopen list.dir+"Albedo.nc"
   h2o = gpopen list.dir+"H2O.nc"
   albedo = cut_and_mean(albedo)
   h2o = cut_and_mean(h2o)
+  
+
+  if defined?(HrInDay) and !HrInDay.nil? then
+    hr_in_day = HrInDay
+  else
+    hr_in_day = 24 / Utiles_spe.omega_ratio(name)
+  end
+
   skip = 6*6
   (time.length/skip).times{ |t|
     time = t*skip 
-    GGraph.scatter albedo[false,time],h2o[false,time],true,hash  
+    x_coord = albedo[false,time]
+    y_coord = h2o[false,time]*cos_ang(h2o[false,time..time],hr_in_day)
+    if t == 0
+      GGraph.scatter(x_coord,y_coord,true,hash) 
+    else  
+      GGraph.scatter(x_coord,y_coord,false,hash)   
+    end
   }
 end
 
-def ang_slr_znt(gp)
+def cos_ang(gp,hr_in_day) 
   # 太陽天頂角の計算
+  time = gp.axis("time").to_gphys
   lon = gp.axis("lon").to_gphys if gp.axnames.include?("lon")
   lat = gp.axis("lat").to_gphys if gp.axnames.include?("lat")
-  time = gp.axis("time").to_gphys if gp.axnames.include?("time")
-  cos_phi = lon.cos * lat.sin
+  # 太陽直下点の計算
+  time = Utiles_spe.min2day(gp,hr_in_day).axis("time").to_gphys
+  slon = (time - time.to_i)*360
+  slon = UNumeric[slon[0].val,"degree"]    # 太陽直下点経度
+      
+  # 大気上端下向きのSW
+  ang = gp[false,0].copy
+  ang[false] = 1.0
+  ang.units = "1"
+  ang = ang*((ang.axis("lon").to_gphys+slon)*PI/180.0).cos
+  ang = ang*(ang.axis("lat").to_gphys*PI/180.0).cos
+  return ang
 end
-
 
 def cut_and_mean(gp)
   return gp
 end
 
-list.dir.each{ |dir| draw_scatter(get_prcwtr(dir),get_satQVap(dir))}
+
+list = Utiles_spe::Explist.new(ARGV[0])
+HrInDay = 24 if list.id.include?("coriolis")
+list.dir.each_index{ |n| draw_scatter(dir[n],name[n])}
