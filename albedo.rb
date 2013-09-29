@@ -15,7 +15,7 @@ def albedo(dir,name)
   data_name = "Albedo"
   # file open
   osr = gpopen(dir+"OSRA.nc")
-  tsw = gpopen(dir+"RadSDWFLXA.nc").cut("sigm"=>0)
+  tsw = gpopen(dir+"RadSDWFLXA.nc")
   return if osr.nil? and tsw.nil?
 
   if defined?(HrInDay) and !HrInDay.nil? then
@@ -54,6 +54,7 @@ def albedo(dir,name)
       [albedo]
     }
   else
+    tsw = tsw.cut("sigm"=>0)
     GPhys::NetCDF_IO.each_along_dims_write([osr,tsw], ofile,'time') { 
       |sw,top|
       albedo = 1.0 + sw/top
