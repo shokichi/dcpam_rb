@@ -25,7 +25,7 @@ def calc_es(dir,name)
 
   ave = 0
   data_name = "Es"
-  GPhys::NetCDF_IO.each_along_dims_write(temp, ofile,'time') { 
+  GPhys.each_along_dims(temp, 'time') {
     |tmp|
     es = 
       ES0 * ( LatentHeat/(GasRUniv/MolWtWet)*(1/273.0- 1/tmp)).exp
@@ -38,6 +38,7 @@ def calc_es(dir,name)
   ofile = NetCDF.create(file.sub(data_name,"MTlocal_" + data_name))
   GPhys::IO.write(ofile, ave)
   ofile.close
+  print "[#{data_name}](#{dir}) is created"
 end
 
 
