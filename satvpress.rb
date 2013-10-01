@@ -27,15 +27,16 @@ def calc_es(dir,name)
   data_name = "Es"
   GPhys.each_along_dims(temp, 'time') {
     |tmp|
-    es = 
+    es = tmp.copy
+    es =  
       ES0 * ( LatentHeat/(GasRUniv/MolWtWet)*(1/273.0- 1/tmp)).exp
     es = local_time(es,hr_in_day)
     ave += es
   }
-  es.name = data_name
-  es.long_name = "saturation vapor pressure"
+  ave.name = data_name
+  ave.long_name = "saturation vapor pressure"
   ave = ave[false,0]/temp.axis("time").pos.length
-  ofile = NetCDF.create(file.sub(data_name,"MTlocal_" + data_name))
+  ofile = NetCDF.create(dir+"MTlocal_" + data_name+".nc")
   GPhys::IO.write(ofile, ave)
   ofile.close
   print "[#{data_name}](#{dir}) is created"
