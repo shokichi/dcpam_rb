@@ -27,6 +27,7 @@ varname = VarName if defined?(VarName)
 IWS = 1 if !defined?(IWS)
 
 # DCL set
+IWS = 1 if !defined?(IWS)
 clrmp = 14  # カラーマップ
 DCL.sgscmn(clrmp)
 DCL.gropn(IWS)

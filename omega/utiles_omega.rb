@@ -136,5 +136,28 @@ module Omega
     end
   end
   #------------------------------------------- 
+  def self.merid2(data,list,hash={}) #水平断面
+    list.dir.each_index do |n|
+      gp = data[n]
+      next if gp.nil?
+      
+      # 時間平均
+      gp = gp.mean("time") if gp.axnames.include?("time")
+      
+      # 経度平均
+      gp = gp.mean("lon") if gp.axnames.include?("lon")
+      gp = gp.mean("local") if gp.axnames.include?("local")
+      
+      # 描画
+      GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
+      GGraph.set_fig('window'=>[-90,90,nil,nil])
+      
+      fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+        'annotate'=>false,
+        'color_bar'=>true
+        'nlev'=>20}.merge(hash)
+      GGraph.tone_and_contour gp ,true, fig_opt
+    end
+  end
 end
 
