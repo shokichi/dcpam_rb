@@ -59,6 +59,7 @@ def cos_ang(gp,hr_in_day)
 end
 
 def cut_and_mean(gp,hr_in_day)
+  nlon = gp.axis(0).length
   gp = local_time(gp,hr_in_day)
   gp = gp[nlon/4+1..nlon*3/4-2,false]
   return gp
