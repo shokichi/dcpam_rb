@@ -23,12 +23,13 @@ def draw_scatter(dir,name,hash={})
   else
     hr_in_day = 24 / Utiles_spe.omega_ratio(name)
   end
-
+  nlon = albedo.axis(0).length
+  
   skip = 6*24
   (albedo.axis("time").length/skip).times{ |t|
     time = t*skip 
     albedo = albedo[nlon/4+1..nlon*3/4-2,true,time..time]
-    h2o = cut_and_mean(h2o[false,time..time],hr_in_day)
+    h2o = cut_and_mean(h2o[nlon/4+1..nlon*3/4-2,true,true,time..time],hr_in_day)
     y_coord = albedo
     x_coord = h2o/cos_ang(h2o,hr_in_day)
     if t == 0 then
@@ -59,9 +60,7 @@ def cos_ang(gp,hr_in_day)
 end
 
 def cut_and_mean(gp,hr_in_day)
-  nlon = gp.axis(0).length
   gp = local_time(gp.cut("sig"=>1),hr_in_day)
-  gp = gp[nlon/4+1..nlon*3/4-2,false]
   return gp
 end
 
