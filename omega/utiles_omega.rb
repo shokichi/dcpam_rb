@@ -154,7 +154,7 @@ module Omega
       
       fig_opt = {'title'=>gp.long_name + " " + list.name[n],
         'annotate'=>false,
-        'color_bar'=>true
+        'color_bar'=>true,
         'nlev'=>20}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
     end

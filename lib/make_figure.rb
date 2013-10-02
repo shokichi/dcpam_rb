@@ -188,8 +188,8 @@ module MKfig
     end
   end
 # -------------------------------------------
-  def rename_img_file(list,scrfile) 
-    img_lg = list.id+File.basename(scrfile,".rb").sub("mkfig","")
+  def rename_img_file(id,scrfile) 
+    img_lg = id+File.basename(scrfile,".rb").sub("mkfig","")
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
     elsif IWS == 4

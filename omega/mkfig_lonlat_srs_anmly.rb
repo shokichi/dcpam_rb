@@ -68,5 +68,4 @@ fig_lonlat_anml("U",list,"min"=>-20,"max"=>20,"nlev"=>20)
 fig_lonlat_anml("V",list,"min"=>-10,"max"=>10)      
 
 DCL.grcls
-
-rename_img_file(list,__FILE__)
+rename_img_file(lists["all"],__FILE__)
