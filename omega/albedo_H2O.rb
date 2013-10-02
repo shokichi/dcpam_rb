@@ -18,6 +18,10 @@ def draw_scatter(dir,name,hash={})
   h2o = gpopen dir+"H2OLiq.nc"
   return if albedo.nil? or h2o.nil?
 
+  ps = gpopen(dir + "Ps.nc","Ps")
+  sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+
+
   if defined?(HrInDay) and !HrInDay.nil? then
     hr_in_day = HrInDay
   else
@@ -28,14 +32,17 @@ def draw_scatter(dir,name,hash={})
   skip = 6*24
   (albedo.axis("time").length/skip).times{ |t|
     time = t*skip 
-    albedo = albedo[nlon/4+1..nlon*3/4-2,true,time..time]
-    h2o = cut_and_mean(h2o[nlon/4+1..nlon*3/4-2,true,true,time..time],hr_in_day)
-    y_coord = albedo
-    x_coord = h2o/cos_ang(h2o,hr_in_day)
+    h = h2o[nlon/4+1..nlon*3/4-2,true,true,time..time]
+    h = (h * ps * sig_weight).sum("sig")/Grav 
+    h = local_time(h,hr_in_day)
+    x_coord = h/cos_ang(h,hr_in_day)
+    y_coord = albedo[nlon/4+1..nlon*3/4-2,true,time..time]
+    hash = {'title'=> "Albedo & H2O"+" "+name,
+                 'annotate'=>false, }.merge(hash)
     if t == 0 then
-      GGraph.scatter(x_coord,y_coord,true,hash) 
+      GGraph.scatter(x_coord,y_coord,true,hash)
     else  
-      GGraph.scatter(x_coord,y_coord,false,hash)   
+      GGraph.scatter(x_coord,y_coord,false)   
     end
   }
 end
@@ -49,8 +56,7 @@ def cos_ang(gp,hr_in_day)
   time = Utiles_spe.min2day(gp,hr_in_day).axis("time").to_gphys
   slon = (time - time.to_i)*360
   slon = UNumeric[slon[0].val,"degree"]    # 太陽直下点経度
-      
-  # 大気上端下向きのSW
+
   ang = gp[false,0].copy
   ang[false] = 1.0
   ang.units = "1"
@@ -59,10 +65,6 @@ def cos_ang(gp,hr_in_day)
   return ang + 1e-14
 end
 
-def cut_and_mean(gp,hr_in_day)
-  gp = local_time(gp.cut("sig"=>1),hr_in_day)
-  return gp
-end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
