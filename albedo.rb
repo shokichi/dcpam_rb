@@ -47,7 +47,7 @@ def albedo(dir,name)
       # albedo
       albedo = 1.0 + sw/top
       albedo = local_time(albedo,hr_in_day)
-      top = top[nlon/4+1..nlon*3/4-2,false]
+      albedo = albedo[nlon/4+1..nlon*3/4-2,false]
       albedo.name = data_name
       albedo.units = "1"
       albedo.long_name = "planetary albedo"
@@ -59,7 +59,7 @@ def albedo(dir,name)
       |sw,top|
       albedo = 1.0 + sw/top
       albedo = local_time(albedo,hr_in_day)
-      top = top[nlon/4+1..nlon*3/4-2,false]
+      albedo = albedo[nlon/4+1..nlon*3/4-2,false]
       albedo.name = data_name
       albedo.units = "1"
       albedo.long_name = "planetary albedo"
