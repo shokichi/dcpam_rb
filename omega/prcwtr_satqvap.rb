@@ -19,7 +19,6 @@ opt.on("--png") {
   IWS = 4
 }
 
-ES0 = UNumeric[611,"Pa"]
 
 def get_prcwtr(dir)
   var_name = "PrcWtr"
@@ -29,15 +28,13 @@ def get_prcwtr(dir)
 end
 
 def get_satQVap(dir)
-  temp = gpopen list.dir + "Temp.nc"
-  temp = cut_and_mean(temp)
-  # 飽和水蒸気圧の計算
-  satqvap = 
-    ES0 * ( LatentHeat / (GasRUniv/MolWtWet) * ( 1/273.0 - 1/temp ) ).exp
+  satqvap = gpopen dir + "Es.nc"
+  satqvap = cut_and_mean(satqvap)
   return satqvap
 end
 
 def cut_and_mean(gp)
+  gp = glmean(gp)
   return gp
 end
 
@@ -54,22 +51,38 @@ def create_clm(list,prc,qvap)
   }
 end
 
-def draw_scatter(list,prc,qvap,hash={})
-  list.dir.each_index{ |n| 
+def draw_scatter(lists,data,hash={})
+  lists.each_index{ |n| 
     if n == 0 then
-      GGraph.scatter glmean(prc[n]),glmean(qvap[n]),true,hash
+      GGraph.scatter data.axis(0).to_gphys,data,true,hash
     else
-      GGraph.scatter glmean(prc[n]),glmean(qvap[n]),false,hash
+      GGraph.scatter data.axis(0).to_gphys,data,false,hash
     end
   }
 end
 
-prc = []
-qvap = []
-list = Explist.new(ARGV[0])
-list.dir.each{ |dir| 
-  prc << get_prcwtr(dir)
-  qvap << get_satQVap(dir)
+def set_data(list)
+  prc = []
+  qvap = []
+  list.dir.each{ |dir| 
+    prc << get_prcwtr(dir)
+    qvap << get_satQVap(dir)
+  }
+  return ary2gp(prc,qvap)
+end
+
+a_list = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
+d_list = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
+c_list = "/home/ishioka/link/coriolis/fig/list/omega_coriolis_MTlocal.list"
+lists={
+  :all=>Utiles_spe::Explist.new(a_list),
+  :diurnal=>Utiles_spe::Explist.new(d_list),
+  :coriolis=>Utiles_spe::Explist.new(c_list)
 }
-#draw_scatter(list,prc,qvap)
-create_clm(list,prc,qvap)
+
+data = []
+data <<  set_data(lists[:all])
+data <<  set_data(lists[:diurnal])
+data <<  set_data(lists[:coriolis])
+draw_scatter(lists,data,)
+#create_clm(list,prc,qvap)

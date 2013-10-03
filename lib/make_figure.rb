@@ -189,6 +189,7 @@ module MKfig
   end
 # -------------------------------------------
   def rename_img_file(id,scrfile) 
+    id = id.id if id.class == Explist
     img_lg = id+File.basename(scrfile,".rb").sub("mkfig","")
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")

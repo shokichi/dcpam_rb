@@ -27,10 +27,13 @@ module Omega
     end
     
     def get_refdata
-      @@ref_data = gpopen @list.dir[@list.refnum]+@data_name+".nc"
-      if @@ref_data.nil?
+      dir = @list.dir[@list.refnum]
+      refdata = gpopen dir+@data_name+".nc"
+      if refdata.nil?
         print "Refarence file is not exist [#{@list.dir[list.refnum]}](#{@data_name})\n"
       end
+      refdata = surfh2o(refdata,dir) if refdata.name == "H2OLiq"
+      @@ref_data = refdata
     end
     
     def get_anomaly
@@ -40,24 +43,34 @@ module Omega
         if gp.nil? then
           result << nil
         else
+          gp = surfh2o(gp,dir) if gp.name == "H2OLiq"
           result << gp - @@ref_data
         end
       end
       @anomaly = result
     end
+
+    def surfh2o(gp,dir)
+      ps = GPhys::IO.open dir+ "H2OLiq.nc"
+      sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+      gp = (gp * ps * sig_weight).sum("sig")/Grav 
+      return gp
+    end
+
     
     public
     attr_reader :list, :data_name, :anomaly
   end
   # -------------------------------------------
-  def delt(gpa1,gpa2)
+  def self.delt(gpa1,gpa2)
     result = []
     gpa1.anomaly.each_index{|n|
       gp1 = gpa1.anomaly[n]
       n2 = gpa2.list.name.index(gpa1.list.name[n])
       next if n2.nil?
       gp2 = gpa2.anomaly[n2]
-      result << gp2 - gp1
+      gp = gp2 - gp1
+      result << gp
     }
     return result
   end
@@ -109,11 +122,6 @@ module Omega
       gp = data[n]
       next if gp.nil?
       
-      if gp.name == "H2OLiq" then
-        ps = GPhys::IO.open gp.data.file.path.sub("H2OLiq","Ps"),"Ps"
-        sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
-        gp = (gp * ps * sig_weight).sum("sig")/Grav 
-      end
       # 時間平均
       gp = gp.mean("time") if gp.axnames.include?("time")
       
@@ -121,15 +129,21 @@ module Omega
       gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
       gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
       
-      # 横軸最大値
-      xcoord = gp.axis(0).to_gphys.val
-      xmax = (xcoord[1]-xcoord[0])*xcoord.length
-      
+      # 地方時を[degree]に変換
+      gp = Omega.fix_axis_local(gp)
       # 描画
+      xmax = 360
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[0,xmax,-90,90])
       
-      fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+      if hash["add"]
+        addtitle = hash["add"]
+        hash.delete("add")
+      else
+        addtitle = ""
+      end
+
+      fig_opt = {'title'=>addtitle + gp.long_name + " " + list.name[n],
         'annotate'=>false,
         'color_bar'=>true}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
@@ -158,6 +172,15 @@ module Omega
         'nlev'=>20}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
     end
+  end
+  def self.fix_axis_local(gp)
+    xcoord = gp.axis(0).to_gphys.val
+    xmax = (xcoord[1]-xcoord[0])*xcoord.length
+    a = 360/xmax
+    local = gp.axis(0).pos * a
+    local.units = "degree"
+    gp.axis(0).set_pos(local)
+    return gp
   end
 end
 
