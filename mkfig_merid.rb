@@ -24,7 +24,6 @@ opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
 varname = VarName if defined?(VarName)
-IWS = 1 if !defined?(IWS)
 
 # DCL set
 IWS = 1 if !defined?(IWS)

@@ -16,7 +16,7 @@ include Math
 def fig_merid_anml(var_name,lists,hash={})
   all = Omega::Anomaly.new(var_name,lists["all"])
   diurnal = Omega::Anomaly.new(var_name,lists["diurnal"])
-  coriois = Omega::Anomaly.new(var_name,lists["coriolis"])
+  coriolis = Omega::Anomaly.new(var_name,lists["coriolis"])
   Omega.merid2(Omega.delt(all,diurnal),lists["all"],"add"=>"A-D ")
   Omega.merid2(Omega.delt(all,coriolis),lists["all"],"add"=>"A-C ")
 end

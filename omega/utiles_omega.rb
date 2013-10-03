@@ -51,8 +51,8 @@ module Omega
     end
 
     def surfh2o(gp,dir)
-      ps = GPhys::IO.open dir+ "H2OLiq.nc"
-      sig_weight = GPhys::IO.open("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+      ps = gpopen dir+ "H2OLiq.nc"
+      sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
       gp = (gp * ps * sig_weight).sum("sig")/Grav 
       return gp
     end
@@ -166,7 +166,14 @@ module Omega
       GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[-90,90,nil,nil])
       
-      fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+      if hash["add"]
+        addtitle = hash["add"]
+        hash.delete("add")
+      else
+        addtitle = ""
+      end
+
+      fig_opt = {'title'=>addtitle + gp.long_name + " " + list.name[n],
         'annotate'=>false,
         'color_bar'=>true,
         'nlev'=>20}.merge(hash)

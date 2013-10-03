@@ -33,7 +33,7 @@ def draw_scatter(dir,name,hash={})
   (albedo.axis("time").length/skip).times{ |t|
     time = t*skip 
     h = h2o[nlon/4+1..nlon*3/4-2,true,true,time..time]
-    h = (h * ps * sig_weight).sum("sig")/Grav 
+    h = (h * ps[nlon/4+1..nlon*3/4-2,true,time..time] * sig_weight).sum("sig")/Grav 
     h = local_time(h,hr_in_day)
     x_coord = h/cos_ang(h,hr_in_day)
     y_coord = albedo[nlon/4+1..nlon*3/4-2,true,time..time]
