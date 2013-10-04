@@ -69,7 +69,20 @@ module Omega
       n2 = gpa2.list.name.index(gpa1.list.name[n])
       next if n2.nil?
       gp2 = gpa2.anomaly[n2]
-      gp = gp2 - gp1
+      gp = gp1 - gp2
+      result << gp
+    }
+    return result
+  end
+  # -------------------------------------------
+  def self.plus(gpa1,gpa2)
+    result = []
+    gpa1.anomaly.each_index{|n|
+      gp1 = gpa1.anomaly[n]
+      n2 = gpa2.list.name.index(gpa1.list.name[n])
+      next if n2.nil?
+      gp2 = gpa2.anomaly[n2]
+      gp = gp1 + gp2
       result << gp
     }
     return result

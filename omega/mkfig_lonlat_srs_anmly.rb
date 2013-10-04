@@ -13,13 +13,15 @@ include NumRu
 include Math
 
 
-
 def fig_lonlat_anml(var_name,lists,hash={})
-  all = Omega::Anomaly.new(var_name,lists["all"])
-  diurnal = Omega::Anomaly.new(var_name,lists["diurnal"])
-  coriolis = Omega::Anomaly.new(var_name,lists["coriolis"])
-  Omega.lonlat2(Omega.delt(diurnal,all),lists["all"],{"add"=>"A-D "}.merge(hash))
-  Omega.lonlat2(Omega.delt(coriolis,all),lists["all"],{"add"=>"A-C "}.merge(hash))
+  all = Omega::Anomaly.new(var_name,lists[:all])
+  diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
+  coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
+  Omega.lonlat2(all,lists[:all],{"add"=>"A "}.merge(hash))
+  Omega.lonlat2(diurnal,lists[:diurnal],{"add"=>"D "}.merge(hash))
+  Omega.lonlat2(coriolis,lists[:coriolis],{"add"=>"C "}.merge(hash))
+  Omega.lonlat2(Omega.plus(diurnal,coriolis),lists[:all],{"add"=>"c+D "}.merge(hash))
+  Omega.lonlat2(Omega.delt(Omega.delt(all,coriolis),diurnal),lists[:all],{"add"=>"A-D-C "}.merge(hash))
 end
 
 opt = OptionParser.new
@@ -30,7 +32,6 @@ opt.on("--png") {
   IWS = 4
 }
 opt.parse!(ARGV)
-
 
 # DCL set
 IWS = 1 if !defined?(IWS)
@@ -46,9 +47,9 @@ a_list = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
 d_list = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
 c_list = "/home/ishioka/link/coriolis/fig/list/omega_coriolis_MTlocal.list"
 lists={
-  "all"=>Utiles_spe::Explist.new(a_list),
-  "diurnal"=>Utiles_spe::Explist.new(d_list),
-  "coriolis"=>Utiles_spe::Explist.new(c_list)
+  all:      Utiles_spe::Explist.new(a_list),
+  diurnal:  Utiles_spe::Explist.new(d_list),
+  coriolis: Utiles_spe::Explist.new(c_list)
 }
 
 fig_lonlat_anml("OSRA",lists,"min"=>-250,"max"=>250,"nlev"=>20,"clr_min"=>99,"clr_max"=>13)
