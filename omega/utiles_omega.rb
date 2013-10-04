@@ -151,6 +151,13 @@ module Omega
   end
   #------------------------------------------- 
   def self.merid2(data,list,hash={}) #水平断面
+    if hash["add"]
+      addtitle = hash["add"]
+      hash.delete("add")
+    else
+      addtitle = ""
+    end
+
     list.dir.each_index do |n|
       gp = data[n]
       next if gp.nil?
@@ -166,12 +173,6 @@ module Omega
       GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[-90,90,nil,nil])
       
-      if hash["add"]
-        addtitle = hash["add"]
-        hash.delete("add")
-      else
-        addtitle = ""
-      end
 
       fig_opt = {'title'=>addtitle + gp.long_name + " " + list.name[n],
         'annotate'=>false,

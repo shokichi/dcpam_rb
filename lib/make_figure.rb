@@ -51,7 +51,12 @@ module MKfig
       gp = gp.mean('time') if gp.axnames.include?("time")
       gp = gp.mean(0) if gp.axnames[0] != "lat"
   
-      # 降水量の単位変換
+      # 
+      if gp.name =="H2OLiq" then
+        ps = gpopen(list.dir[n] + "Ps.nc","Ps")
+        sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+        gp = (gp * ps * sig_weight).sum("sig")/Grav 
+      end
       gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
   
       # 描画
@@ -90,13 +95,14 @@ module MKfig
       # 高さ方向にデータがある場合は最下層を取り出す
       gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
   
-      # 時間平均経度平均
+      # 時間変化
       gp = gp.mean('time') if gp.axnames.include?("time")
-      gp = gp.mean(0) if gp.axnames[0] != "lat"
+      gp = gp.cut("lat"=>0)
   
       # 降水量の単位変換
-      gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
-  
+#      gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
+      gp = fix_axis_local(gp)
+
       # 描画
       vy = vy - 0.025
       if n == 0 then
@@ -186,6 +192,17 @@ module MKfig
                  'color_bar'=>true}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
     end
+  end
+# -------------------------------------------
+  def fix_axis_local(gp)
+    xcoord = gp.axis(0).to_gphys.val
+    xmax = (xcoord[1]-xcoord[0])*xcoord.length
+    return gp if xmax == 360
+    a = 360/xmax
+    local = gp.axis(0).pos * a
+    local.units = "degree"
+    gp.axis(0).set_pos(local)
+    return gp
   end
 # -------------------------------------------
   def rename_img_file(id,scrfile) 

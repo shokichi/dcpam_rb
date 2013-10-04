@@ -17,8 +17,8 @@ def fig_merid_anml(var_name,lists,hash={})
   all = Omega::Anomaly.new(var_name,lists["all"])
   diurnal = Omega::Anomaly.new(var_name,lists["diurnal"])
   coriolis = Omega::Anomaly.new(var_name,lists["coriolis"])
-  Omega.merid2(Omega.delt(all,diurnal),lists["all"],"add"=>"A-D ")
-  Omega.merid2(Omega.delt(all,coriolis),lists["all"],"add"=>"A-C ")
+  Omega.merid2(Omega.delt(diurnal,all),lists["all"],{"add"=>"A-D "}.merge(hash))
+  Omega.merid2(Omega.delt(coriolis,all),lists["all"],{"add"=>"A-C "}.merge(hash))
 end
 
 opt = OptionParser.new
@@ -52,8 +52,7 @@ lists={
 
 fig_merid_anml("Temp",lists,"min"=>-20,"max"=>20)
 fig_merid_anml("RH",lists,"min"=>-50,"max"=>50)
-fig_merid_anml("H2OLiq",lists,"min"=>-1e-4,"max"=>1e-4)
-
+#fig_merid_anml("H2OLiq",lists,"min"=>-1e-4,"max"=>1e-4)
 fig_merid_anml("U",lists,"min"=>-20,"max"=>20,"nlev"=>20)      
 fig_merid_anml("V",lists,"min"=>-10,"max"=>10)      
 

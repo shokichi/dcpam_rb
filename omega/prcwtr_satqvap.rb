@@ -22,7 +22,7 @@ end
 
 def get_satQVap(dir)
   satqvap = gpopen dir + "Es.nc"
-  satqvap = cut_and_mean(satqvap)
+  satqvap = cut_and_mean(satqvap.cut("sig"=>1))
   return satqvap
 end
 
@@ -52,17 +52,19 @@ def draw_scatter(lists,data,hash={})
 end
 
 def create_clm(lists,data)
+  n = 0
   lists.each_value{ |list|
-    fin = File.open(list.id.sub(".list","_clm.dat","w") )
+    fin = File.open(list.id.gsub(".list","_clm.dat"),"w" )
     fin.print "# "
     fin.print "legend\t"
     fin.print "PrcWtr\t"
     fin.print "Es\n"
-    list.name.each_index{ |n|
-      fin.print "#{list.name[n]}\t"
-      fin.print "#{data[n].axis(0).to_gphys.val.to_f}\t"
-      fin.print "#{data[n].val.to_f}\n"
+    list.name.each_index{ |m|
+      fin.print "#{list.name[m]}\t"
+      fin.print "#{data[n].axis(0).to_gphys.val[m].to_f}\t"
+      fin.print "#{data[n].val[m].to_f}\n"
     }
+    n +=1
     fin.close
   }
 end

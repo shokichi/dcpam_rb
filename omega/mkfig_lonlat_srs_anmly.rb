@@ -18,8 +18,8 @@ def fig_lonlat_anml(var_name,lists,hash={})
   all = Omega::Anomaly.new(var_name,lists["all"])
   diurnal = Omega::Anomaly.new(var_name,lists["diurnal"])
   coriolis = Omega::Anomaly.new(var_name,lists["coriolis"])
-  Omega.lonlat2(Omega.delt(all,diurnal),lists["all"],"add"=>"A-C ")
-  Omega.lonlat2(Omega.delt(all,coriolis),lists["all"],"add"=>"A-C ")
+  Omega.lonlat2(Omega.delt(diurnal,all),lists["all"],{"add"=>"A-D "}.merge(hash))
+  Omega.lonlat2(Omega.delt(coriolis,all),lists["all"],{"add"=>"A-C "}.merge(hash))
 end
 
 opt = OptionParser.new
