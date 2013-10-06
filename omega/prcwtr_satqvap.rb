@@ -73,9 +73,9 @@ a_list = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
 d_list = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
 c_list = "/home/ishioka/link/coriolis/fig/list/omega_coriolis_MTlocal.list"
 lists={
-  :all=>Utiles_spe::Explist.new(a_list),
-  :diurnal=>Utiles_spe::Explist.new(d_list),
-  :coriolis=>Utiles_spe::Explist.new(c_list)
+  all: Utiles_spe::Explist.new(a_list),
+  diurnal: Utiles_spe::Explist.new(d_list),
+  coriolis: Utiles_spe::Explist.new(c_list)
 }
 
 opt = OptionParser.new

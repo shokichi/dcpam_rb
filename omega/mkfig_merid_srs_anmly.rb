@@ -14,11 +14,16 @@ include Math
 
 
 def fig_merid_anml(var_name,lists,hash={})
-  all = Omega::Anomaly.new(var_name,lists["all"])
-  diurnal = Omega::Anomaly.new(var_name,lists["diurnal"])
-  coriolis = Omega::Anomaly.new(var_name,lists["coriolis"])
-  Omega.merid2(Omega.delt(diurnal,all),lists["all"],{"add"=>"A-D "}.merge(hash))
-  Omega.merid2(Omega.delt(coriolis,all),lists["all"],{"add"=>"A-C "}.merge(hash))
+  all = Omega::Anomaly.new(var_name,lists[:all])
+  diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
+  coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
+  Omega.merid2(all.anomaly,lists[:all],{"add"=>"A "}.merge(hash))
+  Omega.merid2(diurnal.anomaly,lists[:diurnal],{"add"=>"D "}.merge(hash))
+  Omega.merid2(coriolis.anomaly,lists[:coriolis],{"add"=>"C "}.merge(hash))
+  plus_dc = Omega.plus(diurnal,coriolis)
+  del_adc = Omega.delt(all,plus_dc)
+  Omega.merid2(plus_dc.anomaly,lists[:diurnal],{"add"=>"C+D "}.merge(hash))
+  Omega.merid2(del_adc.anomaly,lists[:all],{"add"=>"A-D-C "}.merge(hash))
 end
 
 opt = OptionParser.new
@@ -30,10 +35,6 @@ opt.on("--png") {
 }
 opt.parse!(ARGV)
 
-a_list = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
-d_list = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
-c_list = "/home/ishioka/link/coriolis/fig/list/omega_coriolis_MTlocal.list"
-
 # DCL set
 IWS = 1 if !defined?(IWS)
 clrmp = 14  # カラーマップ
@@ -44,15 +45,19 @@ DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(0.8)
 
+a_list = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
+d_list = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
+c_list = "/home/ishioka/link/coriolis/fig/list/omega_coriolis_MTlocal.list"
+
 lists={
-  "all"=>Utiles_spe::Explist.new(a_list),
-  "diurnal"=>Utiles_spe::Explist.new(d_list),
-  "coriolis"=>Utiles_spe::Explist.new(c_list)
+  all: Utiles_spe::Explist.new(a_list),
+  diurnal: Utiles_spe::Explist.new(d_list),
+  coriolis: Utiles_spe::Explist.new(c_list)
 }
 
 fig_merid_anml("Temp",lists,"min"=>-20,"max"=>20)
 fig_merid_anml("RH",lists,"min"=>-50,"max"=>50)
-#fig_merid_anml("H2OLiq",lists,"min"=>-1e-4,"max"=>1e-4)
+fig_merid_anml("H2OLiq",lists,"min"=>-1e-4,"max"=>1e-4)
 fig_merid_anml("U",lists,"min"=>-20,"max"=>20,"nlev"=>20)      
 fig_merid_anml("V",lists,"min"=>-10,"max"=>10)      
 

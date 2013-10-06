@@ -92,4 +92,4 @@ HrInDay = 24 if list.id.include?("coriolis")
 list.dir.each_index{ |n| draw_scatter(list.dir[n],list.name[n])}
 
 DCL.grcls
-rename_img_file(lists["all"].id,__FILE__)
+rename_img_file(list.id,__FILE__)
