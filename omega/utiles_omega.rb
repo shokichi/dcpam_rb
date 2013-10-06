@@ -21,10 +21,25 @@ module Omega
   class Anomaly
     def initialize(data_name,list)
       @list = list
+      @legend = list.name
+      @dir = list.dir
       @data_name = data_name
       get_refdata
       get_anomaly
     end
+
+    def create(gp_ary,name=nil,dir=nil)
+      if gp_ary.length != list.name.length
+        puts "Array size is not agreement"
+        return gp_ary
+      end
+      gp_ary = [gp_ary] if gp_ary.class != Array
+      @legend = list.name
+      @data_name = gp[0].name 
+      @anomaly = gp_ary
+    end
+
+    private
     
     def get_refdata
       dir = @list.dir[@list.refnum]
@@ -50,41 +65,41 @@ module Omega
       @anomaly = result
     end
 
-    def surfh2o(gp,dir)
-      ps = gpopen dir+ "H2OLiq.nc"
-      sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
-      gp = (gp * ps * sig_weight).sum("sig")/Grav 
-      return gp
-    end
-
     
     public
-    attr_reader :list, :data_name, :anomaly
+    attr_reader :list, :legend, :dir, :data_name, :anomaly
   end
   # -------------------------------------------
   def self.delt(gpa1,gpa2)
-    result = []
+    result_name = []
+    result_ary = []
     gpa1.anomaly.each_index{|n|
       gp1 = gpa1.anomaly[n]
-      n2 = gpa2.list.name.index(gpa1.list.name[n])
+      n2 = gpa2.legend.index(gpa1.legend[n])
       next if n2.nil?
       gp2 = gpa2.anomaly[n2]
-      gp = gp1 - gp2
-      result << gp
+      gp = gp1 - gp2 
+      result_name << gpa2.legend[n2]
+      result_ary << gp
     }
+    result = Omega::Anomaly.create(result_ary,result_name)
     return result
   end
   # -------------------------------------------
   def self.plus(gpa1,gpa2)
-    result = []
+    legend = []
+    ary = []
     gpa1.anomaly.each_index{|n|
       gp1 = gpa1.anomaly[n]
-      n2 = gpa2.list.name.index(gpa1.list.name[n])
+      n2 = gpa2.legend.index(gpa1.legend[n])
       next if n2.nil?
       gp2 = gpa2.anomaly[n2]
       gp = gp1 + gp2
-      result << gp
+
+      legend << gpa2.legend[n2]
+      ary << gp
     }
+    result = Omega::Anomaly.create(ary,legend)
     return result
   end
   # -------------------------------------------
@@ -194,6 +209,14 @@ module Omega
       GGraph.tone_and_contour gp ,true, fig_opt
     end
   end
+  #--------------------------------------------------
+  def surfh2o(gp,dir)
+    ps = gpopen dir+ "H2OLiq.nc"
+    sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
+    gp = (gp * ps * sig_weight).sum("sig")/Grav 
+    return gp
+  end
+  #--------------------------------------------------
   def self.fix_axis_local(gp)
     xcoord = gp.axis(0).to_gphys.val
     xmax = (xcoord[1]-xcoord[0])*xcoord.length

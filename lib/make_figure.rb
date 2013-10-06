@@ -216,4 +216,13 @@ module MKfig
     end
   end  
 #--------------------------------------------      
+  def fix_axis_local(gp)
+    xcoord = gp.axis(0).to_gphys.val
+    xmax = (xcoord[1]-xcoord[0])*xcoord.length
+    a = 360/xmax
+    local = gp.axis(0).pos * a
+    local.units = "degree"
+    gp.axis(0).set_pos(local)
+    return gp
+  end
 end

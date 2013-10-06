@@ -17,11 +17,13 @@ def fig_lonlat_anml(var_name,lists,hash={})
   all = Omega::Anomaly.new(var_name,lists[:all])
   diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
   coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
-  Omega.lonlat2(all,lists[:all],{"add"=>"A "}.merge(hash))
-  Omega.lonlat2(diurnal,lists[:diurnal],{"add"=>"D "}.merge(hash))
-  Omega.lonlat2(coriolis,lists[:coriolis],{"add"=>"C "}.merge(hash))
-  Omega.lonlat2(Omega.plus(diurnal,coriolis),lists[:all],{"add"=>"c+D "}.merge(hash))
-  Omega.lonlat2(Omega.delt(Omega.delt(all,coriolis),diurnal),lists[:all],{"add"=>"A-D-C "}.merge(hash))
+  Omega.lonlat2(all.anomaly,lists[:all],{"add"=>"A "}.merge(hash))
+  Omega.lonlat2(diurnal.anomaly,lists[:diurnal],{"add"=>"D "}.merge(hash))
+  Omega.lonlat2(coriolis.anomaly,lists[:coriolis],{"add"=>"C "}.merge(hash))
+  plus_dc = Omega.plus(diurnal,coriolis)
+  del_adc = Omega.delt(all,plus_dc)
+  Omega.lonlat2(plus_dc.anomaly,lists[:diurnal],{"add"=>"C+D "}.merge(hash))
+  Omega.lonlat2(del_adc.anomaly,lists[:all],{"add"=>"A-D-C "}.merge(hash))
 end
 
 opt = OptionParser.new
