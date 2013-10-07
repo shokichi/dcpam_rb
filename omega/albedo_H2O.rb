@@ -13,8 +13,8 @@ include Math
 
 
 def draw_scatter(dir,name,hash={})
-  albedo = gpopen dir+"local_Albedo.nc","Albedo"
-  h2o = gpopen dir+"H2OLiq.nc"
+  albedo = gpopen dir+"/local_Albedo.nc","Albedo"
+  h2o = gpopen dir+"/H2OLiq.nc"
   return if albedo.nil? or h2o.nil?
 
   ps = gpopen(dir + "Ps.nc","Ps")

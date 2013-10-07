@@ -159,6 +159,10 @@ module Omega
       
       # 地方時を[degree]に変換
       gp = Omega.fix_axis_local(gp)
+      
+      # 鉛直積分
+      gp = intg_delpress(gp) if gp.name.include?("H2OLiq")
+
       # 描画
       xmax = 360
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
@@ -208,13 +212,6 @@ module Omega
         'nlev'=>20}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
     end
-  end
-  #--------------------------------------------------
-  def surfh2o(gp,dir)
-    ps = gpopen dir+ "H2OLiq.nc"
-    sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
-    gp = (gp * ps * sig_weight).sum("sig")/Grav 
-    return gp
   end
   #--------------------------------------------------
   def self.fix_axis_local(gp)
