@@ -19,7 +19,7 @@ module Utiles_spe
   MolWtWet = UNumeric[18.01528e-3, "kg.mol-1"] # 水蒸気の平均分子量
   MolWtDry = UNumeric[28.964e-3,"kg.mol-1"]    # 乾燥大気の平均分子量
   GasRUniv = UNumeric[8.3144621,"J.K-1.mol-1"] # 気体定数
-  
+ 
   
   class Explist
     # 実験ファイルリストの読み込み
@@ -150,7 +150,9 @@ module Utiles_spe
       else
         sig_weight = gpopen(gp.data.file.path, "sig_weight")    
       end
+
     rescue
+
       if gp.data.file == nil then
         sig_weight = gpopen("./Temp.nc","sig_weight")
       else
@@ -158,13 +160,33 @@ module Utiles_spe
         sig_weight = gpopen(gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight")
       end
     end
-    gp_vintg = GPhys.each_along_dims(gp,"time"){ |gphys|
-      intg = (gphys * sig_weight).sum("sig")
-      return intg
-    }
+
+    gp_vintg = (gp * sig_weight).sum("sig")
     return gp_vintg
   end
-  
+  #----------------------
+  def intg_delpress(gp)  # 鉛直積分(気圧)
+    begin
+      if gp.data.file.class == NArray then
+        filename = gp.data.file[0].path
+      else
+        filename = gp.data.file.path
+      end
+      sig_weight = gpopen filename, "sig_weight"
+      ps = gpopen File.dirname(filename)+"/"+"Ps.nc"
+    rescue
+      if gp.data.file == nil then
+        sig_weight = gpopen "./Temp.nc","sig_weight"
+        ps = gpopen "./Ps.nc"
+      else
+        tmp = gp.data.file.path.split("/")
+        sig_weight = gpopen gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight"
+        ps = gpopen gp.data.file.path.sub(tmp[-1],"Ps.nc")
+      end
+    end
+    gp_intg = (gp * ps * sig_weight).sum("sig")/Grav
+    return gp_intg
+  end
   #----------------------
   def self.wm2mmyr(gp)  # 降水量の単位変換(W.m-2 -> mm.yr-1)
     return gp if gp.units.to_s.include?("W")
