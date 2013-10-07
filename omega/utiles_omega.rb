@@ -28,26 +28,67 @@ module Omega
       get_anomaly
     end
 
-    def create(gp_ary,name=nil,dir=nil)
-      if gp_ary.length != list.name.length
-        puts "Array size is not agreement"
-        return gp_ary
-      end
+    def create(gp_ary,legend,dir=nil)
       gp_ary = [gp_ary] if gp_ary.class != Array
-      @legend = list.name
-      @data_name = gp[0].name 
+      legend = [legend] if legend.class == String
+      return gp_ary if !check_ary_size(gp_ary,legend)
+      @legend = legend
+      @data_name = gp_ary[0].name 
       @anomaly = gp_ary
+      self
     end
 
+    def minus(gpa)
+      legend = []
+      gp_ary = []
+      @anomaly.each_index{|n|
+        gp1 = @anomaly[n]
+        n2 = gpa.legend.index(@legend[n])
+        next if n2.nil?
+        gp2 = gpa.anomaly[n2]
+        gp = gp1 - gp2 
+        legend << gpa.legend[n2]
+        gp_ary << gp
+      }
+      @legend = legend
+      @anomaly = gp_ary
+      self
+    end
+
+    def plus(gpa)
+      legend = []
+      gp_ary = []
+      @anomaly.each_index{|n|
+        gp1 = @anomaly[n]
+        n2 = gpa.legend.index(@legend[n])
+        next if n2.nil?
+        gp2 = gpa.anomaly[n2]
+        gp = gp1 + gp2
+        legend << gpa.legend[n2]
+        gp_ary << gp
+      }
+      @legend = legend
+      @anomaly = gp_ary
+      self
+    end
+        
     private
     
+    def check_ary_size(ary1,ary2)
+      if ary1.length != ary2.length
+        print "Array size is not agreement #{gp_ary.length} vs #{name.length}\n"
+        return false
+      else
+        return true
+      end
+    end
+
     def get_refdata
       dir = @list.dir[@list.refnum]
       refdata = gpopen dir+@data_name+".nc"
       if refdata.nil?
         print "Refarence file is not exist [#{@list.dir[list.refnum]}](#{@data_name})\n"
       end
-      refdata = surfh2o(refdata,dir) if refdata.name == "H2OLiq"
       @@ref_data = refdata
     end
     
@@ -58,7 +99,6 @@ module Omega
         if gp.nil? then
           result << nil
         else
-          gp = surfh2o(gp,dir) if gp.name == "H2OLiq"
           result << gp - @@ref_data
         end
       end
@@ -68,39 +108,6 @@ module Omega
     
     public
     attr_reader :list, :legend, :dir, :data_name, :anomaly
-  end
-  # -------------------------------------------
-  def self.delt(gpa1,gpa2)
-    result_name = []
-    result_ary = []
-    gpa1.anomaly.each_index{|n|
-      gp1 = gpa1.anomaly[n]
-      n2 = gpa2.legend.index(gpa1.legend[n])
-      next if n2.nil?
-      gp2 = gpa2.anomaly[n2]
-      gp = gp1 - gp2 
-      result_name << gpa2.legend[n2]
-      result_ary << gp
-    }
-    result = Omega::Anomaly.create(result_ary,result_name)
-    return result
-  end
-  # -------------------------------------------
-  def self.plus(gpa1,gpa2)
-    legend = []
-    ary = []
-    gpa1.anomaly.each_index{|n|
-      gp1 = gpa1.anomaly[n]
-      n2 = gpa2.legend.index(gpa1.legend[n])
-      next if n2.nil?
-      gp2 = gpa2.anomaly[n2]
-      gp = gp1 + gp2
-
-      legend << gpa2.legend[n2]
-      ary << gp
-    }
-    result = Omega::Anomaly.create(ary,legend)
-    return result
   end
   # -------------------------------------------
   def self.lat_fig2(data,list,hash={}) # 緯度分布
@@ -117,6 +124,9 @@ module Omega
       # 時間平均経度平均
       gp = gp.mean('time') if gp.axnames.include?("time")
       gp = gp.mean(0) if gp.axnames[0] != "lat"
+
+      # 鉛直積分
+      gp = intg_delpress(gp) if gp.name.include?("H2OLiq")
       
       # 降水量の単位変換
       gp = Utiles_spe.wm2mmyr(gp) if gp.name.include?("Rain") 

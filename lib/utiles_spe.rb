@@ -166,26 +166,27 @@ module Utiles_spe
   end
   #----------------------
   def intg_delpress(gp)  # 鉛直積分(気圧)
-    begin
-      if gp.data.file.class == NArray then
-        filename = gp.data.file[0].path
-      else
-        filename = gp.data.file.path
-      end
-      sig_weight = gpopen filename, "sig_weight"
-      ps = gpopen File.dirname(filename)+"/"+"Ps.nc"
-    rescue
-      if gp.data.file == nil then
-        sig_weight = gpopen "./Temp.nc","sig_weight"
-        ps = gpopen "./Ps.nc"
-      else
-        tmp = gp.data.file.path.split("/")
-        sig_weight = gpopen gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight"
-        ps = gpopen gp.data.file.path.sub(tmp[-1],"Ps.nc")
-      end
-    end
-    gp_intg = (gp * ps * sig_weight).sum("sig")/Grav
-    return gp_intg
+    return gp
+#    begin
+#      if gp.data.file.class == NArray then
+#        filename = gp.data.file[0].path
+#      else
+#        filename = gp.data.file.path
+#      end
+#      sig_weight = gpopen filename, "sig_weight"
+#      ps = gpopen File.dirname(filename)+"/"+"Ps.nc"
+#    rescue
+#      if gp.data.file == nil then
+#        sig_weight = gpopen "./Temp.nc","sig_weight"
+#        ps = gpopen "./Ps.nc"
+#      else
+#        tmp = gp.data.file.path.split("/")
+#        sig_weight = gpopen gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight"
+#        ps = gpopen gp.data.file.path.sub(tmp[-1],"Ps.nc")
+#      end
+#    end
+#    gp_intg = (gp * ps * sig_weight).sum("sig")/Grav
+#    return gp_intg
   end
   #----------------------
   def self.wm2mmyr(gp)  # 降水量の単位変換(W.m-2 -> mm.yr-1)
