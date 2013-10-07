@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
-# 絶対角運動量の計算
+# アルベドの計算
 #
 
 require 'numru/ggraph'

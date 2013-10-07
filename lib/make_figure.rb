@@ -52,11 +52,6 @@ module MKfig
       gp = gp.mean(0) if gp.axnames[0] != "lat"
   
       # 
-      if gp.name =="H2OLiq" then
-        ps = gpopen(list.dir[n] + "Ps.nc","Ps")
-        sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
-        gp = (gp * ps * sig_weight).sum("sig")/Grav 
-      end
       gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
   
       # 描画
@@ -134,11 +129,6 @@ module MKfig
       gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
       next if gp.nil?
   
-      if gp.name == "H2OLiq" then
-        ps = gpopen(list.dir[n] + "Ps.nc","Ps")
-        sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
-        gp = (gp * ps * sig_weight).sum("sig")/Grav 
-      end
       # 時間平均
       gp = gp.mean("time") if gp.axnames.include?("time")
   

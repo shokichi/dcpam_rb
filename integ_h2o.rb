@@ -18,11 +18,10 @@ def intg_h2o(dir)
   return if h2o.nil? or ps.nil? or sig_weight.nil?
  
   data_name = "H2OLiqIntP"
-
   ofile = NetCDF.create(dir + data_name + '.nc')
   GPhys::NetCDF_IO.each_along_dims_write([h2o,ps], ofile,'time') { 
     |liq,gps|
-    result = (liq * ps * sig_weight).sum("sig")/Grav
+    result = (liq * gps * sig_weight).sum("sig")/Grav
     result.name = data_name
     [result]
   }

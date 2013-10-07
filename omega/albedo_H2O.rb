@@ -13,12 +13,10 @@ include Math
 
 
 def draw_scatter(dir,name,hash={})
-  albedo = gpopen dir+"/local_Albedo.nc","Albedo"
-  h2o = gpopen dir+"/H2OLiq.nc"
+  albedo = gpopen dir+"local_Albedo.nc","Albedo"
+  h2o = gpopen dir+"H2OLiqIntP.nc"
   return if albedo.nil? or h2o.nil?
 
-  ps = gpopen(dir + "Ps.nc","Ps")
-  sig_weight = gpopen("/home/ishioka/link/all/omega1/data/H2OLiq.nc","sig_weight")
 
 
   if defined?(HrInDay) and !HrInDay.nil? then
@@ -31,9 +29,7 @@ def draw_scatter(dir,name,hash={})
   skip = 6*24
   (albedo.axis("time").length/skip).times{ |t|
     time = t*skip 
-    h = h2o[false,time..time]
-    h = (h * ps[false,time..time] * sig_weight).sum("sig")/Grav 
-    h = local_time(h,hr_in_day)
+    h = local_time(h2o[false,time..time],hr_in_day)
     x_coord = h/cos_ang(h,hr_in_day)
     x_coord = x_coord[nlon/4+1..nlon*3/4-2,false]
     y_coord = albedo[nlon/4+1..nlon*3/4-2,true,time..time]

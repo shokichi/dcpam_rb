@@ -105,10 +105,10 @@ module Omega
       @anomaly = result
     end
 
-    
     public
     attr_reader :list, :legend, :dir, :data_name, :anomaly
   end
+
   # -------------------------------------------
   def self.lat_fig2(data,list,hash={}) # 緯度分布
     lc = 23
@@ -125,8 +125,6 @@ module Omega
       gp = gp.mean('time') if gp.axnames.include?("time")
       gp = gp.mean(0) if gp.axnames[0] != "lat"
 
-      # 鉛直積分
-      gp = intg_delpress(gp) if gp.name.include?("H2OLiq")
       
       # 降水量の単位変換
       gp = Utiles_spe.wm2mmyr(gp) if gp.name.include?("Rain") 
@@ -170,9 +168,6 @@ module Omega
       # 地方時を[degree]に変換
       gp = Omega.fix_axis_local(gp)
       
-      # 鉛直積分
-      gp = intg_delpress(gp) if gp.name.include?("H2OLiq")
-
       # 描画
       xmax = 360
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
@@ -224,6 +219,39 @@ module Omega
     end
   end
   #--------------------------------------------------
+  def self.lonsig2(data,list,hash={}) #赤道断面
+    if hash["add"]
+      addtitle = hash["add"]
+      hash.delete("add")
+    else
+      addtitle = ""
+    end
+
+    list.dir.each_index do |n|
+      gp = data[n]
+      next if gp.nil?
+      
+      # 時間平均
+      gp = gp.mean("time") if gp.axnames.include?("time")
+      
+      # 赤道断面
+      gp = gp.cut("lat"=>0)
+
+      # 地方時を[degree]に変換
+      gp = Omega.fix_axis_local(gp)
+      
+      # 描画
+      GGraph.set_axes("xlabelint"=>60,'xside'=>'bt', 'yside'=>'lr')
+      GGraph.set_fig('window'=>[0,360,nil,nil])
+      
+      fig_opt = {'title'=>addtitle + gp.long_name + " " + list.name[n],
+        'annotate'=>false,
+        'color_bar'=>true,
+        'nlev'=>20}.merge(hash)
+      GGraph.tone_and_contour gp ,true, fig_opt
+    end
+  end
+  #----------------------------------
   def self.fix_axis_local(gp)
     xcoord = gp.axis(0).to_gphys.val
     xmax = (xcoord[1]-xcoord[0])*xcoord.length
