@@ -96,7 +96,13 @@ module MKfig
   
       # 降水量の単位変換
 #      gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
+
       gp = fix_axis_local(gp)
+      
+      # 描画
+      xmax = 360
+      GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+      GGraph.set_fig('window'=>[0,xmax,nil,nil])
 
       # 描画
       vy = vy - 0.025

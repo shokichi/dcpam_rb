@@ -72,13 +72,15 @@ def local_time_mean(var_name,list)
     gp = gpopen(list.dir[n] + var_name + '.nc',var_name)
     next if gp.nil? 
 
-
-    rst_file = list.dir[n].sub("data/","rst_data/rst1800.nc").sub("data1400/","rst_data/rst1440.nc")
-    hr_in_day = gpopen(rst_file,'time').get_att("hour_in_day")
-
-    if HrInDay.nil? and hr_in_day.nil? 
-      hr_in_day = 24/omega_ratio(list.name[n])
-      hr_in_day = 24 if list.id.include?("coriolis")
+    if defined?(HrInDay) and !HrInDay.nil?
+      hr_in_day = HrInDay 
+    else
+      begin
+        rst_file = list.dir[n].sub("data/","rst_data/rst1800.nc").sub("data1400/","rst_data/rst1440.nc")
+        hr_in_day = gpopen(rst_file,'time').get_att("hour_in_day") 
+      rescue
+        hr_in_day = 24/omega_ratio(list.name[n]) 
+      end
     end
     lon = gp.axis('lon')
 
@@ -113,9 +115,10 @@ def local_time_mean(var_name,list)
       ave = ave + gp_local      
     }
     ave = ave[false,0]/gp.axis("time").pos.length
-    ofile = NetCDF.create(file.sub(var_name,"MTlocal_" + var_name))
+    ofile = NetCDF.create(list.dir[n]+"MTlocal_"+var_name+".nc")
     GPhys::IO.write(ofile, ave)
     ofile.close
+    print "[MTlocal_#{var_name}](#{list.dir[n]}) is created\n"
   end
 end
   
@@ -139,11 +142,12 @@ end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
-opt.on("-n VAR") {|str| VarName = str}
+opt.on("-n VAR","--varname=VAR") {|str| VarName = str}
 opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
 opt.parse!(ARGV)
 list = Utiles_spe::Explist.new(ARGV[0])
 varname = VarName if defined?(VarName)
+HrInDay = 24 if list.id.include?("coriolis")
 
 if defined?(varname) and !varname.nil? then
   local_time_mean(varname,list)

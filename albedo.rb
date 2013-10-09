@@ -45,7 +45,7 @@ def albedo(dir,name)
       tsw = tsw*(tsw.axis("lat").to_gphys*PI/180.0).cos
     
       # albedo
-      albedo = 1.0 + sw/top
+      albedo = 1.0 + sw/tsw
       albedo = local_time(albedo,hr_in_day)
       albedo = albedo[nlon/4+1..nlon*3/4-2,false]
       albedo.name = data_name

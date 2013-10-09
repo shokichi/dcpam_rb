@@ -17,8 +17,6 @@ def draw_scatter(dir,name,hash={})
   h2o = gpopen dir+"H2OLiqIntP.nc"
   return if albedo.nil? or h2o.nil?
 
-
-
   if defined?(HrInDay) and !HrInDay.nil? then
     hr_in_day = HrInDay
   else
@@ -26,11 +24,12 @@ def draw_scatter(dir,name,hash={})
   end
   nlon = albedo.axis(0).length
   
-  skip = 6*24
+  skip = 6*24*8
   (albedo.axis("time").length/skip).times{ |t|
     time = t*skip 
-    h = local_time(h2o[false,time..time],hr_in_day)
-    x_coord = h/cos_ang(h,hr_in_day)
+    h = h2o[false,time..time]
+    h = h/cos_ang(h,hr_in_day)
+    x_coord = local_time(h/cos_ang(h,hr_in_day),hr_in_day)
     x_coord = x_coord[nlon/4+1..nlon*3/4-2,false]
     y_coord = albedo[nlon/4+1..nlon*3/4-2,true,time..time]
     hash = {'title'=> "Albedo & H2O"+" "+name,
@@ -52,6 +51,7 @@ def cos_ang(gp,hr_in_day)
   time = Utiles_spe.min2day(gp,hr_in_day).axis("time").to_gphys
   slon = (time - time.to_i)*360
   slon = UNumeric[slon[0].val,"degree"]    # 太陽直下点経度
+  slon = UNumeric[0,"degree"]    # 太陽直下点経度
 
   ang = gp[false,0].copy
   ang[false] = 1.0
@@ -85,6 +85,7 @@ DCL.uzfact(1.0)
 
 list = Utiles_spe::Explist.new(ARGV[0])
 HrInDay = 24 if list.id.include?("coriolis")
+GGraph.set_fig('window'=>[0,200,0,1])
 list.dir.each_index{ |n| draw_scatter(list.dir[n],list.name[n])}
 
 DCL.grcls

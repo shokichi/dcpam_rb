@@ -55,10 +55,10 @@ lists={
   coriolis: Utiles_spe::Explist.new(c_list)
 }
 
-fig_merid_anml("Temp",lists,"min"=>-20,"max"=>20)
+fig_merid_anml("Temp",lists,"min"=>-40,"max"=>40,"nlev"=>20)
 fig_merid_anml("RH",lists,"min"=>-50,"max"=>50)
 fig_merid_anml("H2OLiq",lists,"min"=>-1e-4,"max"=>1e-4)
-fig_merid_anml("U",lists,"min"=>-20,"max"=>20,"nlev"=>20)      
+fig_merid_anml("U",lists,"min"=>-30,"max"=>30,"nlev"=>30)      
 fig_merid_anml("V",lists,"min"=>-10,"max"=>10)      
 
 DCL.grcls
