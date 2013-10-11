@@ -53,7 +53,8 @@ def make_movie(varname,list)
     filename = varname+".nc"
     filename = FileName if defined?(FileName)
     gp = gpopen list.dir[n] + filename,varname
-
+    next if gp.nil?
+    gp = gp.cut("lat"=>0)
     # DCL
     DCL.gropn(4)
     DCL.sgpset('lcntl',false)

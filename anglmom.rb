@@ -14,22 +14,19 @@ include Math
 def anglmom(dir,name)
   data_name = 'AnglMom'
   # file open
-  begin
-    gu = gpopen(dir + "U.nc", "U")
-    gps = gpopen(dir + "Ps.nc", "Ps")
-    sigm = gpopen(dir + "U.nc","sigm")
-    time = gpopen(dir + "U.nc","time")
-  rescue
-    print "[#{data_name}](#{dir}) is not created \n"
-    return
-  end
+  gu = gpopen(dir + "U.nc", "U")
+  gps = gpopen(dir + "Ps.nc", "Ps")
+  sigm = gpopen(dir + "U.nc","sigm")
+  time = gpopen(dir + "U.nc","time")
+  return gu.nil or gps.nil? or sigm.nil? or time.nil? 
+
   # constants
   sec_in_day = UNumeric[86400, "s"]  #<= 24 hrs/day
 
-  if defined?(HrInDay).nil?
-    hr_in_day = 24 / omega_ratio(list.name[n])
-  else
+  if defined?(HrInDay).nil? and HrInDay.nil? then
     hr_in_day = HrInDay 
+  else
+    hr_in_day = 24 / omega_ratio(list.name[n])
   end
 
   omega = 2*PI/sec_in_day           # Earth
@@ -63,4 +60,5 @@ opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
+HrInDay = 24 if list.id.include?("diurnal")
 list.dir.each_index{|n| anglmom(list.dir[n],list.name[n])} 
