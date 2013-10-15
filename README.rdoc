@@ -1,13 +1,17 @@
+=begin rdoc
 = dcpam解析用スクリプト取扱説明書
 == 内容物
 === 描画
 * mkfig_merid.rb:時間・経度平均した子午面(lat-sig)の図を作成
 * mkfig_lat.rb:時間・経度平均した緯度分布の図を作成
+* mkfig_lon.rb:時間平均した経度分布の図を作成
 * mkfig_lonlat.rb:水平面分布(lon-lat)の図を作成
 * mkfig_gave.rb:全球平均値の表を作成
 * mkfig_latsig.rb:赤道断面の図を作成
-* anime:アニメーション作成
-
+* mkfig_anomaly_merid.rb: 
+* mkfig_anomaly_lonlat.rb: 
+* mkfig_anomaly_lonsig.rb: 
+* anime.rb:アニメーション作成
 
 === 解析
 * albedo.rb:惑星アルベド
@@ -19,7 +23,7 @@
 * local_time.rb:地方時変換
 
 === おまけ
-* run_mang.rb: dcpamの連続ジョブ投入用スクリプト
+* run_mang.rb: dcpamのジョブ投入用スクリプト
 
 === ライブラリ
 * lib/utiles_spe.rb
@@ -44,7 +48,6 @@ NetCDFファイルが置いてあるディレクトリで
  $ mkfig_hoge.rb
 と入力すると図が表示される. 
 
-
 ==== 子午面の図を作成
  $ mkfig_merid.rb
 
@@ -55,8 +58,14 @@ NetCDFファイルが置いてあるディレクトリで
  $ mkfig_lonlat.rb
 (高さ方向にデータがある場合は大気最下層が選ばれる)
 
-==== 赤道断面の図を作成
- $ mkfig_latsig.rb
+==== 経度断面の図を作成
+ $ mkfig_lonsig.rb
+
+ $ mkfig_lon.rb
+
+--latオプションを指定することで
+任意の緯度を切り取ることができる. 
+(デフォルトでは赤道を切り取る)
 
 ==== 全球平均
 全球平均値の一覧を作成する場合は mkfig_ave.rb を使用する
@@ -102,7 +111,6 @@ NetCDFファイルが置いてあるディレクトリで
  -n               変数名を指定
  -h, --hr_in_day  1日の長さを指定
 
-
 === 複数の実験データを扱う場合
  $ hogehoge.rb ika.list
 
@@ -121,8 +129,10 @@ ika.listには以下のようにデータの置いてあるディレクトリを
 
 == 使用例 
 * 子午面断面の図を作成する
- $ mkfig_merid.rb list/hoge_exp.list -png
+ $ mkfig_merid.rb list/hoge_exp.list --png
 
 * 地方時変換
  $ local_time.rb -n RH -h 24
 
+
+=end
