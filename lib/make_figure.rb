@@ -202,7 +202,7 @@ module MKfig
   def rename_img_file(id,scrfile) 
     id = id.id if id.class == Explist
     img_lg = id+File.basename(scrfile,".rb").sub("mkfig","")
-    img_lg += "_lat#{Lat}" if defined?(Lat)
+    img_lg += "_lat#{Lat.to_i}" if defined?(Lat)
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
     elsif IWS == 4
