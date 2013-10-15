@@ -37,12 +37,13 @@ def convert_img(file) # 画像結合
 end
 
 def make_movie(varname,list)
-  if defined?(FigOpt)
-    figopt = FigOpt
-  else
-    figopt = {"min"=>0,"max"=>2000,"nlev"=>40}
-  end
+#  if defined?(FigOpt)
+#    figopt = FigOpt
+#  else
+#    figopt = {"min"=>0,"max"=>2000,"nlev"=>40}
+#  end
 
+  figopt = {"min"=>-2e-6,"max"=>2e-6,"nlev"=>40,"color_bar"=>true}
   # DCL
   clrmp = 14  # カラーマップ
   DCL.sgscmn(clrmp)

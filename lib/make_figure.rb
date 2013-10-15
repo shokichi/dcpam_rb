@@ -92,7 +92,11 @@ module MKfig
   
       # 時間変化
       gp = gp.mean('time') if gp.axnames.include?("time")
-      gp = gp.cut("lat"=>0)
+
+      # 緯度切り出し
+      lat = 0
+      lat = Lat if defined?(Lat)
+      gp = gp.cut("lat"=>lat)
   
       # 降水量の単位変換
 #      gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
@@ -165,19 +169,13 @@ module MKfig
       # 時間平均
       gp = gp.mean("time") if !gp.axnames.index("time").nil?
   
-      # 緯度方向の次元をカット
-      if !hash.include?("lat") then
-        lat = 0 
-      else
-        lat = hash["lat"]
-        hash.delete("lat")
-      end
+      # 緯度切り出し
+      lat = 0
+      lat = Lat if defined?(Lat)
       gp = gp.cut("lat"=>lat)
-   
-      # 
+         
       # 横軸最大値
-      xcoord = gp.axis(0).to_gphys.val
-      xmax = (xcoord[1]-xcoord[0])*xcoord.length
+      gp = fix_axis_local(gp)
   
       # 描画
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
@@ -204,6 +202,7 @@ module MKfig
   def rename_img_file(id,scrfile) 
     id = id.id if id.class == Explist
     img_lg = id+File.basename(scrfile,".rb").sub("mkfig","")
+    img_lg += "_lat#{Lat}" if defined?(Lat)
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
     elsif IWS == 4
@@ -211,14 +210,4 @@ module MKfig
         File.rename(filename,filename.sub("dcl",img_lg)) }
     end
   end  
-#--------------------------------------------      
-  def fix_axis_local(gp)
-    xcoord = gp.axis(0).to_gphys.val
-    xmax = (xcoord[1]-xcoord[0])*xcoord.length
-    a = 360/xmax
-    local = gp.axis(0).pos * a
-    local.units = "degree"
-    gp.axis(0).set_pos(local)
-    return gp
-  end
 end

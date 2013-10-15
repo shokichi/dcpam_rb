@@ -28,6 +28,7 @@ end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
+opt.on("--lat=Lat") {|lat| Lat = lat.to_f}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)

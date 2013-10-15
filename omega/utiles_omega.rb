@@ -234,8 +234,10 @@ module Omega
       # 時間平均
       gp = gp.mean("time") if gp.axnames.include?("time")
       
-      # 赤道断面
-      gp = gp.cut("lat"=>0)
+      # 緯度切り出し
+      lat = 0
+      lat = Lat if defined?(Lat)
+      gp = gp.cut("lat"=>lat)
 
       # 地方時を[degree]に変換
       gp = Omega.fix_axis_local(gp)
