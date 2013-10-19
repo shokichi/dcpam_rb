@@ -1,4 +1,3 @@
-=begin rdoc
 = dcpam解析用スクリプト取扱説明書
 == 内容物
 === 描画
@@ -135,4 +134,3 @@ ika.listには以下のようにデータの置いてあるディレクトリを
  $ local_time.rb -n RH -h 24
 
 
-=end
