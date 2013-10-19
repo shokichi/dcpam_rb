@@ -16,7 +16,6 @@ include NumRu
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR","--name=VAR") {|name| VarName = name}
-opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
 opt.on("--lat=Lat") {|lat| Lat = lat.to_f}
 opt.on("--max=max") {|max| Max = max.to_f}
 opt.on("--min=min") {|min| Min = min.to_f}
@@ -39,9 +38,7 @@ DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
 if !varname.nil? then
-  figopt ={}
-  figopt["min"] = Min if defined?(Min) 
-  figopt["max"] = Max if defined?(Max) 
+  figopt = set_figopt
   lon_fig(varname,list,figopt)
 else
   lon_fig("OSRA",list,"min"=>-1200,"max"=>0)
