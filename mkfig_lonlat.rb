@@ -12,15 +12,13 @@ include MKfig
 include NumRu
 
 
-
 #
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR","--name=VAR") {|name| VarName = name}
-opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
 opt.on("--max=max") {|max| Max = max.to_f}
 opt.on("--min=min") {|min| Min = min.to_f}
-opt.on("--nlev=nlev") {|Nlev| Nlev = nlev.to_f}
+opt.on("--nlev=nlev") {|nlev| Nlev = nlev.to_f}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)
@@ -42,8 +40,8 @@ DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
 if !varname.nil? then
-  Figopt ||= {}
-  lonlat(varname,list,Figopt)
+  figopt = set_figopt
+  lonlat(varname,list,figopt)
 else
   lonlat("OSRA",list,"min"=>-1200,"max"=>0,"nlev"=>20,"clr_min"=>99,"clr_max"=>56)
   lonlat("OLRA",list,"min"=>0,"max"=>300,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)

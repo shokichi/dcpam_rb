@@ -199,10 +199,21 @@ module MKfig
     return gp
   end
 # -------------------------------------------
+  def set_figopt
+    figopt = {}
+    figopt["max"] = Max if defined?(Max)
+    figopt["min"] = Min if defined?(Min)
+    figopt["nlev"] = Nlev if defined?(Nlev)
+    figopt["clr_max"] = ClrMax if defined?(ClrMax)
+    figopt["clr_min"] = ClrMin if defined?(ClrMin)        
+    return figopt
+  end
+# -------------------------------------------
   def rename_img_file(id,scrfile) 
     id = id.id if id.class == Explist
     img_lg = id+File.basename(scrfile,".rb").sub("mkfig","")
     img_lg += "_lat#{Lat.to_i}" if defined?(Lat)
+    img_lg += "_#{VarName}" if defined?(VarName)
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
     elsif IWS == 4

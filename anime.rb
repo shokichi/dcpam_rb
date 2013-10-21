@@ -10,20 +10,23 @@ include MKfig
 include NumRu
 
 
-def tone_draw(gp,name,figopt={})
+def tone_draw(gp,name,hr_in_day,figopt={})
   intval = 6
+
   (gp.axis("time").length/intval).to_i.times do |n| 
     figopt["title"] = gp.name + name
     figopt["keep"] = true if n != 0
-    GGraph.tone gp[false,n*intval], true, figopt
+    data = local_time(gp[false,n*intval..n*interval],hr_in_day)
+    GGraph.tone data, true, figopt
   end
 end
 
-def line_draw(gp,name,figopt={})
+def line_draw(gp,name,hr_in_day,figopt={})
   intval = 6
   gp.axis("time").length/intval.to_i.times do |n| 
     figopt["keep"] = true if n != 0
-    GGraph.tone gp[false,n*intval], true, figopt
+    data = local_time(gp[false,n*intval..n*interval],hr_in_day)
+    GGraph.tone data, true, figopt
   end
 end
 
@@ -38,13 +41,8 @@ def convert_img(filename) # 画像結合
 end
 
 def make_movie(varname,list)
-#  if defined?(FigOpt)
-#    figopt = FigOpt
-#  else
-#    figopt = {"min"=>0,"max"=>2000,"nlev"=>40}
-#  end
-
-  figopt = {"min"=>-5e-7,"max"=>5e-7,"nlev"=>40,"color_bar"=>true}
+  # DQVapDtCumulus
+  figopt = set_figopt.merge({"min"=>-5e-7,"max"=>5e-7,"nlev"=>40,"color_bar"=>true})
   # DCL
   clrmp = 14  # カラーマップ
   DCL.sgscmn(clrmp)
@@ -59,7 +57,8 @@ def make_movie(varname,list)
 
     hr_in_day = 24 / omega_ratio(list.name[n])
     hr_in_day = 24 if list.id.include?("coriolis")
-    gp = cut_and_mean(gp,hr_in_day)
+
+    gp = cut_and_mean(gp)
 
     # DCL
     DCL.gropn(4)
@@ -73,9 +72,9 @@ def make_movie(varname,list)
 
     # GGraph
     if defined?(Flag_line)
-      line_draw(gp,list.name[n],figopt)
+      line_draw(gp,list.name[n],hr_in_day,figopt)
     else
-      tone_draw(gp,list.name[n],figopt)
+      tone_draw(gp,list.name[n],hr_in_day,figopt)
     end
     DCL.grcls
     ofilen = list.id+"_"+File.basename(__FILE__,".rb")+"_"+
@@ -103,10 +102,10 @@ def omega_ratio(name)# 名前解析 nameからomega/omega_Eを抽出
   return ratio
 end
 
-def cut_and_mean(gp,hr_in_day)
+def cut_and_mean(gp)
   gp = gp[false,0..6*24*5]
-  gp = gp.cut("lat"=>0)
-#  gp = local_time(gp,hr_in_day)
+  gp = gp.cut("sig"=>Sig) if defined?(Sig)
+  gp = gp.cut("lat"=>0) if gp.axnames.include("sig") or gp.axnames.include("sigm")
   return gp
 end
 
@@ -117,8 +116,14 @@ opt.on("-n VAR","--name=VAR") {|name|
   char = name.split("@")
   VarName = char[-1]
   FileName = char[0] if char.size == 2 }
-opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
+opt.on("--max=max") {|max| Max = max.to_f}
+opt.on("--min=min") {|min| Min = min.to_f}
+opt.on("--nlev=nlevels") {|nlev| Nlev = nlev.to_f}
+opt.on("--clr_max=color_max") {|max| ClrMax = max.to_f}
+opt.on("--cr_min=color_min") {|min| ClrMin = min.to_f}
+opt.on("--sig=sigma") {|sig| Sig = sig.to_f}
 opt.on("--line"){Flag_line = true}
+opt.on("--contour"){Flag_contour = true}
 opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
