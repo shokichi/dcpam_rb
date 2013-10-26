@@ -15,8 +15,10 @@ include NumRu
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR","--name=VAR") {|name| VarName = name}
-opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
 opt.on("--lat=Lat") {|lat| Lat = lat.to_f}
+opt.on("--max=max") {|max| Max = max.to_f}
+opt.on("--min=min") {|min| Min = min.to_f}
+opt.on("--nlev=nlev") {|nlev| Nlev = nlev.to_f}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)
