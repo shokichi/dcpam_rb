@@ -27,16 +27,6 @@ def fig_correlation_anml(var_name,lists,hash={})
 
 end
 
-def correlation_coefficient(x,y)  # 相関係数の計算
-  
-  # 計算速度の確認が必要
-  x_mean = glmean(x)
-  y_mean = glmean(y)
-  xy_S = glmean((x-x_mean)*(y-y_mean))
-  xx_S = glmean((x-x_mean)**2)
-  yy_S = glmean((y-y_mean)**2)
-  return xy_S /(xx_S.sqrt * yy_S.sqrt)
-end
 
 
 

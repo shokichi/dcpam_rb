@@ -200,21 +200,12 @@ module MKfig
   end
 # -------------------------------------------
   def set_figopt
-<<<<<<< HEAD
-    figopt ={}
-    figopt["min"] = Min if defined?(Min) 
-    figopt["max"] = Max if defined?(Max) 
-    figopt["nlev"]= Nlev if defined?(Nlev)
-    figopt["clr_max"]= ClrMax if defined?(ClrMax)
-    figopt["clr_min"]= ClrMin if defined?(ClrMin)
-=======
     figopt = {}
     figopt["max"] = Max if defined?(Max)
     figopt["min"] = Min if defined?(Min)
     figopt["nlev"] = Nlev if defined?(Nlev)
     figopt["clr_max"] = ClrMax if defined?(ClrMax)
     figopt["clr_min"] = ClrMin if defined?(ClrMin)        
->>>>>>> a9aaab809ced9931dda1e436d6a15648a8c80d05
     return figopt
   end
 # -------------------------------------------
