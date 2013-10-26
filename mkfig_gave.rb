@@ -3,24 +3,37 @@
 # Global average
 
 require "numru/ggraph"
-require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
+require 'optparse'
+include MKfig
 include NumRu
-include Math
-include NMath
 
-def gave_list(var_name,list,file)
+#
+opt = OptionParser.new
+opt.on("-r","--rank") {Flag_rank = true}
+opt.on("-n VAR","--name=VAR") {|name| VarName = name}
+opt.on("--max=max") {|max| Max = max.to_f}
+opt.on("--min=min") {|min| Min = min.to_f}
+opt.on("--nlev=nlev") {|nlev| Nlev = nlev.to_f}
+opt.on("--ps") { IWS = 2}
+opt.on("--png") { 
+  DCL::swlset('lwnd',false)
+  IWS = 4
+}
+
+opt.parse!(ARGV)
+
+
+def gave_list(var_name,list)
   datalist = []
   list.dir.lengtheach_index do |n|
     # データの取得
-    begin
-      gp = gpopen(list.dir[n] + var_name + ".nc",var_name).cut("time"=>1080..1440)
-    rescue
-      print "[#{var_name}](#{dir[n]}) is not exist\n"
-      return
-    end
-    gp = gp[false,0,true] if gp.rank == 4
+    gp = gpopen list.dir[n] + varname
+    return if gp.nil?
+    
+    # 大気最下層切り出し
+    gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
+    gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
 
     # 全球平均
     gp = Utiles_spe.glmean(gp) if gp.rank != 1
@@ -33,10 +46,10 @@ def gave_list(var_name,list,file)
   end
 
   # ファイル出力
-  file.print "--- #{gp.long_name} ---\n"
+  Outfile.print "--- #{gp.long_name} ---\n"
   datalist.each do |data|
-    fin.print data, "\t"
-    fin.print data[1]-datalist[list.refnum][1]/datalist[list.refnum][1], "\n"
+    Outfile.print data, "\t"
+    Outfile.print data[1]-datalist[list.refnum][1]/datalist[list.refnum][1], "\n"
   end
 
 end
@@ -90,25 +103,23 @@ if ARGV.index("-net") or ARGV.index("-a") then
   DCL.grcls
 end 
 
-if !ARGV.index("-net") then 
-  file = File.open("#{list.id}_global-ave.dat","w")
-  gave_list('OSRA',list,file)
-  gave_list('OLRA',list,file)
-  gave_list('SurfTemp',list,file)
-  gave_list('Temp',list,file)
-  gave_list('Rain',list,file)
-  gave_list('RainCumulus',list,file)
-  gave_list('RainLsc',list,file)
-  gave_list('PrcWtr',list,file)
-  gave_list('QVap',list,file)
-  gave_list('SSRA',list,file)
-  gave_list('SLRA',list,file)
-  gave_list('EvapA',list,file)
-  gave_list('SensA',list,file)
-  gave_list('RadSUWFLXA',list,file)
-  gave_list('RadSDWFLXA',list,file)
-  gave_list('RadLUWFLXA',list,file)
-  gave_list('RadLDWFLXA',list,file)
+  Outfile = File.open("#{list.id}_global-ave.dat","w")
+  gave_list('OSRA',list)
+  gave_list('OLRA',list)
+  gave_list('SurfTemp',list)
+  gave_list('Temp',list)
+  gave_list('Rain',list)
+  gave_list('RainCumulus',list)
+  gave_list('RainLsc',list)
+  gave_list('PrcWtr',list)
+  gave_list('QVap',list)
+  gave_list('SSRA',list)
+  gave_list('SLRA',list)
+  gave_list('EvapA',list)
+  gave_list('SensA',list)
+  gave_list('RadSUWFLXA',list)
+  gave_list('RadSDWFLXA',list)
+  gave_list('RadLUWFLXA',list)
+  gave_list('RadLDWFLXA',list)
   file.close
   puts "#{list.id}_global-ave.dat created\n"
-end

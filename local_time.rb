@@ -143,8 +143,9 @@ end
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR","--varname=VAR") {|str| VarName = str}
-opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day}
+opt.on("--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_f}
 opt.parse!(ARGV)
+
 list = Utiles_spe::Explist.new(ARGV[0])
 varname = VarName if defined?(VarName)
 HrInDay = 24 if list.id.include?("coriolis")
@@ -187,9 +188,9 @@ var_list =
   "DQVapDtDyn",      
   "DTempDtCumulus",  
   "DTempDtRadL",
+  "DTempDtRadS",
   "DQVapDtLsc",      
-  "DTempDtDryConv",  
-  "DTempDtRadS"
+  "DTempDtDryConv"  
 ]
 
 var_list.each{ |var| local_time_mean(var,list) } 

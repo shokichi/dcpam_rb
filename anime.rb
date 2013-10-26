@@ -16,7 +16,7 @@ def tone_draw(gp,name,hr_in_day,figopt={})
   (gp.axis("time").length/intval).to_i.times do |n| 
     figopt["title"] = gp.name + name
     figopt["keep"] = true if n != 0
-    data = local_time(gp[false,n*intval..n*interval],hr_in_day)
+    data = local_time(gp[false,n*intval..n*intval],hr_in_day)
     GGraph.tone data, true, figopt
   end
 end
@@ -25,7 +25,7 @@ def line_draw(gp,name,hr_in_day,figopt={})
   intval = 6
   gp.axis("time").length/intval.to_i.times do |n| 
     figopt["keep"] = true if n != 0
-    data = local_time(gp[false,n*intval..n*interval],hr_in_day)
+    data = local_time(gp[false,n*intval..n*intval],hr_in_day)
     GGraph.tone data, true, figopt
   end
 end
@@ -105,7 +105,7 @@ end
 def cut_and_mean(gp)
   gp = gp[false,0..6*24*5]
   gp = gp.cut("sig"=>Sig) if defined?(Sig)
-  gp = gp.cut("lat"=>0) if gp.axnames.include("sig") or gp.axnames.include("sigm")
+  gp = gp.cut("lat"=>0) if gp.axnames.include?("sig") or gp.axnames.include?("sigm")
   return gp
 end
 
