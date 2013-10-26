@@ -50,9 +50,10 @@ module Omega
         legend << gpa.legend[n2]
         gp_ary << gp
       }
-      @legend = legend
-      @anomaly = gp_ary
-      self
+      result = self
+      result.legend = legend
+      result.anomaly = gp_ary
+      return result
     end
 
     def plus(gpa)
@@ -67,12 +68,41 @@ module Omega
         legend << gpa.legend[n2]
         gp_ary << gp
       }
-      @legend = legend
-      @anomaly = gp_ary
-      self
+      result = self
+      result.legend = legend
+      result.anomaly = gp_ary
+      return result
     end
         
+    def correlation(gpa)
+      legend = []
+      coef_ary = []
+      @anomaly.each_index{|n|
+        gp1 = @anomaly[n]
+        n2 = gpa.legend.index(@legend[n])
+        next if n2.nil?
+        gp2 = gpa.anomaly[n2]
+        rotaion << rotation_rate(gpa.legend[n2])
+        coef = calc_correlat_coef(gp1,gp2)
+        coef_ary << coef
+      }
+      coef_gp = ary2gp(rotation,coef_ary)
+      coef_gp.axis(0).pos.name = "rotation rate" 
+      coef_gp.name = "correlation"
+      coef_gp.long_name = "correlation coefficient"
+      return coef_gp      
+    end
+
     private
+
+    def calc_correlat_coef(x,y)  # 相関係数の計算 
+      x_mean = glmean(x)
+      y_mean = glmean(y)
+      xy_S = glmean((x-x_mean)*(y-y_mean))
+      xx_S = glmean((x-x_mean)**2)
+      yy_S = glmean((y-y_mean)**2)
+      return xy_S /(xx_S.sqrt * yy_S.sqrt)
+    end
     
     def check_ary_size(ary1,ary2)
       if ary1.length != ary2.length
