@@ -82,11 +82,11 @@ module Omega
         n2 = gpa.legend.index(@legend[n])
         next if n2.nil?
         gp2 = gpa.anomaly[n2]
-        rotaion << rotation_rate(gpa.legend[n2])
+        rotaion << omega_rate(gpa.legend[n2])
         coef = calc_correlat_coef(gp1,gp2)
         coef_ary << coef
       }
-      coef_gp = ary2gp(rotation,coef_ary)
+      coef_gp = array2gp(rotation,coef_ary)
       coef_gp.axis(0).pos.name = "rotation rate" 
       coef_gp.name = "correlation"
       coef_gp.long_name = "correlation coefficient"
