@@ -21,14 +21,14 @@ def fig_correlation_anml(var_name,lists,hash={})
   plus_dc = diurnal.plus(coriolis) # C+D
   del_adc = all.minus(plus_dc)     # A-(C+D)
 
-  coef_D = correlation_coefficient(all.anomaly,diurnal.anomaly)
+  coef_D = correlation_coefficient(all.anomaly,diurnal.anomaly) # .class = GPhys 
   coef_C = correlation_coefficient(all.anomaly,coriolis.anomaly)
-  coef_DC = correlation_coefficient(all.anomaly,del_adc.anomaly)
+  coef_DC = correlation_coefficient(all.anomaly,del_adc.anomaly) 
 
+  GGraph.mark coef_D, true
+  GGraph.mark coef_C, false
+  GGraph.mark coef_DC, false
 end
-
-
-
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
