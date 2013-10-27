@@ -25,7 +25,7 @@ def fig_scat_anml(var_name,lists,hash={})
   scat2(all,plus_dc,lists[:diurnal],{"add"=>"A vs C+D "}.merge(hash))
 end
 
-def scat2(gpa1,gpa2,list,figopt={})
+def scat2(gpa1,gpa2,list,hash={})
   list.name.each_index do |n|
     gpy = gpa1.anomaly[n]
     n2 = gpa2.legend.index(gpa1.legend[n])
