@@ -28,15 +28,17 @@ end
 def scat2(gpa1,gpa2,list,figopt={})
   list.name.each_index do |n|
     gpy = gpa1.anomaly[n]
-    n2 = gp2.legend.index(gpa1.legend[n])
+    n2 = gpa2.legend.index(gpa1.legend[n])
     next if n2.nil?
-    gpx = gp2.anomaly[n2]
+    gpx = gpa2.anomaly[n2]
+
     if hash["add"]
       addtitle = hash["add"]
       hash.delete("add")
     else
       addtitle = ""
     end
+
     GGraph.set_fig('window'=>[nil,nil,nil,nil])
 
     fig_opt = {'title'=>addtitle + gpx.long_name + " " + list.name[n],
