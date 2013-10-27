@@ -14,7 +14,7 @@ include NumRu
 include Math
 
 
-def fig_correlation_anml(var_name,lists,hash={})
+def fig_correlation_anml(var_name,lists)
   all = Omega::Anomaly.new(var_name,lists[:all])
   diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
   coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
@@ -25,13 +25,32 @@ def fig_correlation_anml(var_name,lists,hash={})
   coef_C = correlation_coefficient(all.anomaly,coriolis.anomaly)
   coef_DC = correlation_coefficient(all.anomaly,del_adc.anomaly) 
 
-  GGraph.mark coef_D, true
-  GGraph.mark coef_C, false
-  GGraph.mark coef_DC, false
+  GGraph.mark coef_D, true, "min"=>0, "max"=>1, "title"=>"correlation coefficient"
+  GGraph.mark coef_C, false, "index"=>20
+  GGraph.mark coef_DC, false, "index"=>30
+
+  if defined?(CreateDatFile)
+    # テキストファイルの作成
+    fin = File.open("omega_correlation_clm.dat","w")
+    
+    fin.print "#rotation rate\t"
+    fin.print "D\t"
+    fin.print "C\t"
+    fin.print "DC\n"
+    
+    coef.each_index do |n|
+      fin.print coef_D.axis(0).to_gphys[n].to_f+"\t"
+      fin.print coef_D[n].to_f+"\t"
+      fin.print coef_C[n].to_f+"\t"
+      fin.print coef_X[n].to_f+"\n"
+      fin.close
+  end
+  end
 end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
+opt.on("--dat") {CreateDatFile = true}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)
@@ -58,7 +77,7 @@ lists={
   coriolis: Utiles_spe::Explist.new(c_list)
 }
 
-fig_lonlat_anml("OSRA",lists,"min"=>-250,"max"=>250,"nlev"=>20,"clr_min"=>99,"clr_max"=>13)
+fig_correlation_anml("OSRA",lists)
 
 DCL.grcls
 rename_img_file("omega",__FILE__)
