@@ -21,13 +21,10 @@ def fig_correlation_anml(var_name,lists)
   plus_dc = diurnal.plus(coriolis) # C+D
   del_adc = all.minus(plus_dc)     # A-(C+D)
 
-  coef_D = correlation_coefficient(all.anomaly,diurnal.anomaly) # .class = GPhys 
-  coef_C = correlation_coefficient(all.anomaly,coriolis.anomaly)
-  coef_DC = correlation_coefficient(all.anomaly,del_adc.anomaly) 
+  coef_D = all.correlation(diurnal) # .class = GPhys 
+  coef_C = all.correlation(coriolis)
+  coef_DC = all.correlation(del_adc) 
 
-  GGraph.mark coef_D, true, "min"=>0, "max"=>1, "title"=>"correlation coefficient"
-  GGraph.mark coef_C, false, "index"=>20
-  GGraph.mark coef_DC, false, "index"=>30
 
   if defined?(CreateDatFile)
     # テキストファイルの作成
@@ -38,13 +35,27 @@ def fig_correlation_anml(var_name,lists)
     fin.print "C\t"
     fin.print "DC\n"
     
-    coef.each_index do |n|
-      fin.print coef_D.axis(0).to_gphys[n].to_f+"\t"
-      fin.print coef_D[n].to_f+"\t"
-      fin.print coef_C[n].to_f+"\t"
-      fin.print coef_X[n].to_f+"\n"
-      fin.close
-  end
+    coef_D.val.to_a.each_index do |n|
+      fin.print "#{coef_D.axis(0).to_gphys[n].val}\t"
+      fin.print "#{coef_D[n].val}\t"
+      fin.print "#{coef_C[n].val}\t"
+      fin.print "#{coef_DC[n].val}\n"
+    end
+    fin.close
+  else
+    clrmp = 14  # カラーマップ
+    DCL.sgscmn(clrmp)
+    DCL.gropn(IWS)
+    #DCL.sldiv('Y',2,1)
+    DCL.sgpset('lcntl',true)
+    DCL.sgpset('isub', 96)
+    DCL.uzfact(0.8)
+
+    GGraph.line coef_D, true, "title"=>"correlation coefficient"
+    GGraph.line coef_C, false, "index"=>20
+    GGraph.line coef_DC, false, "index"=>30
+    DCL.grcls
+    rename_img_file("omega_#{var_name}",__FILE__)
   end
 end
 
@@ -60,13 +71,6 @@ opt.parse!(ARGV)
 
 # DCL set
 IWS = 1 if !defined?(IWS)
-clrmp = 14  # カラーマップ
-DCL.sgscmn(clrmp)
-DCL.gropn(IWS)
-#DCL.sldiv('Y',2,1)
-DCL.sgpset('lcntl',true)
-DCL.sgpset('isub', 96)
-DCL.uzfact(0.8)
 
 a_list = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
 d_list = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
@@ -79,5 +83,3 @@ lists={
 
 fig_correlation_anml("OSRA",lists)
 
-DCL.grcls
-rename_img_file("omega",__FILE__)

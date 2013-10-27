@@ -37,12 +37,23 @@ module Omega
       @anomaly = gp_ary
       self
     end
+ 
+    def legend=(ary)
+      @legend = ary
+      self
+    end
+
+    def anomaly=(ary)
+      @anomaly = ary
+      self
+    end
 
     def minus(gpa)
       legend = []
       gp_ary = []
       @anomaly.each_index{|n|
         gp1 = @anomaly[n]
+        next if gp1.nil?
         n2 = gpa.legend.index(@legend[n])
         next if n2.nil?
         gp2 = gpa.anomaly[n2]
@@ -61,6 +72,7 @@ module Omega
       gp_ary = []
       @anomaly.each_index{|n|
         gp1 = @anomaly[n]
+        next if gp1.nil?
         n2 = gpa.legend.index(@legend[n])
         next if n2.nil?
         gp2 = gpa.anomaly[n2]
@@ -75,18 +87,18 @@ module Omega
     end
         
     def correlation(gpa)
-      legend = []
+      rotation = []
       coef_ary = []
       @anomaly.each_index{|n|
         gp1 = @anomaly[n]
         n2 = gpa.legend.index(@legend[n])
         next if n2.nil?
         gp2 = gpa.anomaly[n2]
-        rotaion << omega_rate(gpa.legend[n2])
+        rotation << omega_ratio(gpa.legend[n2])
         coef = calc_correlat_coef(gp1,gp2)
         coef_ary << coef
       }
-      coef_gp = array2gp(rotation,coef_ary)
+      coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
       coef_gp.axis(0).pos.name = "rotation rate" 
       coef_gp.name = "correlation"
       coef_gp.long_name = "correlation coefficient"
@@ -101,10 +113,10 @@ module Omega
       xy_S = glmean((x-x_mean)*(y-y_mean))
       xx_S = glmean((x-x_mean)**2)
       yy_S = glmean((y-y_mean)**2)
-      return xy_S /(xx_S.sqrt * yy_S.sqrt)
+      return xy_S /(xx_S * yy_S).sqrt
     end
     
-    def check_ary_size(ary1,ary2)
+    def check_ary_size(ary1,ary2) # 配列サイズのチェック
       if ary1.length != ary2.length
         print "Array size is not agreement #{gp_ary.length} vs #{name.length}\n"
         return false

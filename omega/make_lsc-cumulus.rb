@@ -34,6 +34,7 @@ end
 
 def create_RainCumulus(dir)
   data_name = "RainCumulus"
+  dir += PRF if defined?(PRF)
   begin
     gp = GPhys::IO.open(dir + 'DQVapDtCumulus.nc','DQVapDtCumulus')
     ps = GPhys::IO.open(dir + 'Ps.nc',"Ps")
@@ -54,7 +55,7 @@ end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
-opt.on("--prefix==STR") {|str| PRF = str}
+opt.on("--prefix=STR") {|str| PRF = str}
 opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])

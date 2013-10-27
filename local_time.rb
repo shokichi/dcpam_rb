@@ -142,7 +142,7 @@ end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
-opt.on("-n VAR","--varname=VAR") {|str| VarName = str}
+opt.on("-n VAR","--name=VAR") {|str| VarName = str}
 opt.on("--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_f}
 opt.parse!(ARGV)
 
