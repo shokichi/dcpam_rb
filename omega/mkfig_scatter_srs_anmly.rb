@@ -42,9 +42,8 @@ def scat2(gpa1,gpa2,list,hash={})
     GGraph.set_fig('window'=>[nil,nil,nil,nil])
 
     fig_opt = {'title'=>addtitle + gpx.long_name + " " + list.name[n],
-        'annotate'=>false,
-        'color_bar'=>true}.merge(hash)
-    GGraph.scatter gpx, gpy,true,figopt
+        'annotate'=>false}.merge(hash)
+    GGraph.scatter gpx, gpy,true,fig_opt
   end
 end
 
