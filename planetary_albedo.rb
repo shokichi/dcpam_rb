@@ -20,12 +20,12 @@ def get_albedo(list)
   albedo = []
   error = []
   list.dir.each_index{ |n| 
-    osr = GPhys::IO.open(list.dir[n] + "OSRA.nc","OSRA")
-    if list.id.include?("diurnal") then    
-      osr = time_range2(osr,list.name[n])
-    else
-      osr = time_range(osr,list.name[n])
-    end
+    osr = gpopen list.dir[n] + "OSRA.nc"
+#    if list.id.include?("diurnal") then    
+#      osr = time_range2(osr,list.name[n])
+#    else
+#      osr = time_range(osr,list.name[n])
+#    end
     alb = 1.0 + Utiles_spe.glmean(osr)/(SolarConst/4) 
     albedo << alb.mean("time").val
     error << std_error(alb.val)
@@ -37,12 +37,12 @@ def get_surftemp(list)
   stemp = []
   error = []
   list.dir.each_index{ |n| 
-    temp = GPhys::IO.open(list.dir[n] + "SurfTemp.nc","SurfTemp")
-    if list.id.include?("diurnal") then    
-      temp = time_range2(temp,list.name[n])
-    else
-      temp = time_range(temp,list.name[n])
-    end
+    temp = gpopen list.dir[n] + "SurfTemp.nc","SurfTemp"
+#    if list.id.include?("diurnal") then    
+#      temp = time_range2(temp,list.name[n])
+#    else
+#      temp = time_range(temp,list.name[n])
+#    end
     st = Utiles_spe.glmean(temp)
     stemp << st.mean("time").val
     error << std_error(st.val)    
@@ -54,15 +54,15 @@ def get_greenhouse(list)
   green = []
   error = []
   list.dir.each_index{ |n| 
-    temp = GPhys::IO.open(list.dir[n] + "SurfTemp.nc","SurfTemp")
-    osr = GPhys::IO.open(list.dir[n] + "OSRA.nc","OSRA")
-    if list.id.include?("diurnal") then    
-      osr = time_range2(osr,list.name[n])
-      temp = time_range2(temp,list.name[n])
-    else
-      osr = time_range(osr,list.name[n])
-      temp = time_range(temp,list.name[n])
-    end
+    temp = gpopen list.dir[n] + "SurfTemp.nc"
+    osr = gpopen list.dir[n] + "OSRA.nc"
+#    if list.id.include?("diurnal") then    
+#      osr = time_range2(osr,list.name[n])
+#      temp = time_range2(temp,list.name[n])
+#    else
+#      osr = time_range(osr,list.name[n])
+#      temp = time_range(temp,list.name[n])
+#    end
     factor= (Utiles_spe.glmean(temp)/
               (SolarConst*
                 (1.0-(1.0 + Utiles_spe.glmean(osr)/(SolarConst/4)))/
@@ -83,26 +83,26 @@ def get_omega(list)
 end
 
 def time_range(gp,name)
-  if gp.axis("time").length == 1441 or 1440
-    result = gp[false,-360..-1]
-  elsif gp.axis("time").pos.units.to_s == "day"
-    gp = Utiles_spe.day2hrs(gp,name)
-    result = gp.cut("time"=>1080*24..1440*24)
-  elsif gp.axis("time").pos.units.to_s == "hrs"
-    result = gp.cut("time"=>1080*24..1440*24)
-  end
+#  if gp.axis("time").length == 1441 or 1440
+#    result = gp[false,-360..-1]
+#  elsif gp.axis("time").pos.units.to_s == "day"
+#    gp = Utiles_spe.day2hrs(gp,name)
+#    result = gp.cut("time"=>1080*24..1440*24)
+#  elsif gp.axis("time").pos.units.to_s == "hrs"
+#    result = gp.cut("time"=>1080*24..1440*24)
+#  end
   return result
 end
 
 def time_range2(gp,name)
-  if gp.axis("time").length == 1441 
-    result = gp[false,-360..-1]
-  elsif gp.axis("time").pos.units.to_s == "day"
-    gp = Utiles_spe.day2hrs(gp,name)
-    result = gp.cut("time"=>1080*24..1440*24)
-  elsif gp.axis("time").pos.units.to_s == "hrs"
-    result = gp.cut("time"=>1080*24..1440*24)
-  end
+#  if gp.axis("time").length == 1441 
+#    result = gp[false,-360..-1]
+#  elsif gp.axis("time").pos.units.to_s == "day"
+#    gp = Utiles_spe.day2hrs(gp,name)
+#    result = gp.cut("time"=>1080*24..1440*24)
+#  elsif gp.axis("time").pos.units.to_s == "hrs"
+#    result = gp.cut("time"=>1080*24..1440*24)
+#  end
   return result
 end
 
@@ -122,11 +122,6 @@ def error_sd(gp)
   return std
 end
 
-opt = OptionParser.new
-opt.on("-a") {type = "a"}
-opt.on("-b") {type = "b"}
-opt.on("-c") {type = "c"}
-opt.parse!(ARGV)
 
 def drawfig(file,chpt="a")
   # DCL open
@@ -303,11 +298,16 @@ def drawclm(file)
  
 end 
 
+opt = OptionParser.new
+opt.on("-a") {type = "a"}
+opt.on("-b") {type = "b"}
+opt.on("-c") {type = "c"}
+opt.parse!(ARGV)
 
 
-file_all = "/home/ishioka/link/all/fig/list/omega_all-1440.list"
-file_coriolis = "/home/ishioka/link/coriolis/fig/list/omega_coriolis-1440.list"
-file_diurnal = "/home/ishioka/link/diurnal/fig/list/omega_diurnal-1440.list"
+file_all = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
+file_coriolis = "/home/ishioka/link/coriolis/fig/list/omega_coriolis_MTlocal.list"
+file_diurnal = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
 
 
 #drawfig([file_all,file_coriolis,file_diurnal],type)
