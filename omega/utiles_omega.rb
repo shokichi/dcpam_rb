@@ -85,11 +85,30 @@ module Omega
       result.anomaly = gp_ary
       return result
     end
+
+    def over(gpa)
+      legend = []
+      gp_ary = []
+      @anomaly.each_index{|n|
+        gp1 = @anomaly[n]
+        next if gp1.nil?
+        n2 = gpa.legend.index(@legend[n])
+        next if n2.nil?
+        gp2 = gpa.anomaly[n2] + 1e-14
+        gp = gp1 / gp2
+        legend << gpa.legend[n2]
+        gp_ary << gp
+      }
+      result = self
+      result.legend = legend
+      result.anomaly = gp_ary
+      return result
+    end
         
     def correlation(gpa)
       rotation = []
       coef_ary = []
-      @anomaly.each_index{|n|
+      @anomaly.each_index do |n|
         gp1 = @anomaly[n]
         n2 = gpa.legend.index(@legend[n])
         next if n2.nil?
@@ -97,7 +116,7 @@ module Omega
         rotation << omega_ratio(gpa.legend[n2])
         coef = calc_correlat_coef(gp1,gp2)
         coef_ary << coef
-      }
+      end
       coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
       coef_gp.axis(0).pos.name = "rotation rate" 
       coef_gp.name = "correlation"

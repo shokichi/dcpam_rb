@@ -16,14 +16,17 @@ include Math
 
 def fig_correlation_anml(var_name,lists)
   all = Omega::Anomaly.new(var_name,lists[:all])
+  all2 = Omega::Anomaly.new(var_name,lists[:all])
   diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
   coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
-  plus_dc = diurnal.plus(coriolis) # C+D
-  del_adc = all.minus(plus_dc)     # A-(C+D)
 
   coef_D = all.correlation(diurnal) # .class = GPhys 
   coef_C = all.correlation(coriolis)
-  coef_DC = all.correlation(del_adc) 
+#  plus_dc = diurnal.plus(coriolis) # C+D
+#  del_adc = all.minus(plus_dc)     # A-(C+D)
+
+  coef_DC = all2.correlation(all.minus(diurnal.plus(coriolis))) 
+
 
 
   if defined?(CreateDatFile)
