@@ -27,6 +27,10 @@ def fig_scat_anml(var_name,lists,hash={})
 end
 
 def scat2(gpa1,gpa2,list,hash={})
+#  max = gpa1.anomaly[0].max
+#  min = gpa1.anomaly[0].min
+#  GGraph.set_fig('window'=>[min,max,min,max])
+
   list.name.each_index do |n|
     gpy = gpa1.anomaly[n]
     n2 = gpa2.legend.index(gpa1.legend[n])
@@ -40,7 +44,6 @@ def scat2(gpa1,gpa2,list,hash={})
       addtitle = ""
     end
 
-    GGraph.set_fig('window'=>[nil,nil,nil,nil])
     fig_opt = {'title'=>addtitle + gpx.long_name + " " + list.name[n],
         'annotate'=>false}.merge(hash)
     GGraph.scatter gpx, gpy,true,fig_opt

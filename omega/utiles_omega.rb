@@ -61,7 +61,7 @@ module Omega
         legend << gpa.legend[n2]
         gp_ary << gp
       }
-      result = self
+      result = self.clone
       result.legend = legend
       result.anomaly = gp_ary
       return result
@@ -80,7 +80,7 @@ module Omega
         legend << gpa.legend[n2]
         gp_ary << gp
       }
-      result = self
+      result = self.clone
       result.legend = legend
       result.anomaly = gp_ary
       return result
@@ -99,11 +99,12 @@ module Omega
         legend << gpa.legend[n2]
         gp_ary << gp
       }
-      result = self
+      result = self.clone
       result.legend = legend
       result.anomaly = gp_ary
       return result
     end
+
         
     def correlation(gpa)
       rotation = []
@@ -121,6 +122,22 @@ module Omega
       coef_gp.axis(0).pos.name = "rotation rate" 
       coef_gp.name = "correlation"
       coef_gp.long_name = "correlation coefficient"
+      return coef_gp      
+    end
+
+    def glmean
+      rotation = []
+      gl_ary = []
+      @anomaly.each_index do |n|
+        gp1 = @anomaly[n]
+        rotation << omega_ratio(self.legend[n])
+        coef = Utiles_spe.glmean(gp1).to_f
+        gl_ary << coef
+      end
+      coef_gp = Utiles_spe.array2gp(rotation,gl_ary)
+      coef_gp.axis(0).pos.name = "rotation rate" 
+      coef_gp.name = @anomaly[0].name 
+      coef_gp.long_name = @anomaly[0].long_name
       return coef_gp      
     end
 
