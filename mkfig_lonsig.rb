@@ -41,14 +41,15 @@ DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 
 if !varname.nil? then
-  Figopt ||= {}
-  lonsig("varname",list,Figopt)
+  figopt = set_figopt
+  lonsig("varname",list,figopt)
 else
   lonsig("Temp",list,"min"=>120,"max"=>320,"nlev"=>20)
   lonsig("DQVapDtCond",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)
   lonsig("DQVapDtCumulus",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)  
   lonsig("DQVapDtLsc",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>40)
   lonsig("RH",list,"min"=>0,"max"=>100)
+  lonsig("QVap",list,"min"=>0,"max"=>2e-2,"nlev"=>20)
   lonsig("H2OLiq",list,"min"=>0,"max"=>1e-4)
   lonsig("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
   lonsig("V",list,"min"=>-10,"max"=>10)      
