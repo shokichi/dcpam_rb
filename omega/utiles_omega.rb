@@ -53,12 +53,10 @@ module Omega
       gp_ary = []
       @anomaly.each_index{|n|
         gp1 = @anomaly[n]
-        next if gp1.nil?
-        n2 = gpa.legend.index(@legend[n])
-        next if n2.nil?
-        gp2 = gpa.anomaly[n2]
+        gp2 = search_gp(gpa,@legend[n])
+        next if gp1.nil? or gp2.nil?
         gp = gp1 - gp2 
-        legend << gpa.legend[n2]
+        legend << @legend[n]
         gp_ary << gp
       }
       result = self.clone
@@ -72,12 +70,10 @@ module Omega
       gp_ary = []
       @anomaly.each_index{|n|
         gp1 = @anomaly[n]
-        next if gp1.nil?
-        n2 = gpa.legend.index(@legend[n])
-        next if n2.nil?
-        gp2 = gpa.anomaly[n2]
+        gp2 = search_gp(gpa,@legend[n])
+        next if gp1.nil? or gp2.nil?
         gp = gp1 + gp2
-        legend << gpa.legend[n2]
+        legend << @legend[n]
         gp_ary << gp
       }
       result = self.clone
@@ -91,12 +87,11 @@ module Omega
       gp_ary = []
       @anomaly.each_index{|n|
         gp1 = @anomaly[n]
-        next if gp1.nil?
-        n2 = gpa.legend.index(@legend[n])
-        next if n2.nil?
+        gp2 = search_gp(gpa,@legend[n])
+        next if gp1.nil? or gp2.nil?
         gp2 = gpa.anomaly[n2] + 1e-14
         gp = gp1 / gp2
-        legend << gpa.legend[n2]
+        legend << @legend[n]
         gp_ary << gp
       }
       result = self.clone
@@ -111,11 +106,10 @@ module Omega
       coef_ary = []
       @anomaly.each_index do |n|
         gp1 = @anomaly[n]
-        n2 = gpa.legend.index(@legend[n])
-        next if n2.nil?
-        gp2 = gpa.anomaly[n2]
-        rotation << omega_ratio(gpa.legend[n2])
+        gp2 = search_gp(gpa,@legend[n])
+        next if gp1.nil? or gp2.nil?
         coef = calc_correlat_coef(gp1,gp2)
+        rotation << omega_ratio(gpa.legend[n2])
         coef_ary << coef
       end
       coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
@@ -124,6 +118,25 @@ module Omega
       coef_gp.long_name = "correlation coefficient"
       return coef_gp      
     end
+
+    def reg_sloop(gpa)
+      rotation = []
+      sloop_ary = []
+      @anomaly.each_index do |n|
+        gp1 = @anomaly[n]
+        gp2 = search_gp(gpa,@legend[n])
+        next if gp1.nil? or gp2.nil?
+        sloop = calc_regression_sloop(gp2,gp1)
+        rotation << omega_ratio(@legend[n])
+        sloop_ary << sloop
+      end
+      sloop_gp = Utiles_spe.array2gp(rotation,sloop_ary)
+      sloop_gp.axis(0).pos.name = "rotation rate" 
+      sloop_gp.name = "correlation"
+      sloop_gp.long_name = "correlation coefficient"
+      return sloop_gp      
+    end
+
 
     def glmean
       rotation = []
@@ -143,6 +156,12 @@ module Omega
 
     private
 
+    def search_gp(gpa,legend)
+      n = gpa.legend.index(legend)
+      return nil if n.nil?
+      return gpa.anomaly[n]
+    end
+
     def calc_correlat_coef(x,y)  # 相関係数の計算 
       x_mean = glmean(x)
       y_mean = glmean(y)
@@ -151,7 +170,15 @@ module Omega
       yy_S = glmean((y-y_mean)**2)
       return xy_S /(xx_S * yy_S).sqrt
     end
-    
+
+    def calc_regression_sloop(x,y)  # 回帰直線の傾き
+      x_mean = glmean(x)
+      y_mean = glmean(y)
+      xy_S = glmean((x-x_mean)*(y-y_mean))
+      xx_S = glmean((x-x_mean)**2)
+      return xy_S /xx_S      
+    end
+        
     def check_ary_size(ary1,ary2) # 配列サイズのチェック
       if ary1.length != ary2.length
         print "Array size is not agreement #{gp_ary.length} vs #{name.length}\n"
