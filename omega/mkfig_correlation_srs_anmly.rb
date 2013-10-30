@@ -16,18 +16,15 @@ include Math
 
 def fig_correlation_anml(var_name,lists)
   all = Omega::Anomaly.new(var_name,lists[:all])
-  all2 = Omega::Anomaly.new(var_name,lists[:all])
   diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
   coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
+  plus_dc = diurnal.plus(coriolis) # C+D
+  del_adc = all.minus(plus_dc)     # A-(C+D)
 
   coef_D = all.correlation(diurnal) # .class = GPhys 
   coef_C = all.correlation(coriolis)
-#  plus_dc = diurnal.plus(coriolis) # C+D
-#  del_adc = all.minus(plus_dc)     # A-(C+D)
-
-  coef_DC = all2.correlation(all.minus(diurnal.plus(coriolis))) 
-
-
+  coef_DC = all.correlation(plus_dc)
+  coef_ADC = all.correlation(del_adc) 
 
   if defined?(CreateDatFile)
     # テキストファイルの作成
@@ -36,13 +33,15 @@ def fig_correlation_anml(var_name,lists)
     fin.print "#rotation rate\t"
     fin.print "D\t"
     fin.print "C\t"
-    fin.print "DC\n"
+    fin.print "DC\t"
+    fin.print "A-DC\n"
     
     coef_D.val.to_a.each_index do |n|
       fin.print "#{coef_D.axis(0).to_gphys[n].val}\t"
       fin.print "#{coef_D[n].val}\t"
       fin.print "#{coef_C[n].val}\t"
-      fin.print "#{coef_DC[n].val}\n"
+      fin.print "#{coef_DC[n].val}\t"
+      fin.print "#{coef_ADC[n].val}\n"
     end
     fin.close
   else

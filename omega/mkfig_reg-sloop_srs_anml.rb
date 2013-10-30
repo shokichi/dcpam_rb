@@ -18,27 +18,30 @@ def fig_reg_sloop_anml(var_name,lists)
   all = Omega::Anomaly.new(var_name,lists[:all])
   diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
   coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
+  plus_dc = diurnal.plus(coriolis) # C+D
+  del_adc = all.minus(plus_dc)     # A-(C+D)
 
   sloop_D = all.correlation(diurnal) # .class = GPhys 
   sloop_C = all.correlation(coriolis)
-  plus_dc = diurnal.plus(coriolis) # C+D
-  del_adc = all.minus(plus_dc)     # A-(C+D)
-  sloop_DC = all.correlation(del_adc) 
+  sloop_DC = all.correlation(plus_dc) 
+  sloop_ADC = all.correlation(del_adc) 
 
   if defined?(CreateDatFile)
     # テキストファイルの作成
-    fin = File.open("omega_correlation_clm.dat","w")
+    fin = File.open("omega_reg-sloop_clm.dat","w")
     
     fin.print "#rotation rate\t"
     fin.print "D\t"
     fin.print "C\t"
-    fin.print "DC\n"
+    fin.print "DC\t"
+    fin.print "A-DC\n"
     
     sloop_D.val.to_a.each_index do |n|
       fin.print "#{sloop_D.axis(0).to_gphys[n].val}\t"
       fin.print "#{sloop_D[n].val}\t"
       fin.print "#{sloop_C[n].val}\t"
-      fin.print "#{sloop_DC[n].val}\n"
+      fin.print "#{sloop_DC[n].val}\t"
+      fin.print "#{sloop_ADC[n].val}\n"
     end
     fin.close
   else

@@ -89,7 +89,7 @@ module Omega
         gp1 = @anomaly[n]
         gp2 = search_gp(gpa,@legend[n])
         next if gp1.nil? or gp2.nil?
-        gp2 = gpa.anomaly[n2] + 1e-14
+        gp2 = @anomaly[n] + 1e-14
         gp = gp1 / gp2
         legend << @legend[n]
         gp_ary << gp
@@ -109,7 +109,7 @@ module Omega
         gp2 = search_gp(gpa,@legend[n])
         next if gp1.nil? or gp2.nil?
         coef = calc_correlat_coef(gp1,gp2)
-        rotation << omega_ratio(gpa.legend[n2])
+        rotation << omega_ratio(@legend[n])
         coef_ary << coef
       end
       coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
@@ -138,21 +138,21 @@ module Omega
     end
 
 
-    def glmean
-      rotation = []
-      gl_ary = []
-      @anomaly.each_index do |n|
-        gp1 = @anomaly[n]
-        rotation << omega_ratio(self.legend[n])
-        coef = Utiles_spe.glmean(gp1).to_f
-        gl_ary << coef
-      end
-      coef_gp = Utiles_spe.array2gp(rotation,gl_ary)
-      coef_gp.axis(0).pos.name = "rotation rate" 
-      coef_gp.name = @anomaly[0].name 
-      coef_gp.long_name = @anomaly[0].long_name
-      return coef_gp      
-    end
+#     def glmean
+#       rotation = []
+#       gl_ary = []
+#       @anomaly.each_index do |n|
+#         gp1 = @anomaly[n]
+#         rotation << omega_ratio(self.legend[n])
+#         coef = Utiles_spe.glmean(gp1).to_f
+#         gl_ary << coef
+#       end
+#       coef_gp = Utiles_spe.array2gp(rotation,gl_ary)
+#       coef_gp.axis(0).pos.name = "rotation rate" 
+#       coef_gp.name = @anomaly[0].name 
+#       coef_gp.long_name = @anomaly[0].long_name
+#       return coef_gp      
+#     end
 
     private
 
