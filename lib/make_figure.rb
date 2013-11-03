@@ -176,7 +176,7 @@ module MKfig
          
       # 横軸最大値
       gp = fix_axis_local(gp)
-  
+      xmax = 360
       # 描画
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[0,xmax,nil,nil])

@@ -21,10 +21,10 @@ def fig_reg_sloop_anml(var_name,lists)
   plus_dc = diurnal.plus(coriolis) # C+D
   del_adc = all.minus(plus_dc)     # A-(C+D)
 
-  sloop_D = all.correlation(diurnal) # .class = GPhys 
-  sloop_C = all.correlation(coriolis)
-  sloop_DC = all.correlation(plus_dc) 
-  sloop_ADC = all.correlation(del_adc) 
+  sloop_D = all.reg_sloop(diurnal) # .class = GPhys 
+  sloop_C = all.reg_sloop(coriolis)
+  sloop_DC = all.reg_sloop(plus_dc) 
+  sloop_ADC = all.reg_sloop(del_adc) 
 
   if defined?(CreateDatFile)
     # テキストファイルの作成

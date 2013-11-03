@@ -58,10 +58,12 @@ lists={
 }
 
 fig_lonsig_anml("Temp",lists,"min"=>-40,"max"=>40,"nlev"=>20)
+fig_lonsig_anml("QVap",lists,"min"=>-2e-2,"max"=>2e-2,"nlev"=>20)
 fig_lonsig_anml("RH",lists,"min"=>-50,"max"=>50)
 fig_lonsig_anml("H2OLiq",lists,"min"=>-1e-4,"max"=>1e-4)
 fig_lonsig_anml("U",lists,"min"=>-30,"max"=>30,"nlev"=>30)      
 fig_lonsig_anml("V",lists,"min"=>-10,"max"=>10)      
+#fig_lonsig_anml("SigDot",lists,"min"=>-10,"max"=>10)      
 
 DCL.grcls
 rename_img_file("omega",__FILE__)

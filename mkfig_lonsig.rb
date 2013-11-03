@@ -42,7 +42,7 @@ DCL.uzfact(1.0)
 
 if !varname.nil? then
   figopt = set_figopt
-  lonsig("varname",list,figopt)
+  lonsig(varname,list,figopt)
 else
   lonsig("Temp",list,"min"=>120,"max"=>320,"nlev"=>20)
   lonsig("DQVapDtCond",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)

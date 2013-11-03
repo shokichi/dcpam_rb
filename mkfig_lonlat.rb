@@ -15,16 +15,12 @@ include NumRu
 #
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
-opt.on("-n VAR","--name=VAR") {|name| VarName = name}
-opt.on("--max=max") {|max| Max = max.to_f}
-opt.on("--min=min") {|min| Min = min.to_f}
-<<<<<<< HEAD
-opt.on("--nlev=nlev") {|nlev| Nlev = nlev.to_i}
-opt.on("--clr_max=clr_max") {|clrmax| ClrMax = clrmax.to_i}
-opt.on("--clr_min=clr_min") {|clrmin| ClrMin = clrmin.to_i}
-=======
-opt.on("--nlev=nlev") {|nlev| Nlev = nlev.to_f}
->>>>>>> a9aaab809ced9931dda1e436d6a15648a8c80d05
+opt.on("-n VAR","--name=VARNAME") {|name| VarName = name}
+opt.on("--max=MAX") {|max| Max = max.to_f}
+opt.on("--min=MIN") {|min| Min = min.to_f}
+opt.on("--nlev=nlevel") {|nlev| Nlev = nlev.to_i}
+opt.on("--clr_max=color_max") {|clrmax| ClrMax = clrmax.to_i}
+opt.on("--clr_min=color_min") {|clrmin| ClrMin = clrmin.to_i}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)

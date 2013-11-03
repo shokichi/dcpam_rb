@@ -348,7 +348,7 @@ module Omega
       gp = Omega.fix_axis_local(gp)
       
       # 描画
-      GGraph.set_axes("xlabelint"=>60,'xside'=>'bt', 'yside'=>'lr')
+      GGraph.set_axes("xlabelint"=>90,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[0,360,nil,nil])
       
       fig_opt = {'title'=>addtitle + gp.long_name + " " + list.name[n],
