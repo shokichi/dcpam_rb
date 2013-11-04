@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# -*- coding: undecided -*-
 #
 #
 
@@ -11,10 +12,17 @@ include Math
 
 filename = ARGV[0]
 def cp_ncf(file)
-  ofile = NetCDF.open("conv_"+file)
+  # GPhys 使用はできない
+  # RubyNetCDFを使用すべし
+  ofile = NetCDF.create("conv_"+file)
   GPhys::IO.var_names(file).each{ |varname|
+    escape =["lon","lat","time","timestr",
+             "sig","sigm","flag_rst","datetime",
+             "lon_weight","lat_weight","sig_weight"]
+    next if escape.include?(varname)
+    p varname
     gp = gpopen(file,varname)
-    ofile.write(gp)
+    GPhys::IO.write(ofile,gp)
   }
   ofile.close  
 end
@@ -23,7 +31,7 @@ def search_rankfile(file)
   return Dir.glob(file.sub(".nc","_rank*.nc"))
 end
 
-rankfils = search_rankfile(filename)
+rankfiles = search_rankfile(filename)
 rankfiles.each do |file| 
   cp_ncf(file)  
 end
