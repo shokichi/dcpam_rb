@@ -4,124 +4,13 @@
 # 
 require "numru/ggraph"
 require 'numru/gphys'
-require "constants.rb"
+require "./utiles_spe.rb"
 include NumRu
 include Math
 include NMath
-include ConstShk
+include Utiles_spe
 
-module Utiles_spe   
-  class Explist
-    # 実験ファイルリストの読み込み
-    def initialize(file_list)
-      @@filelist = file_list
-      if @@filelist != nil then
-        read_file
-        get_exp_id
-      else
-        default
-      end
-    end
-    
-    def create(name,dir)
-      @name = [name]
-      @dir = [dir]
-      self  
-    end
-
-    def refnum
-      result = @name.index(@ref)
-      return result
-    end
-    
-    private
-    
-    def read_file
-      begin
-        fin = File.open(@@filelist,"r")
-      rescue
-        default
-        error_msg
-        return
-      end
-      parse_file(fin)
-    end
-    
-    def parse_file(fin)
-      name = []
-      dir = []
-      fin.each do |char|
-        next if char[0..0] == "#" # コメントアウト機能
-        char = char.chop.split(",")
-        if char[0][0..0] == "!" # 基準実験
-          char[0] = char[0].sub("!","")
-          @ref = char[0]
-        end    
-        name << char[0]
-        dir << char[1]
-        dir << char[1].split(":") if char[1].include?(":") == true 
-      end
-      fin.close
-      @dir = dir 
-      @name = name
-    end
-    
-    def get_exp_id
-      @id = @@filelist.split("/")[-1].sub(".list","")
-    end
-    
-    def default
-      @name = [""]
-      @dir  = ["./"]
-      @id  = "none"
-      @ref = @name
-    end
-    
-    def error_msg
-      print "[#{@@filelist}] No Such file \n"
-      print "[#{@dir[0]}] Set current directory \n"
-    end
-    
-    public  
-    attr_reader :dir, :name, :id, :ref
-  end
-  
-  #----------------------
-  def str_add(str,add_str)
-    result = []
-    if str.class == Array then
-      str.each_index do |n|
-        if add_str.class == Array then
-          result[n] = str[n] + add_str[n]
-        else
-          result[n] = str[n] + add_str
-        end
-      end
-    elsif add_str.class == Array and str.class != Array then
-      add_str.each_index do |n|
-        result[n] = str + add_str[n]
-      end
-    else
-      result = str + add_str
-    end
-    return result
-  end 
-
-  #-----------------------
-  def self.array2gp(x_var,y_var)  # 簡単GPhysオブジェクトの作成
-    x_val = NArray.to_na(x_var) # x軸
-    y_val = NArray.to_na(y_var) # y軸
-    
-    x_coord = Axis.new
-    x_coord.name = "x_coord"
-    x_coord.set_pos(VArray.new(x_val))
-    grid = Grid.new(x_coord)
-    gp = GPhys.new(grid,VArray.new(y_val))
-    gp.name = "y_coord"
-    return gp
-  end
-
-  #---------------------- 
+module Analy
   def glmean(gp)  # 全球平均
     cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
     fact = cos_phi / cos_phi.mean
@@ -213,7 +102,6 @@ module Utiles_spe
     gp.units = Units["mm.hr-1"]
     return gp
   end
-  
   
   #-----------------------
   def calc_press(ps,sig)
@@ -345,10 +233,10 @@ module Utiles_spe
   # -------------------------------------------
   def self.calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
     # file check
-    if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
-      print "Argument is not [QVap,Temp,Ps]"
-      return
-    end
+  if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
+    print "Argument is not [QVap,Temp,Ps]"
+    return
+  end
     
     # 座標データの取得
     lon = gtemp.axis('lon')
@@ -377,7 +265,11 @@ module Utiles_spe
       |qvap,ps,temp| 
       # 気圧の計算
       press = calc_press(ps,sig)    
-            
+      
+      #    for k in 0..sig.length-1
+      #      press[false,k,true] = ps * sig[k].val
+      #    end
+      
       # 飽和水蒸気圧の計算
       es = es0 * ( latentheat / gasrwet * ( 1/273.0 - 1/temp ) ).exp
       # 水蒸気圧の計算
@@ -471,20 +363,6 @@ module Utiles_spe
   end
   
   # ---------------------------------------
-  def mirror_lat(gp) # 折り返し(緯度)
-    lat = gp.axis("lat").to_gphys
-    if lat.max != -lat.min then
-      print "Can not mirror [#{gp.name}]\n"
-      return gp
-    end
-    mirror = gp.cut("lat"=>0..90).copy
-    mirror[false] = 0
-    (0..lat.length/2-1).each{|n|
-      mirror.cut("lat"=>lat.val).val = 
-      (gp.cut("lat"=>lat.val).val + gp.cut("lat"=>-lat.val).val)/2}  
-    return mirror
-  end
-  # ---------------------------------------
   def omega_ratio(name)# 名前解析 nameからomega/omega_Eを抽出
     if name[0..4] == "omega" or name[0..4] == "Omega" then
       var = name.sub("omega","").sub("Omega","")
@@ -530,40 +408,4 @@ module Utiles_spe
     }
     result
   end
-  #---------------------------------------
-  def gpopen(file,name=nil)
-    name = File.basename(file,".nc").gsub("_","").sub("MT","").sub("local","") if name.nil?
-    if defined?(Flag_rank) and Flag_rank == true then
-      gp = gpopen_rank(file,name)
-      gp = gpopen_nomal(file,name) if gp.nil?
-    else
-      gp = gpopen_nomal(file,name)
-      gp = gpopen_rank(file,name) if gp.nil?
-    end
-    print "[#{name}](#{File.dirname(file)}) is not exist \n" if gp.nil?
-    return gp
-  end
-  # ---------------------------------------
-  def gpopen_nomal(file,name)
-    begin
-      gp = GPhys::IO.open file,name
-    rescue
-      gp = nil
-    end
-    return gp
-  end
-  # ---------------------------------------
-  def gpopen_rank(file,name)
-    begin
-      if !file.include?(name)
-        gp = GPhys::IO.open(file.sub(".nc","_rank000000.nc"), name)
-      else
-        gp = GPhys::IO.open(Dir.glob(file.sub(".nc","_rank*.nc")), name)     #<=読み込みに時間がかかりすぎる
-      end
-    rescue
-      gp = nil
-    end 
-    return gp
-  end
-  # ---------------------------------------
 end
