@@ -7,6 +7,7 @@
 require 'numru/ggraph'
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require "optparse"
 include Utiles_spe
 include NumRu
 include Math
@@ -15,17 +16,10 @@ include Math
 def calc_msf(dir)
   data_name = 'Strm'
   # file open
-  begin
-    gv = gpopen(dir + "V.nc", "V")
-    gps = gpopen(dir + "Ps.nc", "Ps")
-    sigm = gpopen(dir + "V.nc", "sigm")
-  rescue
-    print "[#{data_name}](#{dir}) is not created \n"
-    return
-  end
-  # 定数設定
-  grav = UNumeric[9.8, "m.s-2"]
-  a = UNumeric[6400000.0, "m"]
+  gv = gpopen(dir + "V.nc", "V")
+  gps = gpopen(dir + "Ps.nc", "Ps")
+  sigm = gpopen(dir + "V.nc", "sigm")
+  return if gv.nil? or gps.nil? or sigm.nil?
 
   # 座標データの取得
   lon = gv.axis("lon")
@@ -46,7 +40,7 @@ def calc_msf(dir)
     psi[false] = 0
 
     cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
-    alph = vwind * cos_phi * ps * a * PI * 2 / grav 
+    alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
     kmax = 15
     for i in 0..kmax
       k = kmax-i
@@ -60,24 +54,68 @@ def calc_msf(dir)
 end
 
 def calc_msf_rank(dir)
-  rank = ["rank000006.nc","rank000004.nc","rank000002.nc","rank000000.nc",
-          "rank000001.nc","rank000003.nc","rank000005.nc","rank000007.nc"]
-  rank.each do |footer|
-    begin 
-      ps = gpopen(dir +"Ps"+"_"+footer,"Ps")
-      qvap = gpopen(dir +"QVap"+"_"+footer,"QVap")
-      temp = gpopen(dir +"Temp"+ "_"+footer,"Temp")
-    rescue 
-      print "[RH](#{dir}) is not created\n"
-      next
+  ps = gpopen(dir +"Ps"+"_"+footer,"Ps")
+  qvap = gpopen(dir +"QVap"+"_"+footer,"QVap")
+  temp = gpopen(dir +"Temp"+ "_"+footer,"Temp")
+  data_name = 'Strm'
+  # file open
+  gv = gpopen(dir + "V.nc", "V")
+  gps = gpopen(dir + "Ps.nc", "Ps")
+  sigm = gpopen(dir + "V.nc", "sigm")
+  return if gv.nil? or gps.nil? or sigm.nil?
+
+  # 座標データの取得
+  lon = gv.axis("lon")
+  lat = gv.axis("lat")
+  
+  psi_va = VArray.new(
+             NArray.sfloat(
+                lon.length,lat.length,sigm.length,time.length))
+
+  ave = 0
+  GPhys.each_along_dims([gv,gps],'time') do 
+    |vwind,ps|  
+    #
+    time = vwind.axis("time")    
+
+    grid = Grid.new(lon,lat,sigm.axis("sigm"),time)
+    psi = GPhys.new(grid,psi_va)
+    psi.units = 'kg.s-1'
+    psi.long_name = 'mass stream function'
+    psi.name = data_name
+    psi[false] = 0
+
+    cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
+    alph = vwind * cos_phi * ps * PRound * PI * 2 / Grav 
+    kmax = 15
+    for i in 0..kmax
+      k = kmax-i
+      psi[false,k,true] = psi[false,k+1,true] +
+                alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
     end
-    Utiles_spe.calc_msf(qvap,temp,ps)
+
+    # local time mean
+    ave += local_time(psi)
   end
+
+  ave = ave[false,0] if ave.axnames.include?("time")
+  ave = ave/vwind.axis("time").pos.length
+  ofile = NetCDF.create(dir+"MTlocal_"+data_name+".nc")
+  GPhys::IO.write(ofile, ave)
+  ofile.close
+  print "[#{data_name}](#{dir}) is created \n"
 end
 
 
+opt = OptionParser.new
+opt.on("-r","--rank") {Flag_rank = true}
+opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
+opt.parse!(ARGV)
 list = Utiles_spe::Explist.new(ARGV[0])
-if ARGV.index("-rank") then
+HrInDay = 24 if list.id.include?("coriolis")
+
+
+if defined? Flag_rank
   list.dir.each{ |dir| calc_msf_rank(dir) }
 else
   list.dir.each{|dir| calc_msf(dir)}
