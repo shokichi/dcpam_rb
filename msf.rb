@@ -54,29 +54,26 @@ def calc_msf(dir)
 end
 
 def calc_msf_rank(dir)
-  ps = gpopen(dir +"Ps"+"_"+footer,"Ps")
-  qvap = gpopen(dir +"QVap"+"_"+footer,"QVap")
-  temp = gpopen(dir +"Temp"+ "_"+footer,"Temp")
   data_name = 'Strm'
   # file open
-  gv = gpopen(dir + "V.nc", "V")
-  gps = gpopen(dir + "Ps.nc", "Ps")
-  sigm = gpopen(dir + "V.nc", "sigm")
+  gv = gpopen dir + "V.nc"
+  gps = gpopen dir + "Ps.nc"
+  sigm = gpopen dir + "V.nc", "sigm"
   return if gv.nil? or gps.nil? or sigm.nil?
 
   # 座標データの取得
   lon = gv.axis("lon")
   lat = gv.axis("lat")
   
-  psi_va = VArray.new(
-             NArray.sfloat(
-                lon.length,lat.length,sigm.length,time.length))
 
   ave = 0
   GPhys.each_along_dims([gv,gps],'time') do 
     |vwind,ps|  
     #
     time = vwind.axis("time")    
+    psi_va = VArray.new(
+               NArray.sfloat(
+                 lon.length,lat.length,sigm.length,time.length))
 
     grid = Grid.new(lon,lat,sigm.axis("sigm"),time)
     psi = GPhys.new(grid,psi_va)
@@ -86,7 +83,7 @@ def calc_msf_rank(dir)
     psi[false] = 0
 
     cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
-    alph = vwind * cos_phi * ps * PRound * PI * 2 / Grav 
+    alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
     kmax = 15
     for i in 0..kmax
       k = kmax-i
