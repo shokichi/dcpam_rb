@@ -53,54 +53,61 @@ def calc_msf(dir)
   print "[#{data_name}](#{dir}) is created \n"
 end
 
-def calc_msf_rank(dir)
+def calc_msf_rank(list)
   data_name = 'Strm'
-  # file open
-  gv = gpopen dir + "V.nc"
-  gps = gpopen dir + "Ps.nc"
-  sigm = gpopen dir + "V.nc", "sigm"
-  return if gv.nil? or gps.nil? or sigm.nil?
+  list.dir.each_index do |n|
+    # file open
+    gv = gpopen list.dir[n] + "V.nc"
+    gps = gpopen list.dir[n] + "Ps.nc"
+    sigm = gpopen list.dir[n] + "V.nc", "sigm"
+    return if gv.nil? or gps.nil? or sigm.nil?
 
-  # 座標データの取得
-  lon = gv.axis("lon")
-  lat = gv.axis("lat")
-  
-
-  ave = 0
-  GPhys.each_along_dims([gv,gps],'time') do 
-    |vwind,ps|  
-    #
-    time = vwind.axis("time")    
-    psi_va = VArray.new(
-               NArray.sfloat(
-                 lon.length,lat.length,sigm.length,time.length))
-
-    grid = Grid.new(lon,lat,sigm.axis("sigm"),time)
-    psi = GPhys.new(grid,psi_va)
-    psi.units = 'kg.s-1'
-    psi.long_name = 'mass stream function'
-    psi.name = data_name
-    psi[false] = 0
-
-    cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
-    alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
-    kmax = 15
-    for i in 0..kmax
-      k = kmax-i
-      psi[false,k,true] = psi[false,k+1,true] +
-                alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
+    # 座標データの取得
+    lon = gv.axis("lon")
+    lat = gv.axis("lat")
+    
+    if defined? HrInDay
+      hr_in_day = HrInDay
+    else
+      hr_in_day = 24 / omega_ratio(list.name[n])
     end
+    
+    ave = 0
+    GPhys.each_along_dims([gv,gps],'time') do 
+      |vwind,ps|  
+      #
+      time = vwind.axis("time")    
+      psi_va = VArray.new(
+                 NArray.sfloat(
+                   lon.length,lat.length,sigm.length,time.length))
 
-    # local time mean
-    ave += local_time(psi)
+      grid = Grid.new(lon,lat,sigm.axis("sigm"),time)
+      psi = GPhys.new(grid,psi_va)
+      psi.units = 'kg.s-1'
+      psi.long_name = 'mass stream function'
+      psi.name = data_name
+      psi[false] = 0
+      
+      cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
+      alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
+      kmax = 15
+      for i in 0..kmax
+        k = kmax-i
+        psi[false,k,true] = psi[false,k+1,true] +
+          alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
+      end
+      
+      # local time mean
+      ave += local_time(psi,hr_in_day)
+    end
+    
+    ave = ave[false,0] if ave.axnames.include?("time")
+    ave = ave/vwind.axis("time").pos.length
+    ofile = NetCDF.create(list.dir[n]+"MTlocal_"+data_name+".nc")
+    GPhys::IO.write(ofile, ave)
+    ofile.close
+    print "[#{data_name}](#{list.dir[n]}) is created \n"
   end
-
-  ave = ave[false,0] if ave.axnames.include?("time")
-  ave = ave/vwind.axis("time").pos.length
-  ofile = NetCDF.create(dir+"MTlocal_"+data_name+".nc")
-  GPhys::IO.write(ofile, ave)
-  ofile.close
-  print "[#{data_name}](#{dir}) is created \n"
 end
 
 
@@ -113,7 +120,7 @@ HrInDay = 24 if list.id.include?("coriolis")
 
 
 if defined? Flag_rank
-  list.dir.each{ |dir| calc_msf_rank(dir) }
+  calc_msf_rank(list)
 else
   list.dir.each{|dir| calc_msf(dir)}
 end
