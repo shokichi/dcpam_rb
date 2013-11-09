@@ -231,7 +231,7 @@ module Analy
     
   end
   #----------------------------------------- 
-  def self.calc_msf(gv,gps,sigm)  # 質量流線関数の計算
+  def self.calc_msf_save(gv,gps,sigm)  # 質量流線関数の計算
     # file open
     if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
       print "Argument is not [QVap,Temp,Ps]"
@@ -269,7 +269,6 @@ module Analy
     ofile.close
     print "[#{data_name}](#{dir}) is created\n"
   end
-  
   # -------------------------------------------
   def self.calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
     # file check

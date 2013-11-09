@@ -4,13 +4,23 @@
 # 
 require "numru/ggraph"
 require 'numru/gphys'
-require "constants.rb"
+#require "constants.rb"
 include NumRu
 include Math
 include NMath
-include ConstShk
+#include ConstShk
 
 module Utiles_spe   
+  SolarConst = UNumeric[1366.0, "W.m-2"]
+  Grav    = UNumeric[9.8, "m.s-2"]       # 重力加速度
+  RPlanet = UNumeric[6371000.0, "m"]     # 惑星半径
+  RefPrs  = UNumeric[100000, "Pa"]       # 基準気圧
+  LatentHeat = UNumeric[2.5e+6,"J.kg-1"] # 凝結の潜熱
+  WtWet   = UNumeric[1000, "kg.m-3"]     # 水の密度
+  MolWtWet = UNumeric[18.01528e-3, "kg.mol-1"] # 水蒸気の平均分子量
+  MolWtDry = UNumeric[28.964e-3,"kg.mol-1"]    # 乾燥大気の平均分子量
+  GasRUniv = UNumeric[8.3144621,"J.K-1.mol-1"] # 気体定数
+
   class Explist
     # 実験ファイルリストの読み込み
     def initialize(file_list)
@@ -466,7 +476,7 @@ module Utiles_spe
       # lon -> localtime 変換
       gp_local.axis("lon").set_pos(local)
       return gp_local 
-    }  
+    } 
     return gp_local_converted
   end
   
