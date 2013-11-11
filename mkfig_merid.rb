@@ -14,6 +14,11 @@ include NumRu
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR","--name=VAR") {|name| VarName = name}
+opt.on("--max=MAX") {|max| Max = max.to_f}
+opt.on("--min=MIN") {|min| Min = min.to_f}
+opt.on("--nlev=nlevel") {|nlev| Nlev = nlev.to_i}
+opt.on("--clr_max=color_max") {|clrmax| ClrMax = clrmax.to_i}
+opt.on("--clr_min=color_min") {|clrmin| ClrMin = clrmin.to_i}
 opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
@@ -39,8 +44,8 @@ GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
 if !varname.nil? then
-  Figopt ||= {}
-  merid_fig(varname,list,Figopt)
+  figopt = set_figopt
+  merid_fig(varname,list,figopt)
 else
   merid_fig('Temp',list,"min"=>120,"max"=>320,"interval"=>10)
   merid_fig('U',list,"min"=>-80,"max"=>80,"interval"=>5)
