@@ -163,19 +163,37 @@ module Omega
     end
 
     def calc_correlat_coef(x,y)  # 相関係数の計算 
-      x_mean = glmean(x)
-      y_mean = glmean(y)
-      xy_S = glmean((x-x_mean)*(y-y_mean))
-      xx_S = glmean((x-x_mean)**2)
-      yy_S = glmean((y-y_mean)**2)
+#      x_mean = glmean(x)
+#      y_mean = glmean(y)
+#      xy_S = glmean((x-x_mean)*(y-y_mean))
+#      xx_S = glmean((x-x_mean)**2)
+#      yy_S = glmean((y-y_mean)**2)
+      cos_phi = ( y.axis("lat").to_gphys * (PI/180.0) ).cos
+      fact = cos_phi / cos_phi.mean
+      x = x*fact
+      y = y*fact
+      x_mean = x.mean(0,1)
+      y_mean = y.mean(0,1)
+      xy_S = ((x-x_mean)*(y-y_mean)).mean(0,1)
+      xx_S = ((x-x_mean)**2).mean(0,1)
+      yy_S = ((y-y_mean)**2).mean(0,1)
+
       return xy_S /(xx_S * yy_S).sqrt
     end
 
-    def calc_regression_sloop(x,y)  # 回帰直線の傾き
-      x_mean = glmean(x)
-      y_mean = glmean(y)
-      xy_S = glmean((x-x_mean)*(y-y_mean))
-      xx_S = glmean((x-x_mean)**2)
+    def calc_regression_sloop(y,x)  # 回帰直線の傾き
+      cos_phi = ( y.axis("lat").to_gphys * (PI/180.0) ).cos
+      fact = cos_phi / cos_phi.mean
+#      x_mean = glmean(x)
+#      y_mean = glmean(y)
+#      xy_S = glmean((x-x_mean)*(y-y_mean))
+#      xx_S = glmean((x-x_mean)**2)
+      x = x*fact
+      y = y*fact
+      x_mean = x.mean(0,1)
+      y_mean = y.mean(0,1)
+      xy_S = ((x-x_mean)*(y-y_mean)).mean(0,1)
+      xx_S = ((x-x_mean)**2).mean(0,1)
       return xy_S /xx_S      
     end
         

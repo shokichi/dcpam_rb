@@ -102,7 +102,7 @@ def calc_msf_rank(list)
     end
     
     ave = ave[false,0] if ave.axnames.include?("time")
-    ave = ave/vwind.axis("time").pos.length
+    ave = ave/gv.axis("time").pos.length
     ofile = NetCDF.create(list.dir[n]+"MTlocal_"+data_name+".nc")
     GPhys::IO.write(ofile, ave)
     ofile.close
