@@ -38,11 +38,6 @@ def scat2(gpa1,gpa2,list,hash={})
     next if n2.nil?
     gpy = gpa2.anomaly[n2]
 
-    cos_phi = ( gpx.axis("lat").to_gphys * (PI/180.0) ).cos
-    fact = cos_phi / cos_phi.mean
-    gpx = gpx*fact
-    gpy = gpy*fact
-
     if hash["add"]
       addtitle = hash["add"]
       hash.delete("add")
