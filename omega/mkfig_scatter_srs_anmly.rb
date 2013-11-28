@@ -18,11 +18,12 @@ def fig_scat_anml(var_name,lists,hash={})
   all2 = Omega::Anomaly.new(var_name,lists[:all])
   diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
   coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
+  plus_dc = diurnal.plus(coriolis)
+  del_adc = all2.minus(plus_dc)
+
   scat2(all,diurnal,lists[:diurnal],{"add"=>"A vs D "}.merge(hash))
   scat2(all,coriolis,lists[:coriolis],{"add"=>"A vs C "}.merge(hash))
-  plus_dc = diurnal.plus(coriolis)
   scat2(all,plus_dc,lists[:diurnal],{"add"=>"A vs C+D "}.merge(hash))
-  del_adc = all2.minus(plus_dc)
   scat2(all,del_adc,lists[:all],{"add"=>"A vs A-D-C "}.merge(hash))
 end
 
