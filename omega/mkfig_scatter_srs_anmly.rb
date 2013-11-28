@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 # 実験シリーズの偏差
+# Scatter Plot
 # A-C, A-D
 #
 
@@ -21,11 +22,39 @@ def fig_scat_anml(var_name,lists,hash={})
   plus_dc = diurnal.plus(coriolis)
   del_adc = all2.minus(plus_dc)
 
-  scat2(all,diurnal,lists[:diurnal],{"add"=>"A vs D "}.merge(hash))
-  scat2(all,coriolis,lists[:coriolis],{"add"=>"A vs C "}.merge(hash))
-  scat2(all,plus_dc,lists[:diurnal],{"add"=>"A vs C+D "}.merge(hash))
-  scat2(all,del_adc,lists[:all],{"add"=>"A vs A-D-C "}.merge(hash))
+  scat(all,diurnal,coriolis,lists[:all],hash)
+#  scat2(all,diurnal,lists[:diurnal],{"add"=>"A vs D "}.merge(hash))
+#  scat2(all,coriolis,lists[:coriolis],{"add"=>"A vs C "}.merge(hash))
+#  scat2(all,plus_dc,lists[:diurnal],{"add"=>"A vs C+D "}.merge(hash))
+#  scat2(all,del_adc,lists[:all],{"add"=>"A vs A-D-C "}.merge(hash))
 end
+
+
+def scat(all,diurnal,coriolis,list,hash={})
+
+  GGraph.set_fig('window'=>[-200,300,-200,300])
+
+  list.name.each_index do |n|
+    gpx = all.anomaly[n]
+    n2 = diurnal.legend.index(all.legend[n])
+    n3 = coriolis.legend.index(all.legend[n])
+    next if n2.nil? or n3.nil?
+    gpy1 = diurnal.anomaly[n2]
+    gpy2 = coriolis.anomaly[n3]
+
+    if hash["add"]
+      addtitle = hash["add"]
+      hash.delete("add")
+    else
+      addtitle = ""
+    end
+    fig_opt = {'title'=>addtitle + gpx.long_name + " " + list.name[n],
+        'annotate'=>false}.merge(hash)
+    GGraph.scatter -gpx, -gpy1,true,{"index"=20}.merge(fig_opt)
+    GGraph.scatter -gpx, -gpy2,false,{"index"=40}.merge(fig_opt)
+  end
+end
+
 
 def scat2(gpa1,gpa2,list,hash={})
     min = gpa1.anomaly[0].min
