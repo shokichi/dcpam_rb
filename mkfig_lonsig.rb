@@ -53,6 +53,7 @@ else
   lonsig("H2OLiq",list,"min"=>0,"max"=>1e-4)
   lonsig("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
   lonsig("V",list,"min"=>-10,"max"=>10)      
+  lonsig("SigDot",list,"min"=>-2e-6,"max"=>2e-6)
 end
 
 DCL.grcls

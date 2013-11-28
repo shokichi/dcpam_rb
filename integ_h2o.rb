@@ -12,6 +12,7 @@ include NumRu
 include Math
 
 def intg_h2o(dir)
+  dir += PRF if defined?(PRF)
   h2o = gpopen dir+"H2OLiq.nc"
   ps = gpopen dir+"Ps.nc"
   sig_weight = gpopen dir+"H2OLiq.nc", "sig_weight"
@@ -33,6 +34,7 @@ end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
+opt.on("--prefix=STR") {|str| PRF = str}
 opt.parse!(ARGV)
 
 Utiles_spe::Explist.new(ARGV[0]).dir.each{

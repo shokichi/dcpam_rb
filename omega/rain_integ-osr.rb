@@ -11,32 +11,33 @@ include Utiles_spe
 include NumRu
 include Math
 
-def intg_lon(gp)
-  intg = osr.copy
+def intg_lon(gp,omega_ratio)
+  intg = gp.copy
   (gp.axis(0).length-1).times do |n|
-    intg[n+1,false] = intg[n,false] + osr[n+1,false]
+    intg[n+1,false] = intg[n,false] + gp[n+1,false] / omega_ratio
   end
   return intg
 end
 
-def rain_osr(dir)
-  rain = gpopen dir + "Rain.nc"
+def rain_osr(dir,name)
+  rain = gpopen dir + "RainCumulus.nc"
   osr = gpopen dir + "OSRA.nc"
   lat = 0
   lat = Lat if defined? Lat
-  intg = intg_lon(osr).cut("lat"=>lat).val.to_a
+  omega = Utiles_spe.omega_ratio(name)
+  intg = intg_lon(-osr,omega).cut("lat"=>lat).val.to_a
   result = Utiles_spe.array2gp(intg,rain.cut("lat"=>lat).val.to_a)
   result.name = rain.name
   result.long_name = rain.long_name
   return result
 end
 
-def fig_rain_intosr(list,figopt={})
+def fig_rain_intosr(list,hash={})
   lc = 23
   vx = 0.82
   vy = 0.8
   list.dir.each_index do |n|
-    gp = rain_osr(dir[n])
+    gp = rain_osr(list.dir[n],list.name[n])
 
     # 描画
     vy = vy - 0.025
@@ -86,9 +87,10 @@ DCL.gropn(IWS)
 DCL.sgpset('lcntl',true)
 DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
+GGraph.set_fig('window'=>[0,40000,nil,nil])
 
 figopt = set_figopt
 fig_rain_intosr(list,figopt)
 
 DCL.grcls
-rename_img_file("omega",__FILE__)
+rename_img_file("omega_",__FILE__)
