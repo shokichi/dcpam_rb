@@ -50,8 +50,8 @@ def scat(all,diurnal,coriolis,list,hash={})
     end
     fig_opt = {'title'=>addtitle + gpx.long_name + " " + list.name[n],
         'annotate'=>false}.merge(hash)
-    GGraph.scatter -gpx, -gpy1,true,{"index"=20}.merge(fig_opt)
-    GGraph.scatter -gpx, -gpy2,false,{"index"=40}.merge(fig_opt)
+    GGraph.scatter -gpx, -gpy1,true,{"index"=>20}.merge(fig_opt)
+    GGraph.scatter -gpx, -gpy2,false,{"index"=>40}.merge(fig_opt)
   end
 end
 
