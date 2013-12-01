@@ -206,17 +206,17 @@ module MKfig
     figopt["nlev"] = Nlev if defined?(Nlev)
     figopt["clr_max"] = ClrMax if defined?(ClrMax)
     figopt["clr_min"] = ClrMin if defined?(ClrMin)        
+    figopt = parse_Figopt(figopt)
     return figopt
   end
 # -------------------------------------------
-  def parse_figopt(figopt)
+  def parse_Figopt(figopt)
     return figopt if !defined? Figopt
-
     if Figopt.class == Array
       result = []
       Figopt.each{|hash| result = hash.merge(figopt)}
     else
-     result = Figopt.merge(figopt)
+      result = Figopt.merge(figopt)
     return result
   end
 # -------------------------------------------
