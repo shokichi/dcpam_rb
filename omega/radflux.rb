@@ -13,49 +13,45 @@ include Math
 
 def heart_flux(dir)
   # file open
-  gsw = gpopen(dir + "OSRA.nc", "OSRA")
-  glw = gpopen(dir + "OLRA.nc", "OLRA")
+  osr = gpopen dir + "OSRA.nc"
+  olr = gpopen dir + "OLRA.nc"
 
-  gsw = gsw.mean("lon") if gsw.axnames.include?("lon")
-  glw = glw.mean("lon") if gsw.axnames.include?("lon")  
+  osr = cut_and_mean(osr)
+  olr = cut_and_mean(olr)
 
-  gsw = gsw.mean("time") if gsw.axnames.include?("time")
-  glw = glw.mean("time") if gsw.axnames.include?("time")  
+  result = calc_heat_flux(osr,olr)  
+  return result 
+end
 
-  round = UNumeric[6371000, "m"]
-#  lat = lat.sin
-#  cos_phi = lat.cos
-#  lat = lat * round
-  
+def calc_heat_flux()
   lat = gsw.axis('lat').to_gphys
 #  time = gsw.axis('time')
 
+  # 半整数レベルの緯度を求める
   r_lat = VArray.new(NArray.sfloat(lat.length - 1))
   for i in 0..lat.length - 2
     r_lat[i] = (lat[i].val + lat[i+1].val)/2
   end
   r_lat.name = 'lat'
-# データを(lat[j]+lat[j+1])/2上に置く
+  # データを(lat[j]+lat[j+1])/2上に置く
   rlat = Axis.new
   rlat.set_pos(r_lat)
   flux_na = NArray.sfloat(r_lat.length)
   flux = GPhys.new(Grid.new(rlat),VArray.new(flux_na))   
-
   r_lat = r_lat * PI / 180
 
-  alph = -(gsw + glw ) * 2.0 * PI * round * round  
-  #北半球
+
+  alph = -(gsw + glw ) * 2.0 * PI * PRound * PRound  
+
+  # 赤道から極に向かって積分する
+  # 北半球
   i = lat.length/2
-  p flux
-  p alph
 
   flux[i] = alph[i].val * sin(r_lat[i].val)  
   for i in lat.length/2+1..lat.length-2
     flux[i] = flux[i-1].val + alph[i].val * \
               (sin(r_lat[i].val) - sin(r_lat[i-1].val))
   end
-#  i = lat.length-2
-#  flux[i] = flux[i-1].val + alph[i].val * (1 - sin(r_lat[i].val))  
 
   # 南半球
   i = lat.length/2-2
@@ -65,20 +61,16 @@ def heart_flux(dir)
     flux[i] = flux[i+1].val + alph[i+1].val * \
               (sin(r_lat[i].val) - sin(r_lat[i+1].val))  
   end
-=begin
-  i = 0
-  flux[i] = alph[i].val * ( sin(r_lat[i].val) + 1 ) 
-  for i in 1..lat.length/2-2
-#    i = lat.length/2-3 - i
-    flux[i] = flux[i-1].val - alph[i].val * \
-              (-sin(r_lat[i].val) + sin(r_lat[i-1].val))  
-  end
-  i = lat.length/2-2
-#  flux[i] = flux[i-1] - alph[i].val * sin(r_lat[i-1].val)
-=end
   flux.long_name = 'flux'
   flux.units = 'W'
+
   return flux
+end
+
+def cut_and_mean(gp)
+  gp = gp.mean("time") if gp.axnames.include?("time")
+  gp = gp.mean("lon") if gp.axnames.include?("lon")
+  return gp 
 end
 
 
@@ -110,3 +102,16 @@ list.dir.each{|dir| data << heart_flux(dir)}
 Omega.lat_fig2(data,list)
 DCL.grcls
 rename_img_file(list,__FILE__)
+
+=begin
+# 南極から積分する場合
+  i = 0
+  flux[i] = alph[i].val * ( sin(r_lat[i].val) + 1 ) 
+  for i in 1..lat.length/2-2
+#    i = lat.length/2-3 - i
+    flux[i] = flux[i-1].val - alph[i].val * \
+              (-sin(r_lat[i].val) + sin(r_lat[i-1].val))  
+  end
+  i = lat.length/2-2
+#  flux[i] = flux[i-1] - alph[i].val * sin(r_lat[i-1].val)
+=end
