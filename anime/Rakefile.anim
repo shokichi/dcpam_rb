@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+# 動画作成用Rakefile
+#
+#
+#
+
+#######################################################
+# 設定
+ListFile = ""
+VarName = ["DQVapDtCumulus","H2OLiq"]
+Figopt = [{"min"=>-5e-7,"max"=>5e-7,"nlev"=>40,"color_bar"=>true},
+          {"min"}]
+Cut = {}
+Skip = nil
+
+FigType = "tone"
+
+Flag_local = true
+
+Dt = 1.75                       # コマ送り時間
+FileName = "Tmp"                # 変数名
+
+Utiles = "/home/ishioka/ruby/dcpam_rb/lib/utiles_spe.rb" 
+WorkDir = "movie"               # 作業ディレクトリ
+
+
+#######################################################
+# 実行
+require Utiles
+require "~/ruby/dcpam/anime.rb"
+list = Utiles_spe::Explist.new(ListFile)
+
+task default: [:dir, :anime, :gif, :movie, :clean]
+
+
+task :dir do
+  Dir::mkdir(WorkDir) if !Dir::entries("./").include?(WorkDir)    
+end
+
+task :anime do
+  make_movie varname,list
+  sh "mv dcl_*.png #{WorkDir}/"
+end
+
+task :gif do
+  sh "mogrify -format gif #{WorkDir}/*.png"
+end
+
+task :movie do
+  sh "convert -delay #{dt} #{WorkDir}/dcl_*.gif #{WorkDir}/#{FileName}.gif"
+end
+
+task :clean do 
+  sh "rm #{WorkDir}/dcl_*.gif #{WorkDir}/dcl_*.png"
+end
+
