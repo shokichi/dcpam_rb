@@ -209,6 +209,17 @@ module MKfig
     return figopt
   end
 # -------------------------------------------
+  def parse_figopt(figopt)
+    return figopt if !defined? Figopt
+
+    if Figopt.class == Array
+      result = []
+      Figopt.each{|hash| result = hash.merge(figopt)}
+    else
+     result = Figopt.merge(figopt)
+    return result
+  end
+# -------------------------------------------
   def rename_img_file(id,scrfile) 
     id = id.id if id.class == Explist
     img_lg = id+File.basename(scrfile,".rb").sub("mkfig","")
