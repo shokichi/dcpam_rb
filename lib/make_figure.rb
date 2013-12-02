@@ -187,9 +187,9 @@ module MKfig
     end
   end
 # -------------------------------------------
-  def lontime(varname,list,figopt)
+  def lontime(varname,list,hash={})
     list.dir.each_index do |n|
-      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
+      gp = gpopen list.dir[n] + varname + ".nc"
       next if gp.nil?
       # Use time:30 days, Intervel: 1/24 hours
   
@@ -198,6 +198,17 @@ module MKfig
 
       # 鉛直切り出し
       gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
+
+      if defined? HrInDay 
+        hr_in_day = HrInDay
+      else
+        hr_in_day = 24/omega_ratio(list.name[n])
+      end
+
+      # 緯度切り出し
+      lat = 0
+      lat = Lat if defined?(Lat)
+      gp = gp.cut("lat"=>lat)
 
       # 時間切り出し
       time = gp.axis("time").pos
@@ -215,17 +226,12 @@ module MKfig
       # 時間軸の単位を[day]に揃える
       time = time/hr_in_day   if time.units.to_s == "hrs"
       time = time/hr_in_day/60 if time.units.to_s == "min"
-      gp.set_pos(time)
+      gp.axis("time").set_pos(time)
 
       # 1/24日毎のデータ切り出し
       skip = 1.0/24    # [day]
       gp = skip_time(gp,skip)
 
-      # 緯度切り出し
-      lat = 0
-      lat = Lat if defined?(Lat)
-      gp = gp.cut("lat"=>lat)
-         
       # 横軸最大値
 #      gp = fix_axis_local(gp)
       xmax = 360

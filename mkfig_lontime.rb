@@ -14,6 +14,7 @@ include NumRu
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-n VAR","--name=VAR") {|name| VarName = name}
+opt.on("-h Num","--hr_in_day=Num") {|hrs| HrInDay = hrs.to_f}
 opt.on("--lat=Lat") {|lat| Lat = lat.to_f}
 opt.on("--max=max") {|max| Max = max.to_f}
 opt.on("--min=min") {|min| Min = min.to_f}
@@ -43,7 +44,7 @@ if !varname.nil? then
   figopt = set_figopt
   lontime(varname,list,figopt)
 else
-  lontime("Rain",list,figopt)
+  lontime("Rain",list,"nlev"=>20)
 end
 
 DCL.grcls

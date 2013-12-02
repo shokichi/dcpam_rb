@@ -513,21 +513,44 @@ module Utiles_spe
     return ratio
   end
   # ---------------------------------------
-  def day2hrs(gp,name)
-    hour_in_day = 24 / omega_ratio(name)
-    time =  gp.axis("time").pos * hour_in_day
+  def day2min(gp,hr_in_day)
+    time =  gp.axis("time").pos * hr_in_day * 60
+    time.units = "min"
     gp.axis("time").set_pos(time)  
+    return gp
+  end
+  #----------------------------------------
+  def hrs2min(gp,hr_in_day)
+    time =  gp.axis("time").pos * 60
+    time.units = "min"
+    gp.axis("time").set_pos(time)
+    return gp
+  end
+  # ---------------------------------------
+  def day2hrs(gp,hr_in_day)
+    time =  gp.axis("time").pos * hr_in_day
+    time.units = "hrs"
+    gp.axis("time").set_pos(time)  
+    return gp
+  end
+  #----------------------------------------
+  def min2hrs(gp,hr_in_day)
+    time =  gp.axis("time").pos / 60
+    time.units = "hrs"
+    gp.axis("time").set_pos(time)
     return gp
   end
   #----------------------------------------
   def hrs2day(gp,hr_in_day)
     time =  gp.axis("time").pos / hr_in_day
+    time.units = "day"
     gp.axis("time").set_pos(time)  
     return gp
   end
   #----------------------------------------
   def min2day(gp,hr_in_day)
     time =  gp.axis("time").pos / hr_in_day / 60
+    time.units = "day"
     gp.axis("time").set_pos(time)
     return gp
   end
@@ -545,7 +568,7 @@ module Utiles_spe
     time = gp.axis("time").to_gphys.val
     gp_ary = []
     time.length.times do |t|
-      gp_ary << gp.cut("time"=>time[0]+skip*t)
+      gp_ary << gp.cut_rank_conserving("time"=>time[0]+skip*t)
     end
     result = GPhys.join(gp_ary)
     return result
