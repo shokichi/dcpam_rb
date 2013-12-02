@@ -129,8 +129,7 @@ module MKfig
         DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
       end 
-    end
-      
+    end      
   end
 
 # -----------------------------------------------
@@ -217,6 +216,7 @@ module MKfig
       Figopt.each{|hash| result = hash.merge(figopt)}
     else
       result = Figopt.merge(figopt)
+    end
     return result
   end
 # -------------------------------------------
