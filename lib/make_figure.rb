@@ -160,7 +160,7 @@ module MKfig
     end
   end
 #---------------------------------------------
-  def lonsig(var_name,list,hash={}) # 赤道断面
+  def lonsig(var_name,list,hash={}) # 経度断面
     list.dir.each_index do |n|
       gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
       next if gp.nil?
@@ -184,6 +184,60 @@ module MKfig
                  'annotate'=>false,
                  'color_bar'=>true}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
+    end
+  end
+# -------------------------------------------
+  def lontime(varname,list,figopt)
+    list.dir.each_index do |n|
+      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
+      next if gp.nil?
+      # Use time:30 days, Intervel: 1/24 hours
+  
+      # 時間軸確認
+      return if !gp.axnames.include?("time")
+
+      # 鉛直切り出し
+      gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
+
+      # 時間切り出し
+      time = gp.axis("time").pos
+      range = 30  # [day]
+      strtime = time[0].val
+      if time.units.to_s == "hrs"
+        endtime = strtime + range*hr_in_day
+      elsif time.units.to_s == "min"
+        endtime = strtime + range*hr_in_day*60
+      else
+        endtime = strtime + range
+      end
+      gp.cut("time"=>strtime..endtime)
+
+      # 時間軸の単位を[day]に揃える
+      time = time/hr_in_day   if time.units.to_s == "hrs"
+      time = time/hr_in_day/60 if time.units.to_s == "min"
+      gp.set_pos(time)
+
+      # 1/24日毎のデータ切り出し
+      skip = 1.0/24    # [day]
+      gp = skip_time(gp,skip)
+
+      # 緯度切り出し
+      lat = 0
+      lat = Lat if defined?(Lat)
+      gp = gp.cut("lat"=>lat)
+         
+      # 横軸最大値
+#      gp = fix_axis_local(gp)
+      xmax = 360
+
+      # 描画
+      GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+      GGraph.set_fig('window'=>[0,xmax,nil,nil])
+  
+      fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+                 'annotate'=>false,
+                 'color_bar'=>true}.merge(hash)
+      GGraph.tone gp ,true, fig_opt
     end
   end
 # -------------------------------------------
