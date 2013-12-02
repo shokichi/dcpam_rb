@@ -541,6 +541,16 @@ module Utiles_spe
     result
   end
   #---------------------------------------
+  def skip_time(gp,skip)
+    time = gp.axis("time").to_gphys.val
+    gp_ary = []
+    time.length.times do |t|
+      gp_ary << gp.cut("time"=>time[0]+skip*t)
+    end
+    result = GPhys.join(gp_ary)
+    return result
+  end
+  #---------------------------------------
   def gpopen(file,name=nil)
     name = File.basename(file,".nc").gsub("_","").sub("MT","").sub("local","") if name.nil?
     if defined?(Flag_rank) and Flag_rank == true then
