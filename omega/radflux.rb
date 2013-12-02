@@ -23,7 +23,7 @@ def heart_flux(dir)
   return result 
 end
 
-def calc_heat_flux()
+def calc_heat_flux(gsw,glw)
   lat = gsw.axis('lat').to_gphys
 #  time = gsw.axis('time')
 
@@ -41,7 +41,7 @@ def calc_heat_flux()
   r_lat = r_lat * PI / 180
 
 
-  alph = -(gsw + glw ) * 2.0 * PI * PRound * PRound  
+  alph = -(gsw + glw ) * 2.0 * PI * RPlanet * RPlanet  
 
   # 赤道から極に向かって積分する
   # 北半球
