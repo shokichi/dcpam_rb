@@ -25,7 +25,7 @@ module Utiles_spe
     # 実験ファイルリストの読み込み
     def initialize(file_list)
       @@filelist = file_list
-      if @@filelist != nil then
+      if !file_list.nil? then
         read_file
         get_exp_id
       else

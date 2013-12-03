@@ -4,14 +4,14 @@
 # make animation
 #
 require "numru/ggraph"
-require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
+require File.expand_path(File.dirname(__FILE__)+"/../lib/make_figure.rb")
 require 'optparse'
 include MKfig
 include NumRu
 
-module MKanim
+#module MKanim
   def tone_draw(gp_ary,name,hr_in_day,figopt={})
-    intval = Skip
+    intval = Skip.to_f
     
     (gp_ary[0].axis("time").length/intval).to_i.times do |n| 
       
@@ -40,8 +40,7 @@ module MKanim
 
   def contour_draw(gp)
   end
-
-end
+#end
 
 def make_movie(varname,list)
   # DCL
@@ -51,14 +50,17 @@ def make_movie(varname,list)
 
   figopt = set_figopt
   gp_ary = []
-
+  varname = [varname] if varname.class != Array 
   list.dir.each_index do |n|
-    gp_ary << gpopen list.dir[n] + varname+".nc"
+    varname.each{ |var| gp_ary << gpopen( list.dir[n]+var+".nc")}
     next if gp_ary.include? nil
 
-    hr_in_day = 24 / omega_ratio(list.name[n])
-    hr_in_day = 24 if list.id.include?("coriolis")
-
+    if defined? HrInDay
+      hr_in_day =HrInDay
+    else
+      hr_in_day = 24 / omega_ratio(list.name[n])
+      hr_in_day = 24 if list.id.include?("coriolis")
+    end
     # DCL
     DCL.gropn(4)
     DCL.sgpset('lcntl',false)
@@ -75,18 +77,18 @@ def make_movie(varname,list)
     # 描画
       
     if FigType == "line"
-      line_draw(gp,list.name[n],hr_in_day,figopt)
+      MKanim.line_draw(gp_ary,list.name[n],hr_in_day,figopt)
     elsif FigType == "contour"
-      contour_draw(gp,list.name[n],hr_in_day,figopt)
+      MKanim.contour_draw(gp_ary,list.name[n],hr_in_day,figopt)
     else 
-      tone_draw(gp,list.name[n],hr_in_day,figopt)
+      tone_draw(gp_ary,list.name[n],hr_in_day,figopt)
     end
     
     DCL.grcls
     
     ofilen = list.id+"_"+File.basename(__FILE__,".rb")+"_"+
-                                          list.name[n]+"_"+varname
-    print "#{varnames}(#{list.dir[n]})::#{__FILE__} is created\n"
+                                          list.name[n]+"_"+varname.join("_")
+    print "#{varname}(#{list.dir[n]})::#{__FILE__} is created\n"
   end
 end
 
@@ -106,6 +108,7 @@ opt.on("-n VAR","--name=VAR") {|name|
   VarName = char[-1]
   FileName = char[0] if char.size == 2 }
 opt.on("--local") {Flag_local = true}
+opt.on("-h Num","--hr_in_day==Num") {|hrs| HrInDay = hrs.to_f}
 opt.on("--max=max") {|max| Max = max.to_f}
 opt.on("--min=min") {|min| Min = min.to_f}
 opt.on("--nlev=nlevels") {|nlev| Nlev = nlev.to_f}
@@ -121,5 +124,5 @@ opt.parse!(ARGV)
 #varname = "Rain"
 #varname = VarName if defined?(VarName)
 
-make_movie(Varnames,list)
+#make_movie(VarName,list)
 
