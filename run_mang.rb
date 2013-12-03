@@ -23,7 +23,7 @@ end
 loop{
   if !`ps -A | grep #{cmd}`.include?(cmd)  then
     `nohup ./run.sh &`
-    print "Start run.sh [#{Time.now}]"
+    print "Start run.sh [#{Time.now}]\n"
     break
   end
   sleep wait*60
