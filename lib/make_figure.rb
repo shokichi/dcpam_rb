@@ -273,7 +273,7 @@ module MKfig
     return figopt if !defined? Figopt
     if Figopt.class == Array
       result = []
-      Figopt.each{|hash| result = hash.merge(figopt)}
+      Figopt.each{|hash| result << hash.merge(figopt)}
     else
       result = Figopt.merge(figopt)
     end

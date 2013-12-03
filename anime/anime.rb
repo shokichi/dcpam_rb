@@ -9,22 +9,23 @@ require 'optparse'
 include MKfig
 include NumRu
 
-#module MKanim
+module MKanim
   def tone_draw(gp_ary,name,hr_in_day,figopt={})
-    intval = Skip.to_f
-    
-    (gp_ary[0].axis("time").length/intval).to_i.times do |n| 
-      
+    intval = 6*3
+    intval = Skip.to_f if defined? Skip and !Skip.nil?
+
+    (gp_ary[0].axis("time").length/intval).to_i.times do |n|       
       gp_ary.each_index do |n|
         if defined? Cut and !Cut.nil?
           gp = gp_ary[n].cut(Cut)
         else
           gp = gp_ary[n]
         end
-        figopt[n]["title"] = gp.name
-        figopt[n]["keep"] = true if n != 0
+        opt = {}
+        opt["title"] = gp.name
+        opt["keep"] = true if n != 0
         data = local_time(gp[false,n*intval..n*intval],hr_in_day)
-        GGraph.tone data, true, figopt[n]
+        GGraph.tone data, true, figopt[n].merge(opt)
       end
     end
   end
@@ -40,7 +41,7 @@ include NumRu
 
   def contour_draw(gp)
   end
-#end
+end
 
 def make_movie(varname,list)
   # DCL
@@ -52,6 +53,7 @@ def make_movie(varname,list)
   gp_ary = []
   varname = [varname] if varname.class != Array 
   list.dir.each_index do |n|
+
     varname.each{ |var| gp_ary << gpopen( list.dir[n]+var+".nc")}
     next if gp_ary.include? nil
 
@@ -61,6 +63,7 @@ def make_movie(varname,list)
       hr_in_day = 24 / omega_ratio(list.name[n])
       hr_in_day = 24 if list.id.include?("coriolis")
     end
+
     # DCL
     DCL.gropn(4)
     DCL.sgpset('lcntl',false)
