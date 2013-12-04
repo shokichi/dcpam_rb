@@ -564,11 +564,20 @@ module Utiles_spe
     result
   end
   #---------------------------------------
-  def skip_time(gp,skip)
-    time = gp.axis("time").to_gphys.val
+  def skip_time(gp,skip,hr_in_day=24.0)
+    # 時間軸の単位を[day]に揃える
+    time = gp.axis("time").pos
+    time = time/hr_in_day   if time.units.to_s == "hrs"
+    time = time/hr_in_day/60 if time.units.to_s == "min"
+    time.units = "day" 
+    gp.axis("time").set_pos(time)
+    time = time.val
+
     gp_ary = []
-    time.length.times do |t|
-      gp_ary << gp.cut_rank_conserving("time"=>time[0]+skip*t)
+    (time.length-1).times do |t|
+      nowtime = time[0]+skip*t
+      break if nowtime >= time[-1]
+      gp_ary << gp.cut_rank_conserving("time"=>nowtime)
     end
     result = GPhys.join(gp_ary)
     return result

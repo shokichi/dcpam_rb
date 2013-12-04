@@ -9,7 +9,7 @@ require 'optparse'
 include MKfig
 include NumRu
 
-module MKanim
+#module MKanim
   def tone_draw(gp_ary,name,hr_in_day,figopt={})
     intval = 6*3
     intval = Skip.to_f if defined? Skip and !Skip.nil?
@@ -41,7 +41,7 @@ module MKanim
 
   def contour_draw(gp)
   end
-end
+#end
 
 def make_movie(varname,list)
   # DCL
@@ -67,11 +67,11 @@ def make_movie(varname,list)
     # DCL
     DCL.gropn(4)
     DCL.sgpset('lcntl',false)
-    #DCL.sgpset('lfull',true)
     DCL.uzfact(0.7)
     if VarName.class == Array and VarName.length == 2 
+      DCL.sgpset('lfull',true)
       DCL.sldiv('Y',1,2)
-      GGraph.set_fig "viewport"=>[0.15,0.85,0.05,0.25]
+      GGraph.set_fig "viewport"=>[0.05,0.45,0.05,0.25]
     end
     #DCL.sldiv('Y',2,2) if VarName.length > 2
     #DCL::gllset('LMISS', true)

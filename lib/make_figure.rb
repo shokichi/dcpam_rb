@@ -213,6 +213,7 @@ module MKfig
       # 時間切り出し
       time = gp.axis("time").pos
       range = 30  # [day]
+      range = TimeRange if defined? TimeRange
       strtime = time[0].val
       if time.units.to_s == "hrs"
         endtime = strtime + range*hr_in_day
@@ -221,16 +222,11 @@ module MKfig
       else
         endtime = strtime + range
       end
-      gp.cut("time"=>strtime..endtime)
-
-      # 時間軸の単位を[day]に揃える
-      time = time/hr_in_day   if time.units.to_s == "hrs"
-      time = time/hr_in_day/60 if time.units.to_s == "min"
-      gp.axis("time").set_pos(time)
+      gp = gp.cut("time"=>strtime..endtime)
 
       # 1/24日毎のデータ切り出し
       skip = 1.0/24    # [day]
-      gp = skip_time(gp,skip)
+      gp = skip_time(gp,skip,hr_in_day)
 
       # 横軸最大値
 #      gp = fix_axis_local(gp)
