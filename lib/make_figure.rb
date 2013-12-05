@@ -204,6 +204,7 @@ module MKfig
       else
         hr_in_day = 24/omega_ratio(list.name[n])
       end
+      hr_in_day = 24 if list.id.include? "coriolis"
 
       # 緯度切り出し
       lat = 0
