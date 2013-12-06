@@ -76,6 +76,8 @@ end
 
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
+opt.on("--max=Num") {|max| Max = max.to_f}
+opt.on("--min=Num") {|min| Min = min.to_f}
 opt.on("--ps") { IWS = 2}
 opt.on("--png") { 
   DCL::swlset('lwnd',false)
@@ -97,9 +99,12 @@ DCL.sgpset('isub', 96)
 DCL.uzfact(1.0)
 data=[]  
 
+GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
+GGraph.set_fig('window'=>[-90,90,nil,nil])
 
 list.dir.each{|dir| data << heart_flux(dir)}
-Omega.lat_fig2(data,list)
+figopt = set_figopt
+Omega.lat_fig2(data,list,figopt)
 DCL.grcls
 rename_img_file(list,__FILE__)
 

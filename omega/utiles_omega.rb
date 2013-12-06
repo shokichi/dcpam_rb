@@ -254,7 +254,7 @@ module Omega
         GGraph.line( gp ,false ,fig_opt.merge(hash))
         DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
-      end 
+      end
     end
   end
   #---------------------------------------------
