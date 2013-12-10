@@ -555,13 +555,13 @@ module Utiles_spe
     return gp
   end
   #----------------------------------------
-  def thinout(gp,delnum)
-    time = 0
-    result = GPhys.each_along_dims(gp,"time"){ |gphys|
-      return gphys if time%delnum == 0
-      time += 1
-    }
-    result
+  def skip_num(gp,delnum)
+    gp_ary = []
+    (time.length/delnum-1).times do |t|
+      gp_ary << gp[false,t..t] if t%delnum == 0
+    end
+    result = GPhys.join(gp_ary)
+    return result
   end
   #---------------------------------------
   def skip_time(gp,skip,hr_in_day=24.0)
