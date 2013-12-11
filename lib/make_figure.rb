@@ -223,11 +223,12 @@ module MKfig
       else
         endtime = strtime + range
       end
-      gp = gp.cut("time"=>strtime..endtime)
-
+#      gp = gp.cut("time"=>strtime..endtime)
+      gp = gp[false,0..30*24*6]
       # 1/24日毎のデータ切り出し
-      skip = 1.0/24    # [day]
-      gp = skip_time(gp,skip,hr_in_day)
+#      skip = 1.0/24    # [day]
+#      gp = skip_time(gp,skip,hr_in_day)
+      gp = skip_num(gp,6)
 
       # 横軸最大値
 #      gp = fix_axis_local(gp)
@@ -244,40 +245,40 @@ module MKfig
     end
   end
   # -------------------------------------------
-  def gave_netrad(dir,name)  # エネルギー収支の確認
-    # データの取得
-    begin
-      osr = GPhys::IO.open(dir + "OSRA.nc","OSRA")
-      olr = GPhys::IO.open(dir + "OLRA.nc","OLRA")
-    rescue
-      print "[OSR,OLR](#{dir}) is not exist\n"
-    next
-    end
-    # 全球平均
-    if osr.rank != 1 then
-      osr = Utiles_spe.glmean(osr)
-      olr = Utiles_spe.glmean(olr)
-    end
-    # 描画
-    GGraph.line osr+olr,true,'title'=>'OSR+OLR '+name
-  end
-  # -------------------------------------------
-  def gave_AM(dir,name)  # エネルギー収支の確認
-    # データの取得
-    begin
-      am = GPhys::IO.open(dir + "AnglMom.nc","AnglMom")
-      ps = GPhys::IO.open(dir + "Ps.nc","Ps")
-    rescue
-      print "[AnglMon](#{dir}) is not exist\n"
-    next
-    end
-    
-    # 全球平均
-    am = Utiles_spe.virtical_integral(Utiles_spe.glmean(am*ps)) if am.rank !=1
-    
-    # 描画
-    GGraph.line am, true, 'title'=>'AnglMom '+name
-  end
+#   def gave_netrad(dir,name)  # エネルギー収支の確認
+#     # データの取得
+#     begin
+#       osr = GPhys::IO.open(dir + "OSRA.nc","OSRA")
+#       olr = GPhys::IO.open(dir + "OLRA.nc","OLRA")
+#     rescue
+#       print "[OSR,OLR](#{dir}) is not exist\n"
+#       next
+#     end
+#     # 全球平均
+#     if osr.rank != 1 then
+#       osr = Utiles_spe.glmean(osr)
+#       olr = Utiles_spe.glmean(olr)
+#     end
+#     # 描画
+#     GGraph.line osr+olr,true,'title'=>'OSR+OLR '+name
+#   end
+#   # -------------------------------------------
+#   def gave_AM(dir,name)  # エネルギー収支の確認
+#     # データの取得
+#     begin
+#       am = GPhys::IO.open(dir + "AnglMom.nc","AnglMom")
+#       ps = GPhys::IO.open(dir + "Ps.nc","Ps")
+#     rescue
+#       print "[AnglMon](#{dir}) is not exist\n"
+#     next
+#     end
+#     
+#     # 全球平均
+#     am = Utiles_spe.virtical_integral(Utiles_spe.glmean(am*ps)) if am.rank !=1
+#     
+#     # 描画
+#     GGraph.line am, true, 'title'=>'AnglMom '+name
+#   end
   # -------------------------------------------
   def fix_axis_local(gp)
     xcoord = gp.axis(0).to_gphys.val

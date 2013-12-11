@@ -57,7 +57,7 @@ else
   lonlat("SurfTemp",list,"min"=>220,"max"=>360)
   lonlat("Temp",list,"min"=>220,"max"=>320)
   lonlat("RH",list,"min"=>0,"max"=>100)
-  lonlat("H2OLiq",list,"min"=>0,"max"=>0.1)
+  lonlat("H2OLiqIntP",list,"min"=>0,"max"=>1,"nlev"=>20)
   lonlat("PrcWtr",list,"min"=>0,"max"=>100,"nlev"=>20)      
   lonlat("U",list,"min"=>-20,"max"=>20,"nlev"=>20)      
   lonlat("V",list,"min"=>-10,"max"=>10)      

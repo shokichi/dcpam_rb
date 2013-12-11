@@ -557,7 +557,7 @@ module Utiles_spe
   #----------------------------------------
   def skip_num(gp,delnum)
     gp_ary = []
-    (time.length/delnum-1).times do |t|
+    (gp.axis("time").length-1).times do |t|
       gp_ary << gp[false,t..t] if t%delnum == 0
     end
     result = GPhys.join(gp_ary)
