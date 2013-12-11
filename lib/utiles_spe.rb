@@ -20,7 +20,9 @@ module Utiles_spe
   MolWtWet = UNumeric[18.01528e-3, "kg.mol-1"] # 水蒸気の平均分子量
   MolWtDry = UNumeric[28.964e-3,"kg.mol-1"]    # 乾燥大気の平均分子量
   GasRUniv = UNumeric[8.3144621,"J.K-1.mol-1"] # 気体定数
-
+  CpDry = UNumeric[1004,"J.K-1.kg-1"]        # 乾燥空気の定圧比熱
+  GasRDry = GasRUniv/MolWtDry                # 乾燥空気の気体定数
+  
   class Explist
     # 実験ファイルリストの読み込み
     def initialize(file_list)
