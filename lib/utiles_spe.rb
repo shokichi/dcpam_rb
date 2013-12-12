@@ -235,12 +235,12 @@ module Utiles_spe
     press_na = NArray.sfloat(lon.length,lat.length,sig.length,time.length)
     grid = Grid.new(lon,lat,sig.axis(0),time)
     press = GPhys.new(grid,VArray.new(press_na))
-    press.units = "Pa"
-    press.name = "Press"
     
     press[false] = 1
     press = press * ps
     press = press * sig
+    press.units = "Pa"
+    press.name = "Press"
     return press
   end
   
