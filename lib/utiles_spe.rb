@@ -514,6 +514,51 @@ module Utiles_spe
     end
     return ratio
   end
+    # ---------------------------------------
+  def potential_temperature(temp,press) # 温位の計算
+    return  temp*(RefPrs/press)**(GasRDry/CpDry) 
+  end
+  # ---------------------------------------
+  def sub_sig2sigm(gp,sigm) 
+    lon = gp.axis("lon")
+    lat = gp.axis("lat")
+    time = gp.axis("time")
+    result = GPhys.new(Grid.new(lon,lat,sigm.axis("sigm"),time),
+                       VArray.new(
+                                  NArray.sfloat(
+                                                lon.length,lat.length,sigm.length,time.length)))
+    result.name = gp.name
+    result.units = gp.units
+    result[false] = 0
+    return result
+  end
+  # ---------------------------------------
+  def diff_sig(gp,sigm)
+    result = sub_sig2sigm(gp,sigm)
+    sig = gp.axis("sig").to_gphys.val
+    (sig.length-1).times do |n|
+      result[false,n+1,true].val = 
+        (gp.cut("sig"=>sig[n+1]).val-gp.cut("sig"=>sig[n]).val)/
+                                                  (sig[n+1]-sig[n])
+    end
+    return result
+  end
+  # ---------------------------------------
+  def r_inp_z(z_gp,sigm)
+    sig = z_gp.axis("sig").to_gphys.val
+    r_gp = sub_sig2sigm(z_gp,sigm)
+    sigm = sigm.val
+    r_gp[false,0,true].val = z_gp[false,0,true].val
+    (sig.length-2).times do |n|
+      alph = log(sigm[n+1]/sig[n+1]) / log(sig[n]/sig[n+1])
+      beta = log(sig[n]/sigm[n+1]) / log(sig[n]/sig[n+1])
+      r_gp[false,n+1,true].val = alph * z_gp[false,n,true].val 
+                                 + beta * z_gp[false,n+1,true].val
+    end
+    r_gp[false,-1,true].val = z_gp[false,-1,true].val
+    
+    return r_gp
+  end
   # ---------------------------------------
   def day2min(gp,hr_in_day)
     time =  gp.axis("time").pos * hr_in_day * 60
