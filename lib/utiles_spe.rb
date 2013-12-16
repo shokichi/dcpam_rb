@@ -514,9 +514,13 @@ module Utiles_spe
     end
     return ratio
   end
-    # ---------------------------------------
+  # ---------------------------------------
   def potential_temperature(temp,press) # 温位の計算
-    return  temp*(RefPrs/press)**(GasRDry/CpDry) 
+    return temp*(RefPrs/press)**(GasRDry/CpDry) 
+  end
+  # ---------------------------------------
+  def equiv_potential_temperature(temp,qvap,press) # 温位の計算
+    return potential_temperature(temp,press)*(qvap*LatentHeat/(CpDry*temp)).exp 
   end
   # ---------------------------------------
   def sub_sig2sigm(gp,sigm) 
