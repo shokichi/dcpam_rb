@@ -86,7 +86,7 @@ def create_DThetaDsig(list)
     ave = 0
     GPhys.each_along_dims([temp,ps],'time') do
       |gtemp,gps|
-      dthetadz = calc_DThetaDsig(z_temp,ps,sig,sigm)
+      dthetadz = calc_DThetaDsig(gtemp,gps,sig,sigm)
       ave += local_time(dthetadz,hr_in_day)
     end
     ave.name = data_name
