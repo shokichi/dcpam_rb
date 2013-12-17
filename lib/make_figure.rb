@@ -280,6 +280,12 @@ module MKfig
 #     GGraph.line am, true, 'title'=>'AnglMom '+name
 #   end
   # -------------------------------------------
+  def self.cut_and_mean(gp)
+    eval "gp = gp.cut(#{Opt.charge[:cut]})" if defined? Opt.charge[:cut]
+    eval "gp = gp.cut(#{Opt.charge[:mean]})" if defined? Opt.charge[:mean]
+    return gp
+  end
+  # -------------------------------------------
   def fix_axis_local(gp)
     xcoord = gp.axis(0).to_gphys.val
     xmax = (xcoord[1]-xcoord[0])*xcoord.length
