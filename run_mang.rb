@@ -5,7 +5,7 @@
 require 'optparse'
 opt = OptionParser.new
 opt.on("-w VAL","--wait=VAL") {|wait| WAIT= wait.to_i}
-opt.on("-g CMD","--grep=CMD") {|cmd| CMD = cmd.to_s}
+opt.on("-c CMD","--cmd=CMD") {|cmd| CMD = cmd.to_s}
 opt.parse!(ARGV)
 
 if defined?(WAIT) and !WAIT.nil? and WAIT!=0
