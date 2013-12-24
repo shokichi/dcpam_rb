@@ -10,22 +10,16 @@ include MKfig
 include NumRu
 
 # option
-opt = OptionParser.new
-opt.on("-r","--rank") {Flag_rank = true}
-opt.on("-n VAR","--name=VAR") {|name| VarName = name}
-opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
-opt.on("--ps") { IWS = 1}
-opt.on("--png") { 
-  DCL::swlset('lwnd',false)
-  IWS = 4
-}
-opt.parse!(ARGV) 
+Opt = OptCharge::OptCharge.new(ARGV)
+Opt.set
+IWS = 2 if Opt.charge[:ps] || Opt.charge[:eps]
+IWS = 4 if Opt.charge[:png]
+IWS = 1 if !defined? IWS
 
 list = Utiles_spe::Explist.new(ARGV[0])
-varname = VarName if defined?(VarName)
-IWS = 1 if !defined?(IWS) or IWS.nil?
 
 # DCL set
+DCL::swlset('lwnd',false) if IWS==4
 DCL.gropn(IWS)
 # DCL.sldiv('Y',2,1)
 DCL.sgpset('lcntl',true)
@@ -35,9 +29,8 @@ DCL.uzfact(1.0)
 GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
-if !varname.nil? then
-  Figopt ||= {}
-  lat_fig("varname",list,Figopt)
+if !Opt.charge[:varname].nil? then
+  lat_fig(Opt.charge[:varname],list,set_figopt)
 else
   lat_fig("OSRA",list,"min"=>0,"max"=>-320)
   lat_fig("OLRA",list,"min"=>0,"max"=>320)

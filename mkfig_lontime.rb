@@ -11,29 +11,17 @@ include MKfig
 include NumRu
 
 # option
-opt = OptionParser.new
-opt.on("-r","--rank") {Flag_rank = true}
-opt.on("-n VAR","--name=VAR") {|name| VarName = name}
-opt.on("-h Num","--hr_in_day=Num") {|hrs| HrInDay = hrs.to_f}
-opt.on("--time_range=Day") {|day| TimeRange = day.to_f}
-opt.on("--lat=Lat") {|lat| Lat = lat.to_f}
-opt.on("--max=max") {|max| Max = max.to_f}
-opt.on("--min=min") {|min| Min = min.to_f}
-opt.on("--nlev=nlev") {|nlev| Nlev = nlev.to_f}
-opt.on("--ps") { IWS = 2}
-opt.on("--png") { 
-  DCL::swlset('lwnd',false)
-  IWS = 4
-}
-opt.parse!(ARGV)
+Opt = OptCharge::OptCharge.new(ARGV)
+Opt.set
 
-varname = VarName if defined?(VarName)
 list = Utiles_spe::Explist.new(ARGV[0])
-IWS = 1 if !defined?(IWS) or IWS.nil?
-
+IWS = 2 if Opt.charge[:ps] || Opt.charge[:eps]
+IWS = 4 if Opt.charge[:png]
+IWS = 1 if !defined? IWS
 
 # DCL set
 clrmp = 14  # カラーマップ
+DCL::swlset('lwnd',false) if IWS==4
 DCL.sgscmn(clrmp)
 DCL.gropn(IWS)
 #DCL.sldiv('Y',2,1)

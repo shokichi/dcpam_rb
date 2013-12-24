@@ -6,33 +6,21 @@
 
 require "numru/ggraph"
 require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
-require 'optparse'
 include MKfig
 include NumRu
 
 # option
-opt = OptionParser.new
-opt.on("-r","--rank") {Flag_rank = true}
-opt.on("-n VAR","--name=VAR") {|name| VarName = name}
-opt.on("--max=MAX") {|max| Max = max.to_f}
-opt.on("--min=MIN") {|min| Min = min.to_f}
-opt.on("--nlev=nlevel") {|nlev| Nlev = nlev.to_i}
-opt.on("--clr_max=color_max") {|clrmax| ClrMax = clrmax.to_i}
-opt.on("--clr_min=color_min") {|clrmin| ClrMin = clrmin.to_i}
-opt.on("-o OPT","--figopt=OPT") {|hash| Figopt = hash}
-opt.on("--ps") { IWS = 2}
-opt.on("--png") { 
-  DCL::swlset('lwnd',false)
-  IWS = 4
-}
-opt.parse!(ARGV)
+Opt = OptCharge::OptCharge.new(ARGV)
+Opt.set
 
 list = Utiles_spe::Explist.new(ARGV[0])
-varname = VarName if defined?(VarName)
+IWS = 2 if Opt.charge[:ps] || Opt.charge[:eps]
+IWS = 4 if Opt.charge[:png]
+IWS = 1 if !defined? IWS
 
 # DCL set
-IWS = 1 if !defined?(IWS)
 clrmp = 14  # カラーマップ
+DCL::swlset('lwnd',false) if IWS==4
 DCL.sgscmn(clrmp)
 DCL.gropn(IWS)
 # DCL.sldiv('Y',2,1)
