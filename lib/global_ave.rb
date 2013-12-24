@@ -7,7 +7,7 @@
 
 require File.expand_path(File.dirname(__FILE__)+"/make_figure.rb")
 include MKfig
-require "csv"
+
 
 
 module GlobalAverage
@@ -15,13 +15,14 @@ module GlobalAverage
     def initialize(list)
       @@list = list
       @data = {}
-      @@defnum 
+      @@refnum = list.refnum
     end
 
-    def create(varlists)
+    def create(varlist)
       varlist.each do |varname|
         self.add(varname)
       end
+      self
     end
 
     def load_file
@@ -37,14 +38,14 @@ module GlobalAverage
     end
 
     def variable(varname)
-      val = self[varname]
+      val = self.data[varname]
       result = []
       val.each_index do |n|
-        if val[n].include? "None"
-          result << "None" 
-        else
-          result << val[n] - val[@@refnum]
-        end
+#        if val[n] == -999
+#          result[n] = -999 
+#        else
+          result[n] = (val[n].to_f-val[@@refnum].to_f)/val[@@refnum].to_f
+#        end
       end
       return result 
     end
@@ -53,7 +54,7 @@ module GlobalAverage
     def read_file
       File::open(@@file) do |f|
         f.each_line do |line|
-          next if line.strip[0..0] == "#"
+          next if line.strip == -999
           parse_line(line.chop)
         end
       end
@@ -99,9 +100,9 @@ module GlobalAverage
       return {"Rotaion"=>omega}
     end
 
-    def gloval_mean_date(varname,dir)
+    def global_mean_data(varname,dir)
       # データの取得
-      gp = gpopen dir + varname
+      gp = gpopen dir + varname +".nc"
       return "None" if gp.nil?
       
       # 大気最下層切り出し
@@ -109,7 +110,7 @@ module GlobalAverage
       gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
       
       # 降水量の単位変換
-      gp = Utiles_spe.wm2mmyr(gp) if var_name.include? "Rain"
+      gp = Utiles_spe.wm2mmyr(gp) if varname.include? "Rain"
       
       # 全球平均
       result = Utiles_spe.glmean(gp) if gp.rank != 1  
