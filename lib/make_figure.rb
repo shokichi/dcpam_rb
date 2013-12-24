@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # 
 # 
+require "numru/ggraph"
+require 'numru/gphys'
 include NumRu
 include Math
 include NMath
 require File.expand_path(File.dirname(__FILE__)+"/"+"utiles_spe.rb")
 include Utiles_spe
-require "numru/ggraph"
-require 'numru/gphys'
 
 module MKfig
 
@@ -279,6 +279,12 @@ module MKfig
 #     # 描画
 #     GGraph.line am, true, 'title'=>'AnglMom '+name
 #   end
+  # -------------------------------------------
+  def self.cut_and_mean(gp)
+    eval "gp = gp.cut(#{Opt.charge[:cut]})" if defined? Opt.charge[:cut]
+    eval "gp = gp.cut(#{Opt.charge[:mean]})" if defined? Opt.charge[:mean]
+    return gp
+  end
   # -------------------------------------------
   def fix_axis_local(gp)
     xcoord = gp.axis(0).to_gphys.val
