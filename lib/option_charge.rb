@@ -44,9 +44,11 @@ module OptCharge
       @@opt.on("--name=STRING") {|name| @charge[:varname] = name}
       @@opt.on("--hr_in_day=Float") {|hrs| @charge[:hr_in_day] = hrs}
       @@opt.on("--omega=Float") {|omega| @charge[:omega] = omega}
+      @@opt.on("--time_range=Day") {|day| @charge[:timerange] = day.to_f}
     end
     
     def cut_and_mean
+      @@opt.on("--lat=Lat") {|lat| @chrge[:lat] = lat.to_f}
       @@opt.on("--cut=STRING"){|range| @charge[:cut] = range }
       @@opt.on("--mean=STRING"){|axis| @charge[:mean] = axis }
     end
