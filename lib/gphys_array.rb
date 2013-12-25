@@ -91,6 +91,20 @@ module AnalyDCPAM
       self
     end
 
+    def anomaly
+      ary = []
+      @data.each do |gp|
+        if gp.nil?
+          ary << -999
+          next
+        end
+        ary << gp - self.ref
+      end
+      result = self.clone
+      result.data = ary
+      return result
+    end
+
     private
     def get_data
       result = []
