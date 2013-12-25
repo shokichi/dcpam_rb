@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 # GPhysArrayオブジェクト
 # 
-require "numru/ggraph"
-require 'numru/gphys'
-require "./utiles_spe.rb"
+require File.expand_path(File.dirname(__FILE__)+"/"+"utiles_spe.rb")
 include Utiles_spe
 include NumRu
 include Math
@@ -14,7 +12,11 @@ module AnalyDCPAM
   class GPhysArray
     def initialize(name,listfile)
       @@listfile = listfile
-      @list = Explist.new(listfile)
+      if listfile.class == Explist
+        @list = listfile
+      else
+        @list = Explist.new(listfile)
+      end
       @name = name
       @data = get_data
       @legend = get_legend
@@ -25,9 +27,10 @@ module AnalyDCPAM
     end
 
     def +(other_gpa)
+      gp_ary = []
       self.data.each_index do |n|
         gp1 = self.data[n]
-        gp2 = search_gp(other_gpa,self.legend[n])
+        gp2 = other_gpa[self.legend[n]]
         gp = nil if gp1.nil? or gp2.nil?
         gp = gp1 + gp2 unless gp.nil?
         gp_ary << gp
@@ -37,10 +40,11 @@ module AnalyDCPAM
       return result
     end
 
-    def -(other_gpary)
+    def -(other_gpa)
+      gp_ary = []
       self.data.each_index do |n|
         gp1 = self.data[n]
-        gp2 = search_gp(other_gpa,self.legend[n])
+        gp2 = other_gpa[self.legend[n]]
         gp = nil if gp1.nil? or gp2.nil?
         gp = gp1 - gp2 unless gp.nil?
         gp_ary << gp
@@ -50,10 +54,11 @@ module AnalyDCPAM
       return result
     end
 
-    def *(other_gpary)
+    def *(other_gpa)
+      gp_ary = []
       self.data.each_index do |n|
         gp1 = self.data[n]
-        gp2 = search_gp(other_gpa,self.legend[n])
+        gp2 = other_gpa[self.legend[n]]
         gp = nil if gp1.nil? or gp2.nil?
         gp = gp1 * gp2 unless gp.nil?
         gp_ary << gp
@@ -63,10 +68,11 @@ module AnalyDCPAM
       return result
     end
 
-    def /(other_gpary)
+    def /(other_gpa)
+      gp_ary = []
       self.data.each_index do |n|
         gp1 = self.data[n]
-        gp2 = search_gp(other_gpa,self.legend[n])
+        gp2 = other_gpa[self.legend[n]]
         gp = nil if gp1.nil? or gp2.nil?
         gp = gp1 / gp2 unless gp.nil?
         gp_ary << gp
@@ -77,14 +83,20 @@ module AnalyDCPAM
     end
 
     def [](key)
-      rerutn @data[@legend.index(key)]
+      return @data[@legend.index(key)]
+    end
+
+    def data=(ary)
+      @data = ary
+      self
     end
 
     private
     def get_data
       result = []
       @list.dir.each do |dir|
-        result << gpopen dir + @name
+        gp = gpopen dir + @name+".nc"
+        result << gp
       end
       return result
     end
@@ -93,20 +105,19 @@ module AnalyDCPAM
       @list.name
     end
 
-    def search(legend)
-      n = self.legend.index(legend)
-      return nil if n.nil?
-      return self.data[n]
-    end
+#     def search(legend)
+#       n = self.legend.index(legend)
+#       return nil if n.nil?
+#       return self.data[n]
+#     end
     public
 
     attr_reader :list,:name,:data,:legend
   end
-
-  class GPhys
-    def legend=(legend)
-      @legend = leegnd
-    end
-    attr_reader :legend
-  end
+#  class GPhys
+#    def legend=(legend)
+#      @legend = legnd
+#    end
+#    attr_reader :legend
+#  end
 end
