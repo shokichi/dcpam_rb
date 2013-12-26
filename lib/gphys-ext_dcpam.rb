@@ -4,248 +4,250 @@
 # 
 require "numru/ggraph"
 require 'numru/gphys'
-require "./utiles_spe.rb"
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/../lib/utiles_spe.rb")
 include NumRu
 include Math
 include NMath
 
-module AnalyDCPAM
+module NumRu
   class GPhys
-    def glmean  # 全球平均
-      gp = self.clone
-      cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
-      fact = cos_phi / cos_phi.mean
-      gp_mean = (gp * fact).mean("lon","lat")
-      return gp_mean
-    end
-    #---------------------- 
-    def latmean  # 南北平均
-      gp = self.clone
-      cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
-      fact = cos_phi / cos_phi.mean
-      gp_mean = (gp * fact).mean("lat")
-      return gp_mean
-    end
-    #----------------------
-    def variance(axis,ave=nil) # 分散
-      gp = self.clone
-      ave = gp.mean(axis) if ave.nil?
-      result = (gp - ave)**2
-      return result.mean(axis)
-    end
-    #---------------------- 
-    def virtical_integral  # 鉛直積分
-      gp = self.clone
-      begin
-        if gp.data.file.class == NArray then
-          sig_weight = gpopen(gp.data.file[0].path, "sig_weight")
-        else
-          sig_weight = gpopen(gp.data.file.path, "sig_weight")    
-        end
-        
-      rescue
-        
-        if gp.data.file == nil then
-          sig_weight = gpopen("./Temp.nc","sig_weight")
-        else
-          tmp = gp.data.file.path.split("/")
-          sig_weight = gpopen(gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight")
-        end
+    module AnalyDCPAM
+      def glmean  # 全球平均
+        gp = self.clone
+        cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
+        fact = cos_phi / cos_phi.mean
+        gp_mean = (gp * fact).mean("lon","lat")
+        return gp_mean
       end
-      
-      gp_vintg = (gp * sig_weight).sum("sig")
-      return gp_vintg
-    end
-    #----------------------
-    def intg_delpress(gp)  # 鉛直積分(気圧)
-      gp = self.clone
-      return gp
-      #    begin
-      #      if gp.data.file.class == NArray then
-      #        filename = gp.data.file[0].path
-      #      else
-      #        filename = gp.data.file.path
-      #      end
-      #      sig_weight = gpopen filename, "sig_weight"
-      #      ps = gpopen File.dirname(filename)+"/"+"Ps.nc"
-      #    rescue
-      #      if gp.data.file == nil then
-      #        sig_weight = gpopen "./Temp.nc","sig_weight"
-      #        ps = gpopen "./Ps.nc"
-      #      else
-      #        tmp = gp.data.file.path.split("/")
-      #        sig_weight = gpopen gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight"
-      #        ps = gpopen gp.data.file.path.sub(tmp[-1],"Ps.nc")
-      #      end
-      #    end
-      #    gp_intg = (gp * ps * sig_weight).sum("sig")/Grav
+      #---------------------- 
+      def latmean  # 南北平均
+        gp = self.clone
+        cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
+        fact = cos_phi / cos_phi.mean
+        gp_mean = (gp * fact).mean("lat")
+        return gp_mean
+      end
+      #----------------------
+      def variance(axis,ave=nil) # 分散
+        gp = self.clone
+      ave = gp.mean(axis) if ave.nil?
+        result = (gp - ave)**2
+        return result.mean(axis)
+      end
+      #---------------------- 
+      def virtical_integral  # 鉛直積分
+        gp = self.clone
+        begin
+          if gp.data.file.class == NArray then
+            sig_weight = gpopen(gp.data.file[0].path, "sig_weight")
+          else
+            sig_weight = gpopen(gp.data.file.path, "sig_weight")    
+          end
+          
+        rescue
+          if gp.data.file == nil then
+            sig_weight = gpopen("./Temp.nc","sig_weight")
+          else
+            tmp = gp.data.file.path.split("/")
+            sig_weight = gpopen(gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight")
+          end
+        end
+        
+        gp_vintg = (gp * sig_weight).sum("sig")
+        return gp_vintg
+      end
+      #----------------------
+      def intg_delpress(gp)  # 鉛直積分(気圧)
+        gp = self.clone
+        return gp
+        #    begin
+        #      if gp.data.file.class == NArray then
+        #        filename = gp.data.file[0].path
+        #      else
+        #        filename = gp.data.file.path
+        #      end
+        #      sig_weight = gpopen filename, "sig_weight"
+        #      ps = gpopen File.dirname(filename)+"/"+"Ps.nc"
+        #    rescue
+        #      if gp.data.file == nil then
+        #        sig_weight = gpopen "./Temp.nc","sig_weight"
+        #        ps = gpopen "./Ps.nc"
+        #      else
+        #        tmp = gp.data.file.path.split("/")
+        #        sig_weight = gpopen gp.data.file.path.sub(tmp[-1],"Temp.nc"),"sig_weight"
+        #        ps = gpopen gp.data.file.path.sub(tmp[-1],"Ps.nc")
+        #      end
+        #    end
+        #    gp_intg = (gp * ps * sig_weight).sum("sig")/Grav
       #    return gp_intg
-    end
-    #----------------------
-    def wm2mmyr  # 降水量の単位変換(W.m-2 -> mm.yr-1)
-      gp = self.clone
-      return gp if gp.units.to_s.include?("W")
-      gp = gp*(3600 * 24 * 360) * 1000 / LatentHeat / WtWet 
-      gp.units = Units["mm.yr-1"]
-      return gp
-    end
-    #----------------------
-    def wm2mmhr  # 降水量の単位変換(W.m-2 -> mm.hr-1)
-      gp = self.clone
-      return gp if gp.units.to_s.include?("W")
-      gp = gp* 3600 * 1000 / LatentHeat / WtWet 
-      gp.units = Units["mm.hr-1"]
-      return gp
-    end
-    #-----------------------------------------  
-    def sig2press(ps) # 鉛直座標変換(sig -> press)
-      gp = self.clone
-      # 座標データ取得
-      time = gp.axis("time").to_gphys if gp.axnames.include?("time")
-      sig = gp.axis("sig").to_gphys if gp.axnames.include?("sig")
-      sig = gp.axis("sigm").to_gphys if gp.axnames.include?("sigm") 
-     
-      # 気圧データの準備
-      press = calc_press(ps,sig)
-
-      # 補助座標に気圧を設定 
-      gp.set_assoc_coords([press])
-      
-      # 気圧座標の値を準備
-      press_crd = VArray.new( sig.val*RefPrs, {"units"=>"Pa"}, "press")
-      
-      # 鉛直座標を気圧に変換
-      gp_press = gp.interpolate(sig.name=>press_crd)
-      
-      return gp_press
-    end
-    # ---------------------------------------
-    def sub_sig2sigm(sigm)
-      gp = self.clone 
-      lon = gp.axis("lon")
-      lat = gp.axis("lat")
-      time = gp.axis("time")
-      result = GPhys.new(Grid.new(lon,lat,sigm.axis("sigm"),time),
-                         VArray.new(
-                                  NArray.sfloat(
+      end
+      #----------------------
+      def wm2mmyr  # 降水量の単位変換(W.m-2 -> mm.yr-1)
+        gp = self.clone
+        return gp if gp.units.to_s.include?("W")
+        gp = gp*(3600 * 24 * 360) * 1000 / LatentHeat / WtWet 
+        gp.units = Units["mm.yr-1"]
+        return gp
+      end
+      #----------------------
+      def wm2mmhr  # 降水量の単位変換(W.m-2 -> mm.hr-1)
+        gp = self.clone
+        return gp if gp.units.to_s.include?("W")
+        gp = gp* 3600 * 1000 / LatentHeat / WtWet 
+        gp.units = Units["mm.hr-1"]
+        return gp
+      end
+      #-----------------------------------------  
+      def sig2press(ps) # 鉛直座標変換(sig -> press)
+        gp = self.clone
+        # 座標データ取得
+        time = gp.axis("time").to_gphys if gp.axnames.include?("time")
+        sig = gp.axis("sig").to_gphys if gp.axnames.include?("sig")
+        sig = gp.axis("sigm").to_gphys if gp.axnames.include?("sigm") 
+        
+        # 気圧データの準備
+        press = calc_press(ps,sig)
+        
+        # 補助座標に気圧を設定 
+        gp.set_assoc_coords([press])
+        
+        # 気圧座標の値を準備
+        press_crd = VArray.new( sig.val*RefPrs, {"units"=>"Pa"}, "press")
+        
+        # 鉛直座標を気圧に変換
+        gp_press = gp.interpolate(sig.name=>press_crd)
+        
+        return gp_press
+      end
+      # ---------------------------------------
+      def sub_sig2sigm(sigm)
+        gp = self.clone 
+        lon = gp.axis("lon")
+        lat = gp.axis("lat")
+        time = gp.axis("time")
+        result = GPhys.new(Grid.new(lon,lat,sigm.axis("sigm"),time),
+                           VArray.new(
+                                      NArray.sfloat(
                                                 lon.length,lat.length,sigm.length,time.length)))
       result.name = gp.name
-      result.units = gp.units
-      result[false] = 0
-      return result
-    end
-    # ---------------------------------------
-    def diff_sig(sigm)
-      gp = self.clone 
-      result = sub_sig2sigm(gp,sigm)
-      sig = gp.axis("sig").to_gphys.val
-      (sig.length-1).times do |n|
+        result.units = gp.units
+        result[false] = 0
+        return result
+      end
+      # ---------------------------------------
+      def diff_sig(sigm)
+        gp = self.clone 
+        result = sub_sig2sigm(gp,sigm)
+        sig = gp.axis("sig").to_gphys.val
+        (sig.length-1).times do |n|
         result[false,n+1,true].val = 
-          (gp.cut("sig"=>sig[n+1]).val-gp.cut("sig"=>sig[n]).val)/
+            (gp.cut("sig"=>sig[n+1]).val-gp.cut("sig"=>sig[n]).val)/
                                                  (sig[n+1]-sig[n])
+        end
+        return result
       end
-      return result
-    end
-    # ---------------------------------------
-    def r_inp_z(sigm)
-      z_gp = self.clone 
-      sig = z_gp.axis("sig").to_gphys.val
-      r_gp = sub_sig2sigm(z_gp,sigm)
-      sigm = sigm.val
-      r_gp[false,0,true].val = z_gp[false,0,true].val
-      (sig.length-2).times do |n|
-        alph = log(sigm[n+1]/sig[n+1]) / log(sig[n]/sig[n+1])
-        beta = log(sig[n]/sigm[n+1]) / log(sig[n]/sig[n+1])
-        r_gp[false,n+1,true].val = alph * z_gp[false,n,true].val 
-        + beta * z_gp[false,n+1,true].val
+      # ---------------------------------------
+      def r_inp_z(sigm)
+        z_gp = self.clone 
+        sig = z_gp.axis("sig").to_gphys.val
+        r_gp = sub_sig2sigm(z_gp,sigm)
+        sigm = sigm.val
+        r_gp[false,0,true].val = z_gp[false,0,true].val
+        (sig.length-2).times do |n|
+          alph = log(sigm[n+1]/sig[n+1]) / log(sig[n]/sig[n+1])
+          beta = log(sig[n]/sigm[n+1]) / log(sig[n]/sig[n+1])
+          r_gp[false,n+1,true].val = alph * z_gp[false,n,true].val 
+                                  + beta * z_gp[false,n+1,true].val
+        end
+        r_gp[false,-1,true].val = z_gp[false,-1,true].val
+        
+        return r_gp
       end
-      r_gp[false,-1,true].val = z_gp[false,-1,true].val
-      
-      return r_gp
-    end
-    # ---------------------------------------
-    def day2min(hr_in_day)
-      gp = self.clone 
-      time =  gp.axis("time").pos * hr_in_day * 60
-      time.units = "min"
-      gp.axis("time").set_pos(time)  
-      return gp
-    end
-    # ---------------------------------------
-    def day2hrs(hr_in_day)
-      gp = self.clone 
-      time =  gp.axis("time").pos * hr_in_day
-      time.units = "hrs"
-      gp.axis("time").set_pos(time)  
-      return gp
-    end
-    #----------------------------------------
-    def min2hrs
-      gp = self.clone 
-      time =  gp.axis("time").pos / 60
-      time.units = "hrs"
-      gp.axis("time").set_pos(time)
-      return gp
-    end
-    #----------------------------------------
-    def hrs2min
-      gp = self.clone 
-      time =  gp.axis("time").pos * 60
-      time.units = "min"
-      gp.axis("time").set_pos(time)
-      return gp
-    end
-    #----------------------------------------
-    def hrs2day(hr_in_day)
-      gp = self.clone 
-      time =  gp.axis("time").pos / hr_in_day
-      time.units = "day"
-      gp.axis("time").set_pos(time)  
-      return gp
-    end
-    #----------------------------------------
-    def min2day(hr_in_day)
-      gp = self.clone 
-      time =  gp.axis("time").pos / hr_in_day / 60
-      time.units = "day"
-      gp.axis("time").set_pos(time)
-      return gp
-    end
-    #----------------------------------------
-    def skip_num(delnum)
-      gp = self.clone 
-      gp_ary = []
-      (gp.axis("time").length-1).times do |t|
-        gp_ary << gp[false,t..t] if t%delnum == 0
+      # ---------------------------------------
+      def day2min(hr_in_day)
+        gp = self.clone 
+        time =  gp.axis("time").pos * hr_in_day * 60
+        time.units = "min"
+        gp.axis("time").set_pos(time)  
+        return gp
       end
-      result = GPhys.join(gp_ary)
-      return result
-    end
-    #---------------------------------------
-    def skip_time(skip,hr_in_day=24.0)
-      gp = self.clone 
-      # 時間軸の単位を[day]に揃える
-      time = gp.axis("time").pos
-      time = time/hr_in_day   if time.units.to_s == "hrs"
-      time = time/hr_in_day/60 if time.units.to_s == "min"
-      time.units = "day" 
-      gp.axis("time").set_pos(time)
-      time = time.val
-      
-      gp_ary = []
-      (time.length-1).times do |t|
-        nowtime = time[0]+skip*t
-        break if nowtime >= time[-1]
-        gp_ary << gp.cut_rank_conserving("time"=>nowtime)
+      # ---------------------------------------
+      def day2hrs(hr_in_day)
+        gp = self.clone 
+        time =  gp.axis("time").pos * hr_in_day
+        time.units = "hrs"
+        gp.axis("time").set_pos(time)  
+        return gp
       end
-      result = GPhys.join(gp_ary)
-      return result
+      #----------------------------------------
+      def min2hrs
+        gp = self.clone 
+        time =  gp.axis("time").pos / 60
+        time.units = "hrs"
+        gp.axis("time").set_pos(time)
+        return gp
+      end
+      #----------------------------------------
+      def hrs2min
+        gp = self.clone 
+        time =  gp.axis("time").pos * 60
+        time.units = "min"
+        gp.axis("time").set_pos(time)
+        return gp
+      end
+      #----------------------------------------
+      def hrs2day(hr_in_day)
+        gp = self.clone 
+        time =  gp.axis("time").pos / hr_in_day
+        time.units = "day"
+        gp.axis("time").set_pos(time)  
+        return gp
+      end
+      #----------------------------------------
+      def min2day(hr_in_day)
+        gp = self.clone 
+        time =  gp.axis("time").pos / hr_in_day / 60
+        time.units = "day"
+        gp.axis("time").set_pos(time)
+        return gp
+      end
+      #----------------------------------------
+      def skip_num(delnum)
+        gp = self.clone 
+        gp_ary = []
+        (gp.axis("time").length-1).times do |t|
+          gp_ary << gp[false,t..t] if t%delnum == 0
+        end
+        result = GPhys.join(gp_ary)
+        return result
+      end
+      #---------------------------------------
+      def skip_time(skip,hr_in_day=24.0)
+        gp = self.clone 
+        # 時間軸の単位を[day]に揃える
+        time = gp.axis("time").pos
+        time = time/hr_in_day   if time.units.to_s == "hrs"
+        time = time/hr_in_day/60 if time.units.to_s == "min"
+        time.units = "day" 
+        gp.axis("time").set_pos(time)
+        time = time.val
+        
+        gp_ary = []
+        (time.length-1).times do |t|
+          nowtime = time[0]+skip*t
+          break if nowtime >= time[-1]
+          gp_ary << gp.cut_rank_conserving("time"=>nowtime)
+        end
+        result = GPhys.join(gp_ary)
+        return result
+      end
     end
   end
-  ##############################################################
+end
+##############################################################
+module AnalyDCPAM
   def local_time(gphys,hr_in_day)
-      
+    
     lon = gphys.axis('lon')
     local = lon.pos
     local = lon.pos*hr_in_day/360
@@ -468,5 +470,26 @@ module AnalyDCPAM
     }
     ofile.close
     print "[#{data_name}](#{dir}) is created\n"
-  end  
+  end
+  
+  # --------------------------------------------
+  def cos_ang(gp,hr_in_day) # cos(太陽天頂角) 
+    gp = gp.min2day(hr_in_day) if gp.axis("time").units == "min"
+    gp = gp.hrs2day(hr_in_day) if gp.axis("time").units == "hrs"
+
+    lon = gp.axis("lon").to_gphys if gp.axnames.include?("lon")
+    lat = gp.axis("lat").to_gphys if gp.axnames.include?("lat")
+    time = gp.axis("time").to_gphys
+
+    slon = (time - time.to_i)*360
+    slon = UNumeric[slon[0].val,"degree"]    # 太陽直下点経度
+#    slon = UNumeric[0,"degree"]    # 太陽直下点経度
+    
+    ang = gp[false,0].copy
+    ang[false] = 1.0
+    ang.units = "1"
+    ang = ang*((ang.axis("lon").to_gphys+slon)*PI/180.0).cos
+    ang = ang*(ang.axis("lat").to_gphys*PI/180.0).cos
+    return ang + 1e-14
+  end
 end
