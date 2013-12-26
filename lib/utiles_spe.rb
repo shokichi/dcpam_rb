@@ -510,7 +510,7 @@ module Utiles_spe
   def equiv_potential_temperature(temp,qvap,press) # 温位の計算
     return potential_temperature(temp,press)*(qvap*LatentHeat/(CpDry*temp)).exp 
   end
-  # ---------------------------------------
+  # ------------------------------------------
   def sub_sig2sigm(gp,sigm) 
     lon = gp.axis("lon")
     lat = gp.axis("lat")
