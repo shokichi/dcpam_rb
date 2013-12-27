@@ -14,10 +14,6 @@ include Math
 include NMath
 
 module Omega
-  # 定数
-  SolarConst = UNumeric[1366.0, "W.m-2"]
-  StB = UNumeric[5.67e-8, "W.m-2.K-4"]
-
   class Anomaly
     def initialize(data_name,list)
       @list = list
