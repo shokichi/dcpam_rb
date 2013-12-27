@@ -13,9 +13,10 @@ include Math
 
 
 def draw_scatter(dir,name,hash={})
-  albedo = gpopen dir+"local_Albedo.nc","Albedo"
-  h2o = gpopen dir+"H2OLiqIntP.nc"
+  albedo = gpopen( dir+"local_Albedo.nc","Albedo").cut("lat"=>-30..30)
+  h2o = gpopen( dir+"H2OLiqIntP.nc").cut("lat"=>-30..30)
   return if albedo.nil? or h2o.nil?
+
 
   if defined?(HrInDay) and !HrInDay.nil? then
     hr_in_day = HrInDay
@@ -31,7 +32,8 @@ def draw_scatter(dir,name,hash={})
     h = h/cos_ang(h,hr_in_day)
     x_coord = local_time(h/cos_ang(h,hr_in_day),hr_in_day)
     x_coord = x_coord[nlon/4+1..nlon*3/4-2,false]
-    y_coord = albedo[nlon/4+1..nlon*3/4-2,true,time..time]
+#    y_coord = albedo[nlon/4+1..nlon*3/4-2,true,time..time]
+    y_coord = albedo[false,time..time]
     hash = {'title'=> "Albedo & H2O"+" "+name,
                  'annotate'=>false, }.merge(hash)
     if t == 0 then
