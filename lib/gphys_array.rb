@@ -86,6 +86,13 @@ module AnalyDCPAM
       return @data[@legend.index(key)]
     end
 
+    def []=(*arg)
+      val = arg.pop
+      key = arg
+      @data[@legend.index(key)] = val
+      return 
+    end
+
     def data=(ary)
       @data = ary
       self
@@ -105,6 +112,24 @@ module AnalyDCPAM
       return result
     end
 
+    def mean(*axis)
+      result = self.clone
+      @legend.each do |key|
+        next if self[key].nil?
+        result[key] = self[key].mean(*axis)
+      end
+      return result
+    end
+
+    def cut(range)
+      result = self.clone
+      @legend.each do |key|
+        next if self[key].nil?
+        result[key] self[key].cut(range)
+      end
+      return result 
+    end
+
     private
     def get_data
       result = []
@@ -119,19 +144,7 @@ module AnalyDCPAM
       @list.name
     end
 
-#     def search(legend)
-#       n = self.legend.index(legend)
-#       return nil if n.nil?
-#       return self.data[n]
-#     end
     public
-
     attr_reader :list,:name,:data,:legend
   end
-#  class GPhys
-#    def legend=(legend)
-#      @legend = legnd
-#    end
-#    attr_reader :legend
-#  end
 end
