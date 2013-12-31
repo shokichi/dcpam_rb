@@ -224,7 +224,7 @@ module NumRu
       #---------------------------------------
       def skip_time(skip,hr_in_day=24.0)
         gp = self.clone 
-        # 時間軸の単位を[day]に揃える
+
         time = gp.axis("time").pos
         time = time/hr_in_day   if time.units.to_s == "hrs"
         time = time/hr_in_day/60 if time.units.to_s == "min"
@@ -239,6 +239,23 @@ module NumRu
           gp_ary << gp.cut_rank_conserving("time"=>nowtime)
         end
         result = GPhys.join(gp_ary)
+        return result
+      end
+      # --------------------------------------
+      def mask_diurnal
+        gp = self.clone
+        if gp.axis("lon").long_name.include? "local"
+          print "Not local time\n"
+          return 
+        end
+        max = gp.lon_max
+        gp = gp.cut("lon"=>max/4..max*3/4)
+        return gp
+      end
+      # ---------------------------------------
+      def lon_max
+        lon = self.axis("lon").to_gphys.val
+        result = (lon[1]-lon[0])*lon.length
         return result
       end
     end
@@ -481,9 +498,9 @@ module AnalyDCPAM
     lat = gp.axis("lat").to_gphys if gp.axnames.include?("lat")
     time = gp.axis("time").to_gphys
 
-    slon = (time - time.to_i)*360
-    slon = UNumeric[slon[0].val,"degree"]    # 太陽直下点経度
-#    slon = UNumeric[0,"degree"]    # 太陽直下点経度
+#    slon = (time - time.to_i)*360
+#    slon = UNumeric[slon[0].val,"degree"]    # 太陽直下点経度
+    slon = UNumeric[0,"degree"]    # 太陽直下点経度
     
     ang = gp[false,0].copy
     ang[false] = 1.0
