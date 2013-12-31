@@ -34,10 +34,10 @@ module MKfig
 
   end
 # --------------------------------------------------  
-  def set_dcl    # DCL set
+  def set_dcl(clr=false)    # DCL set
     clrmp = 14  # カラーマップ
     DCL::swlset('lwnd',false) if IWS==4
-    DCL.sgscmn(clrmp)
+    DCL.sgscmn(clrmp) if clr
     DCL.gropn(IWS)
     #DCL.sldiv('Y',2,1)
     DCL.sgpset('lcntl',true)
@@ -45,47 +45,43 @@ module MKfig
     DCL.uzfact(1.0)
   end
 # --------------------------------------------------  
-  def merid_fig(var_name,list,hash={}) # 子午面断面
-    list.dir.each_index do |n|
-      gp = gpopen(Utiles_spe.str_add(list.dir[n],var_name)+'.nc',var_name)
-      next if gp.nil?
-      # 時間平均
-      gp = gp.mean("time") if gp.axnames.include?("time")
-      # 経度平均
-      gp = gp.mean("lon") if gp.axnames.include?("lon")
+  def merid(gpa,hash={}) # 子午面断面
+    gpa = gpa.mean("time") if gpa.axnames.include?("time")
+    gpa = gpa.mean("lon") if gpa.axnames.include?("lon")
       
-      # 
+    gpa.legend.each do |legend|
+      next if gpa[legend].nil?
+      gp = gpa[legend]
       if gp.max.to_f > 1e+10 then
         gp = gp*1e-10
         gp.units = "10^10 " + gp.units.to_s
       end
   
       fig_opt = {'color_bar'=>true,
-                 'title'=>gp.long_name + " " + list.name[n],
+                 'title'=>gp.long_name + " " + legend,
                  'annotate'=>false,
                  'nlev'=>20}.merge(hash)
       GGraph.tone_and_contour(gp, true,fig_opt)
     end
   end
 #------------------------------------------------  
-  def lat_fig(var_name,list,hash={}) # 緯度分布
+  def lat(gpa,hash={}) # 緯度分布
+    # 高さ方向にデータがある場合は最下層を取り出す
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
+    # 時間平均経度平均
+    gpa = gpa.mean('time') if gpa.axnames.include?("time")
+    gpa = gpa.mean("lon") if gp.axnames.include?("lon")
+  
     lc = 23
     vx = 0.82
     vy = 0.8
-    list.dir.each_index do |n|
-      # データの取得
-      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
-      next if gp.nil?
-  
-      # 高さ方向にデータがある場合は最下層を取り出す
-      gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
-  
-      # 時間平均経度平均
-      gp = gp.mean('time') if gp.axnames.include?("time")
-      gp = gp.mean(0) if gp.axnames[0] != "lat"
-  
+    gpa.legend.each do |legend|
+
+      next if gpa[legend].nil?
+      gp = gpa[legend]
+
       # 
-      gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
+      gp = gp.wm2mmyr if gp.name.include?("Rain") 
   
       # 描画
       vy = vy - 0.025
@@ -93,49 +89,45 @@ module MKfig
         lc = 13 if list.ref.nil?
         fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
         GGraph.line( gp ,true ,fig_opt.merge(hash))
-        DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
       elsif n == list.refnum
         lc_ref = 13
         fig_opt = {'index'=>lc_ref}      
         GGraph.line( gp ,false ,fig_opt.merge(hash))
-        DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
       else
         lc = lc + 10
         fig_opt = {'index'=>lc}      
         GGraph.line( gp ,false ,fig_opt.merge(hash))
-        DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
       end 
     end
   end
 #------------------------------------------------
-  def lon_fig(var_name,list,hash={})
+  def lon(gpa,hash={})
+    # 高さ方向にデータがある場合は最下層を取り出す
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
+    # 時間平均経度平均
+    gpa = gpa.mean('time') if gpa.axnames.include?("time")
+    # 緯度切り出し
+    lat = 0
+    lat = Lat if defined?(Lat)
+    gp = gp.cut("lat"=>lat)
+
     lc = 23
     vx = 0.82
     vy = 0.8
-    list.dir.each_index do |n|
-      # データの取得
-      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
-      next if gp.nil?
-  
-      # 高さ方向にデータがある場合は最下層を取り出す
-      gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
-  
-      # 時間変化
-      gp = gp.mean('time') if gp.axnames.include?("time")
-
-      # 緯度切り出し
-      lat = 0
-      lat = Lat if defined?(Lat)
-      gp = gp.cut("lat"=>lat)
+    gpa.legend.each do |legend|
+      next if gpa[legend].nil?
+      gp = gpa[legend]
   
       # 降水量の単位変換
-#      gp = Utiles_spe.wm2mmyr(gp) if var_name.include?("Rain") 
+      gp = gp.wm2mmyr if gp.name.include?("Rain") 
 
-      gp = fix_axis_local(gp)
-      
+      gp = fix_axis_local(gp)      
       # 描画
       xmax = 360
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
@@ -147,19 +139,19 @@ module MKfig
         lc = 13 if list.ref.nil?
         fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
         GGraph.line( gp ,true ,fig_opt.merge(hash))
-        DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
       elsif n == list.refnum
         lc_ref = 13
         fig_opt = {'index'=>lc_ref}      
         GGraph.line( gp ,false ,fig_opt.merge(hash))
-        DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
       else
         lc = lc + 10
         fig_opt = {'index'=>lc}      
         GGraph.line( gp ,false ,fig_opt.merge(hash))
-        DCL.sgtxzv(vx+0.05,vy,list.name[n],0.015,0,-1,3)
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
       end 
     end      
@@ -167,16 +159,15 @@ module MKfig
 
 # -----------------------------------------------
   def lonlat(var_name,list,hash={}) #水平断面
-    list.dir.each_index do |n|
-      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
-      next if gp.nil?
-  
-      # 時間平均
-      gp = gp.mean("time") if gp.axnames.include?("time")
-  
-      # 高さ方向の次元をカット
-      gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
-      gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
+    # 高さ方向にデータがある場合は最下層を取り出す
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
+    gpa = gpa.cut("sigm"=>1) if gpa.axnames.include?("sigm")
+    # 時間平均経度平均
+    gpa = gpa.mean('time') if gpa.axnames.include?("time")
+
+    gpa.legend.each do |legend|
+      next if gpa[legend].nil?
+      gp = gpa[legend]
    
       # 横軸最大値
       xcoord = gp.axis(0).to_gphys.val
@@ -186,7 +177,7 @@ module MKfig
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[0,xmax,-90,90])
   
-      fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+      fig_opt = {'title'=>gp.long_name + " " + legend,
                  'annotate'=>false,
                  'color_bar'=>true}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
@@ -194,18 +185,18 @@ module MKfig
   end
 #---------------------------------------------
   def lonsig(var_name,list,hash={}) # 経度断面
-    list.dir.each_index do |n|
-      gp = gpopen(list.dir[n] + var_name + ".nc",var_name)
-      next if gp.nil?
-  
-      # 時間平均
-      gp = gp.mean("time") if !gp.axnames.index("time").nil?
-  
-      # 緯度切り出し
-      lat = 0
-      lat = Lat if defined?(Lat)
-      gp = gp.cut("lat"=>lat)
-         
+    # 時間平均経度平均
+    gpa = gpa.mean('time') if gpa.axnames.include?("time")
+
+    # 緯度切り出し
+    lat = 0
+    lat = Lat if defined?(Lat)
+    gpa = gpa.cut("lat"=>lat)
+
+    gpa.legend.each do |legend|
+      next if gpa[legend].nil?
+      gp = gpa[legend]
+
       # 横軸最大値
       gp = fix_axis_local(gp)
       xmax = 360
@@ -213,7 +204,7 @@ module MKfig
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[0,xmax,nil,nil])
   
-      fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+      fig_opt = {'title'=>gp.long_name + " " + legend,
                  'annotate'=>false,
                  'color_bar'=>true}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
@@ -221,28 +212,28 @@ module MKfig
   end
 # -------------------------------------------
   def lontime(varname,list,hash={})
-    list.dir.each_index do |n|
-      gp = gpopen list.dir[n] + varname + ".nc"
-      next if gp.nil?
-      # Use time:30 days, Intervel: 1/24 hours
-  
-      # 時間軸確認
-      return if !gp.axnames.include?("time")
+    # 時間軸確認
+    return if !gpa.axnames.include?("time")
 
-      # 鉛直切り出し
-      gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
+    # 鉛直切り出し
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
+    # 緯度切り出し
+    lat = 0
+    lat = Lat if defined?(Lat)
+    gpa = gpa.cut("lat"=>lat)
+
+    gpa.legend.each do |legend|
+      next if gpa[legend].nil?
+      gp = gpa[legend]
+
+      # Use time:30 days, Intervel: 1/24 hours
 
       if defined? HrInDay 
         hr_in_day = HrInDay
       else
-        hr_in_day = 24/omega_ratio(list.name[n])
+        hr_in_day = 24/omega_ratio(legend)
       end
-      hr_in_day = 24 if list.id.include? "coriolis"
-
-      # 緯度切り出し
-      lat = 0
-      lat = Lat if defined?(Lat)
-      gp = gp.cut("lat"=>lat)
+      hr_in_day = 24 if gpa.list.id.include? "coriolis"
 
       # 時間切り出し
       time = gp.axis("time").pos
@@ -271,7 +262,7 @@ module MKfig
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[0,xmax,nil,nil])
   
-      fig_opt = {'title'=>gp.long_name + " " + list.name[n],
+      fig_opt = {'title'=>gp.long_name + " " + legend,
                  'annotate'=>false,
                  'color_bar'=>true}.merge(hash)
       GGraph.tone gp ,true, fig_opt
