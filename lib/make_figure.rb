@@ -8,10 +8,43 @@ include NumRu
 include Math
 include NMath
 require File.expand_path(File.dirname(__FILE__)+"/"+"utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/gphys-ext_dcpam.rb")
+include AnalyDCPAM
 include Utiles_spe
 
 module MKfig
+  def make_figure(varname,list,type,figopt={})
+    gpa = GPhysArray.new(varname,list)
 
+    case type 
+      merid(gpa,figopt)
+    when "lat"
+      lat(gpa,figopt)
+    when "lon"
+      lon(gpa,figopt)
+    when "merid"
+      merid(gpa,figopt)
+    when "lonsig"
+      lonsig(gpa,figopt)
+    when "lonlat"
+      lonlat(gpa,figopt)
+    when "lontime"
+      lontime(gpa,figopt)
+    end    
+
+  end
+# --------------------------------------------------  
+  def set_dcl    # DCL set
+    clrmp = 14  # カラーマップ
+    DCL::swlset('lwnd',false) if IWS==4
+    DCL.sgscmn(clrmp)
+    DCL.gropn(IWS)
+    #DCL.sldiv('Y',2,1)
+    DCL.sgpset('lcntl',true)
+    DCL.sgpset('isub', 96)
+    DCL.uzfact(1.0)
+  end
+# --------------------------------------------------  
   def merid_fig(var_name,list,hash={}) # 子午面断面
     list.dir.each_index do |n|
       gp = gpopen(Utiles_spe.str_add(list.dir[n],var_name)+'.nc',var_name)
