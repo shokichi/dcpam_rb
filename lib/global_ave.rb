@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 #
 #
-# require "/home/ishioka/ruby/dcpam_rb/lib/global_ave.rb"
-# GlobalAverage::TableVal.new("omega_all_MTlocal_global-ave.dat")
 
 require File.expand_path(File.dirname(__FILE__)+"/make_figure.rb")
 include MKfig
@@ -41,11 +39,11 @@ module GlobalAverage
       val = self.data[varname]
       result = []
       val.each_index do |n|
-#        if val[n] == -999
-#          result[n] = -999 
-#        else
+        if val[n].val == -999
+          result[n].val = -999 
+        else
           result[n] = (val[n].to_f-val[@@refnum].to_f)/val[@@refnum].to_f
-#        end
+        end
       end
       return result 
     end
