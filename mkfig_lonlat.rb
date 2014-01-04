@@ -16,10 +16,7 @@ Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
 
 list = Utiles_spe::Explist.new(ARGV[0])
-IWS = 2 if Opt.charge[:ps] || Opt.charge[:eps]
-IWS = 4 if Opt.charge[:png]
-IWS = 1 if !defined? IWS
-
+IWS = get_iws
 set_dcl(14)
 
 FigType = "lonlat"

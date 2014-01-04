@@ -5,7 +5,7 @@
 #
 
 require 'numru/ganalysis'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/make_fig.rb")
+require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
 include MKfig
 include NumRu
 include Math
@@ -57,18 +57,9 @@ Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
 
 list = Utiles_spe::Explist.new(ARGV[0])
-IWS = 2 if Opt.charge[:ps] || Opt.charge[:eps]
-IWS = 4 if Opt.charge[:png]
-IWS = 1 if !defined? IWS
+IWS = get_iws
 
-clrmp = 14  # カラーマップ
-DCL::swlset('lwnd',false) if IWS==4
-DCL.sgscmn(clrmp)
-DCL.gropn(IWS)
-#DCL.sldiv('Y',2,1)
-DCL.sgpset('lcntl',true)
-DCL.sgpset('isub', 96)
-DCL.uzfact(1.0)
+set_dcl(14)
 
 hist_fig("H2OLiqIntP",list,"min"=>0,"max"=>30,"nbins"=>300)
 #hist_fig("RH",list,"min"=>0,"max"=>120,"nbins"=>120)

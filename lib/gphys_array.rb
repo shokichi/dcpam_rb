@@ -125,7 +125,7 @@ module AnalyDCPAM
       result = self.clone
       @legend.each do |key|
         next if self[key].nil?
-        result[key] self[key].cut(range)
+        result[key] = self[key].cut(range)
       end
       return result 
     end

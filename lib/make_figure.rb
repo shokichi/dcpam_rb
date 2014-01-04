@@ -7,8 +7,10 @@ require 'numru/gphys'
 include NumRu
 include Math
 include NMath
-require File.expand_path(File.dirname(__FILE__)+"/"+"utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/option_charge.rb")
+require File.expand_path(File.dirname(__FILE__)+"/utiles_spe.rb")
 require File.expand_path(File.dirname(__FILE__)+"/gphys-ext_dcpam.rb")
+require File.expand_path(File.dirname(__FILE__)+"/gphys_array.rb")
 include AnalyDCPAM
 include Utiles_spe
 
@@ -25,7 +27,6 @@ module MKfig
     return if defined? type    
 
     case type 
-      merid(gpa,figopt)
     when "lat"
       lat(gpa,figopt)
     when "lon"
@@ -56,7 +57,10 @@ module MKfig
   def merid(gpa,hash={}) # 子午面断面
     gpa = gpa.mean("time") if gpa.axnames.include?("time")
     gpa = gpa.mean("lon") if gpa.axnames.include?("lon")
-      
+
+    GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
+    GGraph.set_fig('window'=>[-90,90,nil,nil])
+
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
       gp = gpa[legend]
@@ -327,6 +331,12 @@ module MKfig
     local.units = "degree"
     gp.axis(0).set_pos(local)
     return gp
+  end
+# -------------------------------------------
+  def get_iws
+    return 2 if Opt.charge[:ps] || Opt.charge[:eps]
+    return 4 if Opt.charge[:png]
+    return 1 if !defined? IWS
   end
 # -------------------------------------------
   def set_figopt

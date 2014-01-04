@@ -15,22 +15,15 @@ include NumRu
 #
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
-IWS = 2 if Opt.charge[:ps] || Opt.charge[:eps]
-IWS = 4 if Opt.charge[:png]
-IWS = 1 if !defined? IWS
 list = Utiles_spe::Explist.new(ARGV[0])
+IWS = get_iws
 
 # DCL set
-DCL.gropn(IWS)
-#DCL.sldiv('Y',2,1)
-DCL.sgpset('lcntl',true)
-DCL.sgpset('isub', 96)
-DCL.uzfact(1.0)
+set_dcl
 
-
-if !varname.nil? then
-  figopt = set_figopt
-  make_figure(varname,list,figopt)
+FigType = "lon"
+if !Opt.charge[:varname].nil? then
+  make_figure(Opt.charge[:varname],list,set_figopt)
 else
   make_figure("OSRA",list,"min"=>-1200,"max"=>0)
   make_figure("OLRA",list,"min"=>0,"max"=>300)

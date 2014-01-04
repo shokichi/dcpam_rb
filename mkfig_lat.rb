@@ -12,11 +12,8 @@ include NumRu
 # option
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
-IWS = 2 if Opt.charge[:ps] || Opt.charge[:eps]
-IWS = 4 if Opt.charge[:png]
-IWS = 1 if !defined? IWS
-
 list = Utiles_spe::Explist.new(ARGV[0])
+IWS = get_iws2
 
 # DCL set
 set_dcl
