@@ -19,32 +19,28 @@ IWS = 1 if !defined? IWS
 list = Utiles_spe::Explist.new(ARGV[0])
 
 # DCL set
-DCL::swlset('lwnd',false) if IWS==4
-DCL.gropn(IWS)
-# DCL.sldiv('Y',2,1)
-DCL.sgpset('lcntl',true)
-DCL.sgpset('isub', 96)
-DCL.uzfact(1.0)
+set_dcl
 
 GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
+FigType = "lat"
 if !Opt.charge[:varname].nil? then
-  lat_fig(Opt.charge[:varname],list,set_figopt)
+  make_figure(Opt.charge[:varname],list,set_figopt)
 else
-  lat_fig("OSRA",list,"min"=>0,"max"=>-320)
-  lat_fig("OLRA",list,"min"=>0,"max"=>320)
-  lat_fig("EvapA",list,"min"=>-20,"max"=>300)
-  lat_fig("SensA",list,"min"=>-20,"max"=>300)
-  lat_fig("SSRA",list,"min"=>20,"max"=>-300)
-  lat_fig("SLRA",list,"min"=>-20,"max"=>300)
-  lat_fig("Temp",list,"min"=>200,"max"=>300)
-  lat_fig("SurfTemp",list,"min"=>200,"max"=>300)
-  lat_fig("Rain",list,"min"=>0,"max"=>6000)
-  lat_fig("RainCumulus",list,"min"=>0,"max"=>6000)
-  lat_fig("RainLsc",list,"min"=>0,"max"=>6000)
-  lat_fig("Ps",list,"min"=>90000,"max"=>110000)
-  lat_fig("PrcWtr",list,"min"=>0,"max"=>50)
+  make_figure("OSRA",list,"min"=>0,"max"=>-320)
+  make_figure("OLRA",list,"min"=>0,"max"=>320)
+  make_figure("EvapA",list,"min"=>-20,"max"=>300)
+  make_figure("SensA",list,"min"=>-20,"max"=>300)
+  make_figure("SSRA",list,"min"=>20,"max"=>-300)
+  make_figure("SLRA",list,"min"=>-20,"max"=>300)
+  make_figure("Temp",list,"min"=>200,"max"=>300)
+  make_figure("SurfTemp",list,"min"=>200,"max"=>300)
+  make_figure("Rain",list,"min"=>0,"max"=>6000)
+  make_figure("RainCumulus",list,"min"=>0,"max"=>6000)
+  make_figure("RainLsc",list,"min"=>0,"max"=>6000)
+  make_figure("Ps",list,"min"=>90000,"max"=>110000)
+  make_figure("PrcWtr",list,"min"=>0,"max"=>50)
 end  
 
 DCL.grcls

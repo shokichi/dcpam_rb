@@ -16,6 +16,14 @@ module MKfig
   def make_figure(varname,list,type,figopt={})
     gpa = GPhysArray.new(varname,list)
 
+    if !figopt[:type].nil?
+      type = figopt[:type]
+      figopt.delete(:type)
+    end
+    
+    type = FigType if defined? FigType
+    return if defined? type    
+
     case type 
       merid(gpa,figopt)
     when "lat"

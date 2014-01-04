@@ -20,20 +20,13 @@ IWS = 4 if Opt.charge[:png]
 IWS = 1 if !defined? IWS
 
 # DCL set
-clrmp = 14  # カラーマップ
-DCL::swlset('lwnd',false) if IWS==4
-DCL.sgscmn(clrmp)
-DCL.gropn(IWS)
-#DCL.sldiv('Y',2,1)
-DCL.sgpset('lcntl',true)
-DCL.sgpset('isub', 96)
-DCL.uzfact(1.0)
+set_dcl(14)
 
-if !varname.nil? then
-  figopt = set_figopt
-  lontime(varname,list,figopt)
+FigType = "lontime"
+if !Opt.charge[:varname].nil? then
+  make_figure(Opt.charge[:varname],list,set_figopt)
 else
-  lontime("Rain",list,"nlev"=>20)
+  make_figure("Rain",list,"nlev"=>20)
 end
 
 DCL.grcls
