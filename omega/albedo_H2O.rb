@@ -35,11 +35,11 @@ def draw_scatter(dir,name,hash={})
 #    y_coord = albedo[nlon/4+1..nlon*3/4-2,true,time..time]
     y_coord = albedo[false,time..time]
     hash = {'title'=> "Albedo & H2O"+" "+name,
-                 'annotate'=>false, }.merge(hash)
+                 'annotate'=>false,"type"=>1 }.merge(hash)
     if t == 0 then
       GGraph.scatter(x_coord,y_coord,true,hash)
     else  
-      GGraph.scatter(x_coord,y_coord,false)   
+      GGraph.scatter(x_coord,y_coord,false,"type"=>1)   
     end
   }
 end

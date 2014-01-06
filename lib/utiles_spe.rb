@@ -437,7 +437,7 @@ module Utiles_spe
     print "[#{data_name}](#{dir}) is created\n"
   end
   # ---------------------------------------
-  def local_time(gphys,hr_in_day)
+  def self.local_time(gphys,hr_in_day)
     
     lon = gphys.axis('lon')
     local = lon.pos

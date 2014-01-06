@@ -5,7 +5,7 @@
 
 require "numru/ggraph"
 require 'optparse'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/make_figure.rb")
+require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
 include MKfig
 include NumRu
 
@@ -13,7 +13,7 @@ include NumRu
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
 list = Utiles_spe::Explist.new(ARGV[0])
-IWS = get_iws2
+IWS = get_iws
 
 # DCL set
 set_dcl

@@ -88,7 +88,7 @@ module AnalyDCPAM
 
     def []=(*arg)
       val = arg.pop
-      key = arg
+      key = arg[0]
       @data[@legend.index(key)] = val
       return 
     end
@@ -130,6 +130,9 @@ module AnalyDCPAM
       return result 
     end
 
+    def axnames
+      return @data[0].axnames
+    end
     private
     def get_data
       result = []

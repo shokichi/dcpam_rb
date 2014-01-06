@@ -15,16 +15,16 @@ include AnalyDCPAM
 include Utiles_spe
 
 module MKfig
-  def make_figure(varname,list,type,figopt={})
+  def make_figure(varname,list,figopt={})
     gpa = GPhysArray.new(varname,list)
 
     if !figopt[:type].nil?
       type = figopt[:type]
       figopt.delete(:type)
     end
-    
+
     type = FigType if defined? FigType
-    return if defined? type    
+    return if !defined? type    
 
     case type 
     when "lat"
@@ -82,28 +82,27 @@ module MKfig
     gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
     # 時間平均経度平均
     gpa = gpa.mean('time') if gpa.axnames.include?("time")
-    gpa = gpa.mean("lon") if gp.axnames.include?("lon")
+    gpa = gpa.mean("lon") if gpa.axnames.include?("lon")
   
     lc = 23
     vx = 0.82
     vy = 0.8
-    gpa.legend.each do |legend|
-
-      next if gpa[legend].nil?
+    gpa.legend.each_index do |n|
+      legend = gpa.legend[n]
       gp = gpa[legend]
 
       # 
-      gp = gp.wm2mmyr if gp.name.include?("Rain") 
+#      gp = gp.wm2mmyr if gp.name.include?("Rain") 
   
       # 描画
       vy = vy - 0.025
       if n == 0 then
-        lc = 13 if list.ref.nil?
+        lc = 13 if gpa.list.ref.nil?
         fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
         GGraph.line( gp ,true ,fig_opt.merge(hash))
         DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
-      elsif n == list.refnum
+      elsif n == gpa.list.refnum
         lc_ref = 13
         fig_opt = {'index'=>lc_ref}      
         GGraph.line( gp ,false ,fig_opt.merge(hash))
@@ -119,25 +118,23 @@ module MKfig
     end
   end
 #------------------------------------------------
-  def lon(gpa,hash={})
-    # 高さ方向にデータがある場合は最下層を取り出す
-    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
-    # 時間平均経度平均
-    gpa = gpa.mean('time') if gpa.axnames.include?("time")
+  def lon(gpa,hash={}) 
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")#最下層切り出し
+    gpa = gpa.mean('time') if gpa.axnames.include?("time")#時間平均
     # 緯度切り出し
     lat = 0
     lat = Lat if defined?(Lat)
-    gp = gp.cut("lat"=>lat)
+    gpa = gpa.cut("lat"=>lat)
 
     lc = 23
     vx = 0.82
     vy = 0.8
-    gpa.legend.each do |legend|
-      next if gpa[legend].nil?
+    gpa.legend.each_index do |n|
+      legend = gpa.legend[n]
       gp = gpa[legend]
   
       # 降水量の単位変換
-      gp = gp.wm2mmyr if gp.name.include?("Rain") 
+#      gp = gp.wm2mmyr if gp.name.include?("Rain") 
 
       gp = fix_axis_local(gp)      
       # 描画
@@ -148,12 +145,12 @@ module MKfig
       # 描画
       vy = vy - 0.025
       if n == 0 then
-        lc = 13 if list.ref.nil?
+        lc = 13 if gpa.list.ref.nil?
         fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
         GGraph.line( gp ,true ,fig_opt.merge(hash))
         DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
-      elsif n == list.refnum
+      elsif n == gpa.list.refnum
         lc_ref = 13
         fig_opt = {'index'=>lc_ref}      
         GGraph.line( gp ,false ,fig_opt.merge(hash))
@@ -170,7 +167,7 @@ module MKfig
   end
 
 # -----------------------------------------------
-  def lonlat(var_name,list,hash={}) #水平断面
+  def lonlat(gpa,hash={}) #水平断面
     # 高さ方向にデータがある場合は最下層を取り出す
     gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
     gpa = gpa.cut("sigm"=>1) if gpa.axnames.include?("sigm")
@@ -196,7 +193,7 @@ module MKfig
     end
   end
 #---------------------------------------------
-  def lonsig(var_name,list,hash={}) # 経度断面
+  def lonsig(gpa,hash={}) # 経度断面
     # 時間平均経度平均
     gpa = gpa.mean('time') if gpa.axnames.include?("time")
 
@@ -223,7 +220,7 @@ module MKfig
     end
   end
 # -------------------------------------------
-  def lontime(varname,list,hash={})
+  def lontime(gpa,hash={})
     # 時間軸確認
     return if !gpa.axnames.include?("time")
 
@@ -363,7 +360,7 @@ module MKfig
 # -------------------------------------------
   def rename_img_file(id,scrfile) 
     id = id.id if id.class == Explist
-    img_lg = id+File.basename(scrfile,".rb").sub("mkfig","")
+    img_lg = id+"_"+File.basename(scrfile,".rb").sub("mkfig_","")
     img_lg += "_lat#{Lat.to_i}" if defined?(Lat)
     img_lg += "_#{VarName}" if defined?(VarName)
     if IWS == 2 

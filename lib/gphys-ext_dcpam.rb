@@ -4,7 +4,7 @@
 # 
 require "numru/ggraph"
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/../lib/utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/utiles_spe.rb")
 include NumRu
 include Math
 include NMath
@@ -273,8 +273,11 @@ module AnalyDCPAM
     lon = lon.to_gphys
     local_time = lon.copy
     nlon = lon.length
-    
-    gp_local_converted = GPhys.each_along_dims(gphys,"time"){ |gp|
+    gp_local_converted = gphys.copy
+#    GPhys.each_along_dims(gphys,"time") do |gp|
+    gphys.axis("time").to_gphys.val.to_a.each_index do |t|
+#      gp = gphys.cut_rank_conserving("time"=>time)
+      gp = gphys[false,t..t]
       nowtime = gp.axis("time").to_gphys
       gp_local = gp.copy
       # 時間の単位を[day]に変更
@@ -289,10 +292,16 @@ module AnalyDCPAM
         gp_local[0..nlon-1-local_min_index,false].val = gp[local_min_index..-1,false].val
         gp_local[nlon-local_min_index..-1,false].val = gp[0..local_min_index-1,false].val
       end
-      # lon -> localtime 変換
-      gp_local.axis("lon").set_pos(local)
-      return gp_local 
-    }  
+      gp_local_converted[false,t..t].val = gp_local[false].val 
+    end
+    # lon -> localtime 変換
+    gp_local_converted.axis("lon").set_pos(local)
+
+#    if gp_local_converted.size == 1
+#      return gp_local_converted[0] 
+#    else
+#      return GPhys.join(gp_local_converted)
+#    end
     return gp_local_converted
   end
   #-----------------------
