@@ -28,12 +28,22 @@ module AnalyDCPAM
 
     def +(other_gpa)
       gp_ary = []
-      self.data.each_index do |n|
-        gp1 = self.data[n]
-        gp2 = other_gpa[self.legend[n]]
-        gp = nil if gp1.nil? or gp2.nil?
-        gp = gp1 + gp2 unless gp.nil?
-        gp_ary << gp
+      if other_gpa.class == GPhysArray 
+        self.data.each_index do |n|
+          gp1 = self.data[n]
+          gp2 = other_gpa[self.legend[n]]
+          gp = nil if gp1.nil? or gp2.nil?
+          gp = gp1 + gp2 unless gp.nil?
+          gp_ary << gp
+        end
+      else
+        gp2 = other_gpa
+        self.data.each_index do |n|
+          gp1 = self.data[n]
+          gp = nil if gp1.nil?
+          gp = gp1 + gp2 unless gp.nil?
+          gp_ary << gp
+        end
       end
       result = self.clone
       result.data = gp_ary
@@ -41,13 +51,23 @@ module AnalyDCPAM
     end
 
     def -(other_gpa)
-      gp_ary = []
-      self.data.each_index do |n|
-        gp1 = self.data[n]
-        gp2 = other_gpa[self.legend[n]]
-        gp = nil if gp1.nil? or gp2.nil?
-        gp = gp1 - gp2 unless gp.nil?
-        gp_ary << gp
+      if other_gpa.class == GPhysArray 
+        gp_ary = []
+        self.data.each_index do |n|
+          gp1 = self.data[n]
+          gp2 = other_gpa[self.legend[n]]
+          gp = nil if gp1.nil? or gp2.nil?
+          gp = gp1 - gp2 unless gp.nil?
+          gp_ary << gp
+        end
+      else
+        gp2 = other_gpa
+        self.data.each_index do |n|
+          gp1 = self.data[n]
+          gp = nil if gp1.nil?
+          gp = gp1 - gp2 unless gp.nil?
+          gp_ary << gp
+        end
       end
       result = self.clone
       result.data = gp_ary
@@ -56,12 +76,22 @@ module AnalyDCPAM
 
     def *(other_gpa)
       gp_ary = []
-      self.data.each_index do |n|
-        gp1 = self.data[n]
-        gp2 = other_gpa[self.legend[n]]
-        gp = nil if gp1.nil? or gp2.nil?
-        gp = gp1 * gp2 unless gp.nil?
-        gp_ary << gp
+      if other_gpa.class == GPhysArray 
+        self.data.each_index do |n|
+          gp1 = self.data[n]
+          gp2 = other_gpa[self.legend[n]]
+          gp = nil if gp1.nil? or gp2.nil?
+          gp = gp1 * gp2 unless gp.nil?
+          gp_ary << gp
+        end
+      else
+        gp2 = other_gpa
+        self.data.each_index do |n|
+          gp1 = self.data[n]
+          gp = nil if gp1.nil?
+          gp = gp1 * gp2 unless gp.nil?
+          gp_ary << gp
+        end
       end
       result = self.clone
       result.data = gp_ary
@@ -70,12 +100,22 @@ module AnalyDCPAM
 
     def /(other_gpa)
       gp_ary = []
-      self.data.each_index do |n|
-        gp1 = self.data[n]
-        gp2 = other_gpa[self.legend[n]]
-        gp = nil if gp1.nil? or gp2.nil?
-        gp = gp1 / gp2 unless gp.nil?
-        gp_ary << gp
+      if other_gpa.class == GPhysArray 
+        self.data.each_index do |n|
+          gp1 = self.data[n]
+          gp2 = other_gpa[self.legend[n]]
+          gp = nil if gp1.nil? or gp2.nil?
+          gp = gp1 / gp2 unless gp.nil?
+          gp_ary << gp
+        end
+      else
+        gp2 = other_gpa
+        self.data.each_index do |n|
+          gp1 = self.data[n]
+          gp = nil if gp1.nil?
+          gp = gp1 / gp2 unless gp.nil?
+          gp_ary << gp
+        end
       end
       result = self.clone
       result.data = gp_ary
@@ -133,6 +173,26 @@ module AnalyDCPAM
     def axnames
       return @data[0].axnames
     end
+
+    def correlation(other_gpa)
+      rotation = []
+      coef_ary = []
+      self.data.each_index do |n|
+        gp1 = self.data[n]
+        gp2 = other_gpa[self.legend[n]]
+        coef = nil if gp2.nil?
+        coef = calc_correlat_coef(gp1,gp2) if !gp2.nil?
+        rotation << omega_ratio(@legend[n])
+        coef_ary << coef
+p coef
+      end
+      coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
+      coef_gp.axis(0).pos.name = "rotation rate" 
+      coef_gp.name = "correlation"
+      coef_gp.long_name = "correlation coefficient"
+      return coef_gp      
+    end
+
     private
     def get_data
       result = []
