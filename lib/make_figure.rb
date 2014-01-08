@@ -278,7 +278,7 @@ module MKfig
     end
   end
   # -------------------------------------------
-  def plot(y_coord,alon=true,hash={})
+  def plot(y_coord,newframe=true,hash={})
     x_coord = y_coord.axis(0).to_gphys
     y_coord.length.times do |n|
       figopt ={"index"=>index+10-2,"size"=>0.015,"type"=>4}.merge(hash)
