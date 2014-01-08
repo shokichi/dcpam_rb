@@ -7,7 +7,6 @@ require File.expand_path(File.dirname(__FILE__)+"/make_figure.rb")
 include MKfig
 
 
-
 module GlobalAverage
   class TableVal
     def initialize(list)

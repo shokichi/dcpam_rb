@@ -282,7 +282,7 @@ module MKfig
     x_coord = y_coord.axis(0).to_gphys
     y_coord.length.times do |n|
       figopt ={"index"=>index+10-2,"size"=>0.015,"type"=>4}.merge(hash)
-      GGraph.scatter x_coord[n..n],gp[n..n],alon,figopt
+      GGraph.scatter x_coord[n..n],gp[n..n],newframe,figopt
     end
   end
   # -------------------------------------------
