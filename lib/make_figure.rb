@@ -278,6 +278,14 @@ module MKfig
     end
   end
   # -------------------------------------------
+  def plot(y_coord,alon=true,hash={})
+    x_coord = y_coord.axis(0).to_gphys
+    y_coord.length.times do |n|
+      figopt ={"index"=>index+10-2,"size"=>0.015,"type"=>4}.merge(hash)
+      GGraph.scatter x_coord[n..n],gp[n..n],alon,figopt
+    end
+  end
+  # -------------------------------------------
 #   def gave_netrad(dir,name)  # エネルギー収支の確認
 #     # データの取得
 #     begin
