@@ -11,9 +11,10 @@ include NMath
 
 module NumRu
   class GPhys
-    module AnalyDCPAM
+#    module AnalyDCPAM
       def glmean  # 全球平均
         gp = self.clone
+        return gp.mean(0) if !gp.axnames.include?("lat")
         cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
         fact = cos_phi / cos_phi.mean
         gp_mean = (gp * fact).mean("lon","lat")
@@ -28,11 +29,11 @@ module NumRu
         return gp_mean
       end
       #----------------------
-      def variance(axis,ave=nil) # 分散
+      def variance(axis=0,ave=nil) # 分散
         gp = self.clone
-      ave = gp.mean(axis) if ave.nil?
+        ave = gp.glmean(axis) if ave.nil?
         result = (gp - ave)**2
-        return result.mean(axis)
+        return result.glmean(axis)
       end
       #---------------------- 
       def virtical_integral  # 鉛直積分
@@ -244,10 +245,10 @@ module NumRu
       # --------------------------------------
       def mask_diurnal
         gp = self.clone
-        if gp.axis("lon").long_name.include? "local"
-          print "Not local time\n"
-          return 
-        end
+#        if gp.axis("lon").pos.long_name.include? "local"
+#          print "Not local time\n"
+#          return gp
+#        end
         max = gp.lon_max
         gp = gp.cut("lon"=>max/4..max*3/4)
         return gp
@@ -258,7 +259,7 @@ module NumRu
         result = (lon[1]-lon[0])*lon.length
         return result
       end
-    end
+#    end
   end
 end
 ##############################################################
@@ -294,6 +295,7 @@ module AnalyDCPAM
       end
       gp_local_converted[false,t..t].val = gp_local[false].val 
     end
+
     # lon -> localtime 変換
     gp_local_converted.axis("lon").set_pos(local)
 
@@ -500,18 +502,20 @@ module AnalyDCPAM
   
   # --------------------------------------------
   def cos_ang(gp,hr_in_day) # cos(太陽天頂角) 
-    gp = gp.min2day(hr_in_day) if gp.axis("time").units == "min"
-    gp = gp.hrs2day(hr_in_day) if gp.axis("time").units == "hrs"
+    # gp は地方時変換済みであることが前提
 
     lon = gp.axis("lon").to_gphys if gp.axnames.include?("lon")
     lat = gp.axis("lat").to_gphys if gp.axnames.include?("lat")
-    time = gp.axis("time").to_gphys
-
+    if gp.axnames.include?("time")
+      time = gp.axis("time").to_gphys 
+      gp = gp.min2day(hr_in_day) if gp.axis("time").pos.units.to_s == "min"
+      gp = gp.hrs2day(hr_in_day) if gp.axis("time").pos.units.to_s == "hrs"
+    end
 #    slon = (time - time.to_i)*360
 #    slon = UNumeric[slon[0].val,"degree"]    # 太陽直下点経度
     slon = UNumeric[0,"degree"]    # 太陽直下点経度
     
-    ang = gp[false,0].copy
+    ang = gp[false].copy
     ang[false] = 1.0
     ang.units = "1"
     ang = ang*((ang.axis("lon").to_gphys+slon)*PI/180.0).cos
