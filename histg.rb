@@ -16,24 +16,30 @@ def hist_fig(data_name,list,opt={})
     next if gp.nil?
     gp = gp.wm2mmhr if gp.name.include? "Rain"
     gp = gp.cut("sig"=>1) if gp.axnames.include? "sig"
-    hr_in_day = Utiles_spe.omega_ratio(list.name[n])
-    gp = local_time(gp.cut("lat"=>0),hr_in_day)  #
+    if list.id.include? "coriolis"
+      hr_in_day = 24
+    else
+      hr_in_day = 24.0/Utiles_spe.omega_ratio(list.name[n])
+    end
+    gp = local_time(gp.cut("lat"=>0),hr_in_day)  # 
     gh = histogram_lon(gp,opt)
-    draw_fig(gh,list.name[n])
+    draw_fig(gh,list.name[n],set_figopt)
   end
 end
 
 def draw_fig(gp,legend,hash={})
-#  xcoord = gp.axis(0).to_gphys.val
-#  xmax = (xcoord[1]-xcoord[0])*xcoord.length
-#  GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+  xcoord = gp.axis(0).to_gphys.val
+  xmax = (xcoord[1]-xcoord[0])*xcoord.length
+  GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
   fig_opt = {'title'=>gp.long_name + " " + legend,
     'annotate'=>false,
     'color_bar'=>true,
+    'max'=>1,
+    'min'=>2e-10,
     'nlev'=>30,
     'log'=>3}.merge(hash)
-  GGraph.set_fig('window'=>[0,nil,nil,nil])
-  GGraph.tone(gp,true,fig_opt)
+  GGraph.set_fig('window'=>[0,xmax,nil,nil])
+  GGraph.tone_and_contour(gp,true,fig_opt)
 end
 
 def histogram_dev_time(gphys,range)
@@ -77,7 +83,9 @@ IWS = get_iws
 
 set_dcl(14)
 
-hist_fig("H2OLiqIntP",list,"min"=>0,"max"=>30,"nbins"=>300)
+
+hist_fig("H2OLiqIntP",list,"min"=>0,"max"=>3,"nbins"=>150)
+#hist_fig("Rain",list,"min"=>0,"max"=>300,"nbins"=>150)
 #hist_fig("RH",list,"min"=>0,"max"=>120,"nbins"=>120)
 
 DCL.grcls
