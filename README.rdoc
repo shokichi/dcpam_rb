@@ -7,10 +7,11 @@
 * mkfig_lonlat.rb:水平面分布(lon-lat)の図を作成
 * mkfig_gave.rb:全球平均値の表を作成
 * mkfig_latsig.rb:赤道断面の図を作成
+* mkfig_lontime.rb:ホフメラー図を作成
 * mkfig_anomaly_merid.rb: 
 * mkfig_anomaly_lonlat.rb: 
 * mkfig_anomaly_lonsig.rb: 
-* anime.rb:アニメーション作成
+* anime/:アニメーション作成ツール
 
 === 解析
 * albedo.rb:惑星アルベド
@@ -27,6 +28,9 @@
 === ライブラリ
 * lib/utiles_spe.rb
 * lib/make_figure.rb
+* lib/gphys-ext_dcpam.rb
+* lib/gphys_array.rb
+* lib/option_charge.rb
 
 == 準備
 * 依存ライブラリ
@@ -107,14 +111,17 @@ NetCDFファイルが置いてあるディレクトリで
  $ local_time.rb
 
 * オプション
- -n               変数名を指定
+ -n, --name       変数を指定
  -h, --hr_in_day  1日の長さを指定
+
+現状では地方時変換の後に時間平均される
+仕様になっている.
 
 === 複数の実験データを扱う場合
  $ hogehoge.rb ika.list
 
 ika.listには以下のようにデータの置いてあるディレクトリを書いておく
- [データの名前],[ディレクトリ]
+ [データの凡例],[ディレクトリ]
 
 * 行の先頭に# を付けるとその行はコメントアウトされる
 * 行の先頭に! を付けると標準実験として認識される
@@ -133,4 +140,5 @@ ika.listには以下のようにデータの置いてあるディレクトリを
 * 地方時変換
  $ local_time.rb -n RH -h 24
 
-
+ここで紹介されいないオプションについては --help オプションを付けることで
+確認できる
