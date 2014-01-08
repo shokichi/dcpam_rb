@@ -20,3 +20,5 @@ varlist = ['OSRA','OLRA',
            'RadLUWFLXA','RadLDWFLXA']
 
 GlobalAverage::create_gave(list,varlist)
+
+
