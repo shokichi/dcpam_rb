@@ -14,6 +14,7 @@ require File.expand_path(File.dirname(__FILE__)+"/gphys_array.rb")
 include AnalyDCPAM
 include Utiles_spe
 
+
 module MKfig
   def make_figure(varname,list,figopt={})
     gpa = GPhysArray.new(varname,list)
@@ -339,8 +340,10 @@ module MKfig
   end
 # -------------------------------------------
   def get_iws
-    return 2 if Opt.charge[:ps] || Opt.charge[:eps]
-    return 4 if Opt.charge[:png]
+    if defined? Opt
+      return 2 if Opt.charge[:ps] || Opt.charge[:eps]
+      return 4 if Opt.charge[:png]
+    end
     return 1 if !defined? IWS
   end
 # -------------------------------------------

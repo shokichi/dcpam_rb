@@ -9,7 +9,7 @@ require File.expand_path(File.dirname(__FILE__)+"/make_figure.rb")
 require File.expand_path(File.dirname(__FILE__)+"/gphys-ext_dcpam.rb")
 require File.expand_path(File.dirname(__FILE__)+"/gphys_array.rb")
 require File.expand_path(File.dirname(__FILE__)+"/option_charge.rb")
-require File.expand_path(File.dirname(__FILE__)+"/globa_ave.rb")
+require File.expand_path(File.dirname(__FILE__)+"/global_ave.rb")
 
 include NumRu
 include Math

@@ -8,30 +8,61 @@ include MKfig
 
 
 module GlobalAverage
-  class TableVal
+  class GLmean
     def initialize(list)
-      @@list = list
+      if list.class == Explist
+        @@list = list
+      else
+        @@list = Explist.new(list)
+      end
       @data = {}
-      @@refnum = list.refnum
+      @@refnum = @@list.refnum
     end
 
     def create(varlist)
+      varlist = [varlist] if varlist.class != Array
       varlist.each do |varname|
         self.add(varname)
       end
       self
     end
 
-    def load_file
+    def load(file_path)
+      @@infile = file_path
       read_file
+    end
+
+    def print(file_path)
+      @@outfile = file_path
+      write_file
     end
     
     def add(varname)
       @data[varname] = global_dataset(varname)
     end
 
+    def delete(varname)
+      @data.delete(varname)
+    end
+
     def add_rotation_rate
       @data = @data.merge(rotation_rate(@@list))
+    end
+
+    def set_axis(varname)
+      @axis_name = varname
+      @axis = @data[varname]
+    end
+
+    def [](arg)
+      return @data[arg]
+    end
+
+    def []=(*arg)
+      val = arg.pop
+      key = arg
+      val = [val] if !val.class.to_s.include? Array
+      @data[key] = val
     end
 
     def variable(varname)
@@ -47,9 +78,22 @@ module GlobalAverage
       return result 
     end
 
+    def to_gphys
+      if !defined? @axis
+        print "Axis is not defined."
+        return
+      end
+      result = self.clone
+      result.data.keys.each do |varname|
+        result.data[varname] = convert_gphys(varname)
+      end
+      result.delete(@axis_name)
+      return result
+    end
+
     private
     def read_file
-      File::open(@@file) do |f|
+      File::open(@@infile) do |f|
         f.each_line do |line|
           next if line.strip == -999
           parse_line(line.chop)
@@ -57,8 +101,8 @@ module GlobalAverage
       end
     end
     
-    def write_file(file_path)
-      File.open(file_path) do |file|
+    def write_file
+      File.open(@@outfile) do |file|
         print_header(file)
         @data.keys.each do |varname|
           file.print varname, "\t"
@@ -84,7 +128,7 @@ module GlobalAverage
     def global_dataset(varname) 
       ary = []
       @@list.dir.each do |dir|
-        ary << global_mean_data(varname,dir)  
+        ary << global_mean_data(varname,dir).to_f  
       end
       return ary
     end
@@ -94,27 +138,45 @@ module GlobalAverage
       list.name.each do |name|
         omega << Utiles_spe.omega_ratio(name)
       end
-      return {"Rotaion"=>omega}
+      return {"Rotation"=>omega}
     end
 
-    def global_mean_data(varname,dir)
-      # データの取得
+    def global_mean_data(varname,dir)  
       gp = gpopen dir + varname +".nc"
       return "None" if gp.nil?
       
-      # 大気最下層切り出し
       gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
       gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
       
-      # 降水量の単位変換
-      gp = Utiles_spe.wm2mmyr(gp) if varname.include? "Rain"
+      gp = gp.mask_diurnal*mask_day_fix(gp) if defined? DayTime
+      gp = gp.mask_night*mask_day_fix(gp) if defined? NightTime
+
+      gp = gp.wm2mmyr if varname.include? "Rain"
       
-      # 全球平均
-      result = Utiles_spe.glmean(gp) if gp.rank != 1  
-      return result
-    end  
+      gp = gp.glmean if gp.rank != 1
+      return gp
+    end
+
+    def convert_gphys(varname)
+      gp = Utiles_spe.array2gp(@axis,@data[varname])
+      gp.name = varname
+      axis = gp.axis(0).pos
+      axis.name = @axis_name
+      gp.axis(0).set_pos(axis)
+      return gp
+    end
     public
 
-    attr_reader :data
+    attr_reader :data, :axis, :axis_name
+  end
+  # -------------------------------------------------
+  def mask_day_fix(gp) # for glmean
+    nlon = gp.axis(0).length.to_f
+    return nlon/(nlon/2+1)/2
+  end
+  
+  def mask_night_fix(gp) # for glmean
+    nlon = gp.axis(0).length.to_f
+    return nlon/(nlon/2-1)/2    
   end
 end
