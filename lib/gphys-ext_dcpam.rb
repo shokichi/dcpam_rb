@@ -130,7 +130,7 @@ module NumRu
                            VArray.new(
                                       NArray.sfloat(
                                                 lon.length,lat.length,sigm.length,time.length)))
-      result.name = gp.name
+        result.name = gp.name
         result.units = gp.units
         result[false] = 0
         return result
@@ -243,15 +243,25 @@ module NumRu
         return result
       end
       # --------------------------------------
-      def mask_diurnal
+      def diurnal(slon=nil)
         gp = self.clone
-#        if gp.axis("lon").pos.long_name.include? "local"
-#          print "Not local time\n"
-#          return gp
-#        end
         max = gp.lon_max
-        gp = gp.cut("lon"=>max/4..max*3/4)
+        sunrise = max/4
+        sunset = max*3/4
+        gp = gp.cut("lon"=>sunset..sunrise)
         return gp
+      end
+      # --------------------------------------
+      def mask_diurnal(slon=nil)
+        gp = self.clone
+        result = gp*day_mask(gp)
+        return result
+      end
+      # ---------------------------------------
+      def mask_night(slon=nil)
+        gp = self.clone
+        result = gp*(1-day_mask(gp))
+        return result
       end
       # ---------------------------------------
       def lon_max
@@ -259,6 +269,7 @@ module NumRu
         result = (lon[1]-lon[0])*lon.length
         return result
       end
+
 #    end
   end
 end
@@ -498,8 +509,7 @@ module AnalyDCPAM
     }
     ofile.close
     print "[#{data_name}](#{dir}) is created\n"
-  end
-  
+  end  
   # --------------------------------------------
   def cos_ang(gp,hr_in_day) # cos(太陽天頂角) 
     # gp は地方時変換済みであることが前提
@@ -521,5 +531,14 @@ module AnalyDCPAM
     ang = ang*((ang.axis("lon").to_gphys+slon)*PI/180.0).cos
     ang = ang*(ang.axis("lat").to_gphys*PI/180.0).cos
     return ang + 1e-14
+  end
+  # ---------------------------------------------
+  def day_mask(gp,slon=0)
+    mask = gp.copy
+    mask[false] = 0
+    nmax = mask.axis(0).length
+    mask[nmax/4..nmax*3/4,false] = 1
+    mask.units = "1"
+    return mask
   end
 end
