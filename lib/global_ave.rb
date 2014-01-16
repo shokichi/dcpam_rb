@@ -9,13 +9,14 @@ include MKfig
 
 module GlobalAverage
   class GLmean
-    def initialize(list)
+    def initialize(list=nil)
       if list.class == Explist
         @@list = list
       else
         @@list = Explist.new(list)
       end
       @data = {}
+      @@units = {}
       @@refnum = @@list.refnum
     end
 
@@ -30,9 +31,10 @@ module GlobalAverage
     def load(file_path)
       @@infile = file_path
       read_file
+      return self
     end
 
-    def print(file_path)
+    def prints(file_path)
       @@outfile = file_path
       write_file
     end
@@ -60,12 +62,23 @@ module GlobalAverage
 
     def []=(*arg)
       val = arg.pop
-      key = arg
-      val = [val] if !val.class.to_s.include? Array
+      key = arg[0]
+      val = [val] if !val.class.to_s.include? "Array"
       @data[key] = val
     end
 
-    def variable(varname)
+    def units_of(varname)
+      return @@units[varname]
+    end
+
+    def units=(*arg)
+      arg = arg[0]
+      unit = arg.pop
+      varname = arg[0]
+      @@units[varname] = unit
+    end
+
+    def anomaly(varname)
       val = self.data[varname]
       result = []
       val.each_index do |n|
@@ -102,28 +115,36 @@ module GlobalAverage
     end
     
     def write_file
-      File.open(@@outfile) do |file|
-        print_header(file)
+      File.open(@@outfile,"w") do |file|
+        # print_header(file)
         @data.keys.each do |varname|
+          varname += ","+@@units[varname] if !@@units[varname].nil?
           file.print varname, "\t"
           file.print @data[varname].join("\t") ,"\n"
         end
       end
-      puts "#{file_path} created\n"
+      puts "#{@@outfile} created\n"
     end
     
     def print_header(file)
-      file.print <<-EOS
-        ##########################
-        # 全球平均値              
-        ##########################
+      file.print <<-EOS               
       EOS
     end
 
     def parse_line(line)
       line = line.split("\t")
-      @data[line[0]] = line[1..-1]
+      varname = line[0].split(",")[0]
+      @@units[varname] = line[0].split(",")[1]   
+      @data[varname] = ary_s2f(line[1..-1])
     end    
+
+    def ary_s2f(ary)
+      result = []
+      ary.each do |s|
+        result << s.to_f
+      end
+      return result
+    end
 
     def global_dataset(varname) 
       ary = []
@@ -143,17 +164,19 @@ module GlobalAverage
 
     def global_mean_data(varname,dir)  
       gp = gpopen dir + varname +".nc"
-      return "None" if gp.nil?
+      return -999.9 if gp.nil?
       
       gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
       gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
       
-      gp = gp.mask_diurnal*mask_day_fix(gp) if defined? DayTime
-      gp = gp.mask_night*mask_day_fix(gp) if defined? NightTime
-
+      if varname != "SurfTemp"
+        gp = gp.mask_diurnal*mask_day_fix(gp) if defined? DayTime
+        gp = gp.mask_night*mask_day_fix(gp) if defined? NightTime
+      end
       gp = gp.wm2mmyr if varname.include? "Rain"
       
       gp = gp.glmean if gp.rank != 1
+      @@units[varname] = gp.units
       return gp
     end
 
