@@ -6,7 +6,7 @@
 
 require 'numru/ggraph'
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/lib/dcpam.rb")
 require "optparse"
 include Utiles_spe
 include NumRu
