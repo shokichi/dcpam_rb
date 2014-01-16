@@ -31,29 +31,36 @@ module OptCharge
     
     private
     def figure_parameter
-      @@opt.on("--max=MAX") {|max| @charge[:max] = max.to_f}
-      @@opt.on("--min=MIN") {|min| @charge[:min] = min.to_f}
-      @@opt.on("--nlev=nlevel") {|nlev| @charge[:nlev] = nlev.to_i}
-      @@opt.on("--clr_max=color_max") {|clrmax| @charge[:clrmax] = clrmax.to_i}
-      @@opt.on("--clr_min=color_min") {|clrmin| @charge[:clrmin] = clrmin.to_i}
+      @@opt.on("--max=[maximum]") {|max| @charge[:max] = max.to_f}
+      @@opt.on("--min=[minimum]") {|min| @charge[:min] = min.to_f}
+      @@opt.on("--nlev=[number of levels]") {
+        |nlev| @charge[:nlev] = nlev.to_i}
+      @@opt.on("--clr_max=[maximum color id]") {
+        |id| @charge[:clrmax] = id.to_i}
+      @@opt.on("--clr_min=[minimum color id]") {
+        |id| @charge[:clrmin] = id.to_i}
       @@opt.on("--notitle") {@charge[:notitle] = true}
     end
     
     def attribute_parameter
      @@opt.on("-r","--rank") {@charge[:rank] = true}
-      @@opt.on("--name=STRING") {|name| @charge[:varname] = name}
-      @@opt.on("--hr_in_day=Float") {|hrs| @charge[:hr_in_day] = hrs}
-      @@opt.on("--omega=Float") {|omega| @charge[:omega] = omega}
+      @@opt.on("--name=[data name]") {|name| @charge[:varname] = name}
+      @@opt.on("--hr_in_day=[hours in day]") {
+        |hrs| @charge[:hr_in_day] = hrs}
+      @@opt.on("--omega=[rotation rate]") {
+        |omega| @charge[:omega] = omega}
       @@opt.on("--time_range=Day") {|day| @charge[:timerange] = day.to_f}
     end
     
     def cut_and_mean
-      @@opt.on("--lat=Lat") {|lat| @chrge[:lat] = lat.to_f}
-      @@opt.on("--cut=STRING"){|range| @charge[:cut] = range }
-      @@opt.on("--mean=STRING"){|axis| @charge[:mean] = axis }
+      @@opt.on("--lat=[latitude]") {|lat| @charge[:lat] = lat.to_f}
+      @@opt.on("--cut=[cut range]"){|range| @charge[:cut] = range }
+      @@opt.on("--mean=[mean axis]"){|axis| @charge[:mean] = axis }
     end
     
     def picture_format
+      @@opt.on("--parafig=[number of picture]"){
+        |num| @charge[:parafig] = num.to_i }
       @@opt.on("--eps") {@charge[:eps] = true} 
       @@opt.on("--ps")  {@charge[:ps]  = true}
       @@opt.on("--png") {@charge[:png] = true}
