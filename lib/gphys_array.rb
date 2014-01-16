@@ -32,17 +32,17 @@ module AnalyDCPAM
         self.data.each_index do |n|
           gp1 = self.data[n]
           gp2 = other_gpa[self.legend[n]]
-          gp = nil if gp1.nil? or gp2.nil?
-          gp = gp1 + gp2 unless gp.nil?
-          gp_ary << gp
+          if gp1.nil? or gp2.nil?
+            gp_ary << nil 
+          else
+            gp_ary << gp1 + gp2
+          end 
         end
       else
         gp2 = other_gpa
         self.data.each_index do |n|
           gp1 = self.data[n]
-          gp = nil if gp1.nil?
-          gp = gp1 + gp2 unless gp.nil?
-          gp_ary << gp
+          gp_ary << gp1 + gp2
         end
       end
       result = self.clone
@@ -56,17 +56,17 @@ module AnalyDCPAM
         self.data.each_index do |n|
           gp1 = self.data[n]
           gp2 = other_gpa[self.legend[n]]
-          gp = nil if gp1.nil? or gp2.nil?
-          gp = gp1 - gp2 unless gp.nil?
-          gp_ary << gp
+          if gp1.nil? or gp2.nil?
+            gp_ary << nil 
+          else
+            gp_ary << gp1 - gp2
+          end 
         end
       else
         gp2 = other_gpa
         self.data.each_index do |n|
           gp1 = self.data[n]
-          gp = nil if gp1.nil?
-          gp = gp1 - gp2 unless gp.nil?
-          gp_ary << gp
+          gp_ary << gp1 - gp2
         end
       end
       result = self.clone
@@ -80,17 +80,17 @@ module AnalyDCPAM
         self.data.each_index do |n|
           gp1 = self.data[n]
           gp2 = other_gpa[self.legend[n]]
-          gp = nil if gp1.nil? or gp2.nil?
-          gp = gp1 * gp2 unless gp.nil?
-          gp_ary << gp
+          if gp1.nil? or gp2.nil?
+            gp_ary << nil 
+          else
+            gp_ary << gp1 * gp2
+          end 
         end
       else
         gp2 = other_gpa
         self.data.each_index do |n|
           gp1 = self.data[n]
-          gp = nil if gp1.nil?
-          gp = gp1 * gp2 unless gp.nil?
-          gp_ary << gp
+          gp_ary << gp1 * gp2           
         end
       end
       result = self.clone
@@ -104,17 +104,17 @@ module AnalyDCPAM
         self.data.each_index do |n|
           gp1 = self.data[n]
           gp2 = other_gpa[self.legend[n]]
-          gp = nil if gp1.nil? or gp2.nil?
-          gp = gp1 / gp2 unless gp.nil?
-          gp_ary << gp
+          if gp1.nil? or gp2.nil?
+            gp_ary << nil 
+          else
+            gp_ary << gp1 / gp2
+          end 
         end
       else
         gp2 = other_gpa
         self.data.each_index do |n|
           gp1 = self.data[n]
-          gp = nil if gp1.nil?
-          gp = gp1 / gp2 unless gp.nil?
-          gp_ary << gp
+          gp_ary << gp1 / gp2 
         end
       end
       result = self.clone
