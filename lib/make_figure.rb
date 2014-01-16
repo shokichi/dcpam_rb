@@ -49,10 +49,19 @@ module MKfig
     DCL::swlset('lwnd',false) if IWS==4
     DCL.sgscmn(clrmp) if clr
     DCL.gropn(IWS)
-    #DCL.sldiv('Y',2,1)
     DCL.sgpset('lcntl',true)
     DCL.sgpset('isub', 96)
     DCL.uzfact(1.0)
+    plural_picture(Opt.charge[:parafig]) if defined? Opt
+  end
+# --------------------------------------------------
+  def plural_picture(amount)
+    return if amount.nil?
+    yoko = 2
+    tate = (amount.to_i+1)/2
+    DCL.sldiv('T',yoko,tate) 
+#    DCL.sgpset('lcntl', false)   # 制御文字を解釈しない
+    DCL.sgpset('lfull',true)     # 全画面表示
   end
 # --------------------------------------------------  
   def merid(gpa,hash={}) # 子午面断面
@@ -91,6 +100,7 @@ module MKfig
     gpa.legend.each_index do |n|
       legend = gpa.legend[n]
       gp = gpa[legend]
+      next if gp.nil?  
 
       # 
 #      gp = gp.wm2mmyr if gp.name.include?("Rain") 
@@ -125,6 +135,7 @@ module MKfig
     # 緯度切り出し
     lat = 0
     lat = Lat if defined?(Lat)
+    lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
     gpa = gpa.cut("lat"=>lat)
 
     lc = 23
@@ -133,7 +144,7 @@ module MKfig
     gpa.legend.each_index do |n|
       legend = gpa.legend[n]
       gp = gpa[legend]
-  
+      next if gp.nil?  
       # 降水量の単位変換
 #      gp = gp.wm2mmyr if gp.name.include?("Rain") 
 
@@ -201,6 +212,7 @@ module MKfig
     # 緯度切り出し
     lat = 0
     lat = Lat if defined?(Lat)
+    lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
     gpa = gpa.cut("lat"=>lat)
 
     gpa.legend.each do |legend|
@@ -230,6 +242,7 @@ module MKfig
     # 緯度切り出し
     lat = 0
     lat = Lat if defined?(Lat)
+    lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
     gpa = gpa.cut("lat"=>lat)
 
     gpa.legend.each do |legend|
@@ -349,11 +362,11 @@ module MKfig
 # -------------------------------------------
   def set_figopt
     figopt = {}
-    figopt["max"] = Max if defined?(Max)
-    figopt["min"] = Min if defined?(Min)
-    figopt["nlev"] = Nlev if defined?(Nlev)
-    figopt["clr_max"] = ClrMax if defined?(ClrMax)
-    figopt["clr_min"] = ClrMin if defined?(ClrMin)        
+    figopt["max"] = Opt.charge[:max] if Opt && !Opt.charge[:max].nil?
+    figopt["min"] = Opt.charge[:min] if Opt && !Opt.charge[:min].nil?
+    figopt["nlev"] = Opt.charge[:nlev] if Opt && !Opt.charge[:nlev].nil?
+    figopt["clr_max"] = Opt.charge[:clr_max] if Opt && !Opt.charge[:clr_max].nil?
+    figopt["clr_min"] = Opt.charge[:clr_min] if Opt && !Opt.charge[:clr_min].nil?
     figopt = parse_Figopt(figopt)
     return figopt
   end
@@ -372,8 +385,8 @@ module MKfig
   def rename_img_file(id,scrfile) 
     id = id.id if id.class == Explist
     img_lg = id+"_"+File.basename(scrfile,".rb").sub("mkfig_","")
-    img_lg += "_lat#{Lat.to_i}" if defined?(Lat)
-    img_lg += "_#{VarName}" if defined?(VarName)
+    img_lg += "_lat#{Opt.charge[:lat].to_i}" if Opt && !Opt.charge[:lat].nil?
+    img_lg += "_#{Opt.charge[:name]}"  if Opt && !Opt.charge[:name].nil?
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
     elsif IWS == 4
