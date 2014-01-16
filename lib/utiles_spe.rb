@@ -123,6 +123,7 @@ module Utiles_spe
 
   #---------------------- 
   def self.glmean(gp)  # 全球平均
+    return gp.mean(0) if !gp.axnames.include?("lat")
     cos_phi = ( gp.axis("lat").to_gphys * (Math::PI/180.0) ).cos
     fact = cos_phi / cos_phi.mean
     gp_mean = (gp * fact).mean("lon","lat")
@@ -478,6 +479,14 @@ module Utiles_spe
     yy_S = Utiles_spe.glmean((y-y_mean)**2)
     return xy_S /(xx_S * yy_S).sqrt
   end  
+  # ---------------------------------------
+  def calc_regression_sloop(x,y)  # 回帰係数の計算
+    x_mean = Utiles_spe.glmean(x)
+    y_mean = Utiles_spe.glmean(y)
+    xy_S = Utiles_spe.glmean((x-x_mean)*(y-y_mean))
+    xx_S = Utiles_spe.glmean((x-x_mean)**2)
+    return xy_S /xx_S      
+  end
   # ---------------------------------------
   def mirror_lat(gp) # 折り返し(緯度)
     lat = gp.axis("lat").to_gphys
