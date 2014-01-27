@@ -109,14 +109,11 @@ module Utiles_spe
 
   #-----------------------
   def self.array2gp(x_var,y_var)  # 簡単GPhysオブジェクトの作成
-    x_val = NArray.to_na(x_var) # x軸
-    y_val = NArray.to_na(y_var) # y軸
-    
     x_coord = Axis.new
     x_coord.name = "x_coord"
-    x_coord.set_pos(VArray.new(x_val))
+    x_coord.set_pos(VArray.new( NArray.to_na(x_var)))
     grid = Grid.new(x_coord)
-    gp = GPhys.new(grid,VArray.new(y_val))
+    gp = GPhys.new(grid,VArray.new( NArray.to_na(y_var)))
     gp.name = "y_coord"
     return gp
   end
