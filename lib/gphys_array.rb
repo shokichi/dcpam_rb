@@ -138,6 +138,14 @@ module AnalyDCPAM
       self
     end
 
+    def delete(*varnames)
+      varnames.each do |varname|
+        @data.delete_at(@legend.index(varname))
+        @legend.delete(varname)
+      end
+      self
+    end
+
     def anomaly
       ary = []
       @data.each do |gp|
@@ -170,6 +178,24 @@ module AnalyDCPAM
       return result 
     end
 
+    def glmean
+      result = self.clone
+      @legend.each do |key|
+        next if self[key].nil?
+        result[key] = self[key].glmean
+      end
+      return result
+    end
+
+    def latmean
+      result = self.clone
+      @legend.each do |key|
+        next if self[key].nil?
+        result[key] = self[key].latmean
+      end
+      return result
+    end
+
     def axnames
       return @data[0].axnames
     end
@@ -184,7 +210,6 @@ module AnalyDCPAM
         coef = calc_correlat_coef(gp1,gp2) if !gp2.nil?
         rotation << omega_ratio(@legend[n])
         coef_ary << coef
-p coef
       end
       coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
       coef_gp.axis(0).pos.name = "rotation rate" 
