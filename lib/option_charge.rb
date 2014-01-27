@@ -8,7 +8,7 @@ module OptCharge
 
   class OptCharge
  
-    def initialize(arge)
+    def initialize(arge=ARGV)
       @@arge = arge
       @@opt = OptionParser.new
       @charge = {}
@@ -16,6 +16,7 @@ module OptCharge
       attribute_parameter
       picture_format
       cut_and_mean
+      self
     end
     
     def set
@@ -25,6 +26,7 @@ module OptCharge
     def add_option(arg,option,format=nil)
       @@opt.on(arg) {|v| 
         v = v.to_f if format == "float"
+        v = true if format == "flag"
         @charge[option] = v 
       }
     end
@@ -36,15 +38,19 @@ module OptCharge
       @@opt.on("--nlev=[number of levels]") {
         |nlev| @charge[:nlev] = nlev.to_i}
       @@opt.on("--clr_max=[maximum color id]") {
-        |id| @charge[:clrmax] = id.to_i}
+        |id| @charge[:clr_max] = id.to_i}
       @@opt.on("--clr_min=[minimum color id]") {
-        |id| @charge[:clrmin] = id.to_i}
+        |id| @charge[:clr_min] = id.to_i}
       @@opt.on("--notitle") {@charge[:notitle] = true}
+      @@opt.on("--xmin=[x axis minimum]"){|min| @charge[:xmin] = min.to_f}
+      @@opt.on("--xmax=[x axis maximum]"){|max| @charge[:xmax] = max.to_f}
+      @@opt.on("--ymin=[y axis minimum]"){|min| @charge[:ymin] = min.to_f}
+      @@opt.on("--ymax=[y axis maximum]"){|max| @charge[:ymax] = max.to_f}
     end
     
     def attribute_parameter
      @@opt.on("-r","--rank") {@charge[:rank] = true}
-      @@opt.on("--name=[data name]") {|name| @charge[:varname] = name}
+      @@opt.on("--name=[data name]") {|name| @charge[:name] = name}
       @@opt.on("--hr_in_day=[hours in day]") {
         |hrs| @charge[:hr_in_day] = hrs}
       @@opt.on("--omega=[rotation rate]") {

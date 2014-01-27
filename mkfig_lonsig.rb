@@ -21,8 +21,8 @@ IWS = get_iws
 set_dcl(14)
 
 FigType = "lonsig"
-if !Opt.charge[:varname].nil then
-  make_figure(Opt.charge[:varname],list,set_figopt)
+if !Opt.charge[:name].nil then
+  make_figure(Opt.charge[:name],list,set_figopt)
 else
   make_figure("Temp",list,"min"=>120,"max"=>320,"nlev"=>20)
   make_figure("DQVapDtCond",list,"min"=>-2e-7,"max"=>2e-7,"nlev"=>20)

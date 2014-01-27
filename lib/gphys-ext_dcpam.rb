@@ -269,7 +269,18 @@ module NumRu
         result = (lon[1]-lon[0])*lon.length
         return result
       end
-
+      # -----------------------------------
+      def local2degree
+        gp = self.clone
+        xcoord = gp.axis(0).to_gphys.val
+        xmax = gp.lon_max
+        return gp if xmax == 360
+        a = 360/xmax
+        local = gp.axis(0).pos * a
+        local.units = "degree"
+        gp.axis(0).set_pos(local)
+        return gp
+      end
 #    end
   end
 end
@@ -372,6 +383,10 @@ module AnalyDCPAM
       [gp_press]
     }
     
+  end
+  #----------------------------------------- 
+  def calc_planetary_albedo(osr)
+    return 1.0 + osr.glmean/(SolarConst/4)
   end
   #----------------------------------------- 
   def self.calc_msf_save(gv,gps,sigm)  # 質量流線関数の計算
@@ -511,11 +526,12 @@ module AnalyDCPAM
     print "[#{data_name}](#{dir}) is created\n"
   end  
   # --------------------------------------------
-  def cos_ang(gp,hr_in_day) # cos(太陽天頂角) 
+  def cos_ang(gp,hr_in_day=24.0) # cos(太陽天頂角) 
     # gp は地方時変換済みであることが前提
-
+    gp = gp.local2degree
     lon = gp.axis("lon").to_gphys if gp.axnames.include?("lon")
     lat = gp.axis("lat").to_gphys if gp.axnames.include?("lat")
+
     if gp.axnames.include?("time")
       time = gp.axis("time").to_gphys 
       gp = gp.min2day(hr_in_day) if gp.axis("time").pos.units.to_s == "min"
@@ -526,11 +542,11 @@ module AnalyDCPAM
     slon = UNumeric[0,"degree"]    # 太陽直下点経度
     
     ang = gp[false].copy
-    ang[false] = 1.0
+    ang[false] = -1.0
     ang.units = "1"
     ang = ang*((ang.axis("lon").to_gphys+slon)*PI/180.0).cos
     ang = ang*(ang.axis("lat").to_gphys*PI/180.0).cos
-    return ang + 1e-14
+    return ang.mask_diurnal + 1e-14
   end
   # ---------------------------------------------
   def day_mask(gp,slon=0)

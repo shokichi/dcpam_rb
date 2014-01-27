@@ -51,6 +51,10 @@ module GlobalAverage
       @data = @data.merge(rotation_rate(@@list))
     end
 
+    def add_planetary_albedo
+      @data = @data.merge(planetary_albedo)
+    end
+
     def set_axis(varname)
       @axis_name = varname
       @axis = @data[varname]
@@ -141,7 +145,7 @@ module GlobalAverage
     def ary_s2f(ary)
       result = []
       ary.each do |s|
-        result << s.to_f
+        result << s.to_f if !s.empty?
       end
       return result
     end
@@ -162,14 +166,27 @@ module GlobalAverage
       return {"Rotation"=>omega}
     end
 
+    def planetary_albedo
+      alb = []
+      @@list.dir.each do |dir|
+        gp = gpopen dir + "OSRA.nc"
+        alb << calc_planetary_albedo(gp)
+      end
+      return {"Albedo"=>alb}
+    end
+
     def global_mean_data(varname,dir)  
       gp = gpopen dir + varname +".nc"
       return -999.9 if gp.nil?
-      
+
       gp = gp.cut("sig"=>1) if gp.axnames.include?("sig")
       gp = gp.cut("sigm"=>1) if gp.axnames.include?("sigm")
-      
-      if varname != "SurfTemp"
+
+#      if defined? AngSolar && varname == "H2OLiqIntP"
+#        gp = gp*cos_ang(gp)
+#      end      
+
+      if varname != "SurfTemp" && varname != "Albedo"
         gp = gp.mask_diurnal*mask_day_fix(gp) if defined? DayTime
         gp = gp.mask_night*mask_day_fix(gp) if defined? NightTime
       end

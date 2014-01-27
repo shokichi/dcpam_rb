@@ -5,81 +5,72 @@
 
 require 'numru/ggraph'
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-require 'narray'
-require "narray_miss"
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/dcpam.rb")
+require 'optparse'
+include Utiles_spe
 include NumRu
 include Math
 
 
 def big_mean(dir,data_name)
-  for n in 0..dir.length-1
-    begin
-      gphys = GPhys::IO.open(dir[n] + data_name + '.nc',data_name)
-    rescue
-      print "[#{data_name}](#{dir[n]}) is not exist\n"
-      next
-    end
-    ntime = gphys.axis('time').length
-    ave = gphys[false,0]
-    for i in 1..ntime-1
-      ave = ave + gphys[false,i]
-    end
-    ave = ave/ntime
-    ave = ave.mean('lon')
-    ofile = NetCDF.create(dir[n] + 'M' + data_name + '.nc')
-    GPhys::IO.write(ofile, ave)
-    ofile.close
+  gphys = gpopen dir + data_name + '.nc'
+  return if gphys.nil?
+  ntime = gphys.axis('time').length
+  ave = gphys[false,0]
+  for i in 1..ntime-1
+    ave = ave + gphys[false,i]
   end
+  ave = ave/ntime
+  ave = ave.mean('lon')
+  ofile = NetCDF.create(dir + 'M' + data_name + '.nc')
+  GPhys::IO.write(ofile, ave)
+  ofile.close
 end
 
 def time_mean(dir,data_name)
-  for n in 0..dir.length-1
-    begin
-      gphys = GPhys::IO.open(dir[n] + data_name + '.nc',data_name)
-    rescue
-      print "[#{data_name}](#{dir[n]}) is not exist\n"
-      next
-    end
-    ntime = gphys.axis('time').length
-    ave = 0
-    GPhys.each_along_dims(gphys,"time") do |gp|
-      ave = ave + gp
-    end
-    ave = ave/ntime
-    ofile2 = NetCDF.create(dir[n] + 'MT' + data_name + '.nc')
-    GPhys::IO.write(ofile2, ave)
-    ofile2.close
+  gphys = gpopen dir + data_name + '.nc'
+  return if gphys.nil?
+  ntime = gphys.axis('time').length
+  ave = 0
+  GPhys.each_along_dims(gphys,"time") do |gp|
+    ave = ave + gp
   end
+  ave = ave/ntime
+  ofile2 = NetCDF.create(dir + 'MT' + data_name + '.nc')
+  GPhys::IO.write(ofile2, ave)
+  ofile2.close
 end
 
 def lon_mean(dir,data_name)
-  for n in 0..dir.length-1
-    begin
-      gphys = GPhys::IO.open(dir[n] + data_name + '.nc',data_name)
-    rescue
-      print "[#{data_name}](#{dir[n]}) is not exist\n"
-      next
-    end
-    ofile2 = NetCDF.create(dir[n] + 'ML' + data_name + '.nc')
-    GPhys::NetCDF_IO.each_along_dims_write(gphys, ofile2, 'time') { 
-      |sub|  
-      subm = sub.mean('lon')
-      [submean]
-    }
-    ofile2.close
-  end
+  gphys = gpopen dir + data_name + '.nc'
+  return if gphys.nil?
+  ofile2 = NetCDF.create(dir + 'ML' + data_name + '.nc')
+  GPhys::NetCDF_IO.each_along_dims_write(gphys, ofile2, 'time') { 
+    |sub|  
+    subm = sub.mean('lon')
+    [submean]
+  }
+  ofile2.close
 end
 
-list = Utiles_spe::Explist.new(ARGV[0])
-var_name = ARGV[1]
 
-if ARGV.index('-t') 
-  time_mean(list.dir,var_name)
-elsif ARGV.index('-l')
-  lon_mean(list.dir,var_name)
+# option
+Opt = OptCharge::OptCharge.new(ARGV)
+Opt.add_option("--time",:time_mean,"flag")
+Opt.add_option("--lon",:lon_mean,"flag")
+Opt.set
+
+list = Utiles_spe::Explist.new(ARGV[0])
+IWS = get_iws
+
+varname = Opt.charge[:name]
+
+if Opt.charge[:time_mean]
+  list.dir.each{|dir| time_mean(dir,varname)}
+elsif  Opt.charge[:lon_mean]
+  list.dir.each{|dir| lon_mean(dir,varname)}
 else
-  big_mean(list.dir,var_name)
+  list.dir.each{|dir| big_mean(dir,varname)}
 end
 
 =begin

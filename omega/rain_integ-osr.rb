@@ -14,9 +14,9 @@ include Math
 def intg_lon(gp,omega_ratio)
   intg = gp.copy
   (gp.axis(0).length-1).times do |n|
-    intg[n+1,false] = intg[n,false] + gp[n+1,false] / omega_ratio
+    intg[n+1,false] = intg[n,false] + gp[n+1,false] 
   end
-  return intg
+  return intg / omega_ratio
 end
 
 def rain_osr(dir,name)
@@ -80,13 +80,7 @@ list = Utiles_spe::Explist.new(ARGV[0])
 IWS = 1 if !defined?(IWS) or IWS.nil?
 
 # DCL set
-clrmp = 14  # カラーマップ
-DCL.sgscmn(clrmp)
-DCL.gropn(IWS)
-#DCL.sldiv('Y',2,1)
-DCL.sgpset('lcntl',true)
-DCL.sgpset('isub', 96)
-DCL.uzfact(1.0)
+set_dcl(14)
 GGraph.set_fig('window'=>[0,40000,nil,nil])
 
 figopt = set_figopt
