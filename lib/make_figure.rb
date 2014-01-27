@@ -69,12 +69,13 @@ module MKfig
     gpa = gpa.mean("lon") if gpa.axnames.include?("lon")
 
     GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
-    GGraph.set_fig('window'=>[-90,90,nil,nil])
+    GGraph.set_fig('window'=>set_window([-90,90,nil,nil]))
+
 
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
       gp = gpa[legend]
-      if gp.max.to_f > 1e+10 then
+      if gp.max.to_f > 1e+9 then
         gp = gp*1e-10
         gp.units = "10^10 " + gp.units.to_s
       end
@@ -101,6 +102,7 @@ module MKfig
       legend = gpa.legend[n]
       gp = gpa[legend]
       next if gp.nil?  
+      GGraph.set_fig('window'=>set_window([-90,90,nil,nil]))
 
       # 
 #      gp = gp.wm2mmyr if gp.name.include?("Rain") 
@@ -133,11 +135,12 @@ module MKfig
     gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")#最下層切り出し
     gpa = gpa.mean('time') if gpa.axnames.include?("time")#時間平均
     # 緯度切り出し
-    lat = 0
-    lat = Lat if defined?(Lat)
-    lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
-    gpa = gpa.cut("lat"=>lat)
-
+    if gpa.axnames.include?("lat")
+      lat = 0
+      lat = Lat if defined?(Lat)
+      lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
+      gpa = gpa.cut("lat"=>lat)
+    end
     lc = 23
     vx = 0.82
     vy = 0.8
@@ -152,7 +155,7 @@ module MKfig
       # 描画
       xmax = 360
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-      GGraph.set_fig('window'=>[0,xmax,nil,nil])
+      GGraph.set_fig('window'=>set_window([0,xmax,nil,nil]))
 
       # 描画
       vy = vy - 0.025
@@ -196,7 +199,7 @@ module MKfig
   
       # 描画
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-      GGraph.set_fig('window'=>[0,xmax,-90,90])
+      GGraph.set_fig('window'=>set_window([0,xmax,nil,nil]))
   
       fig_opt = {'title'=>gp.long_name + " " + legend,
                  'annotate'=>false,
@@ -224,7 +227,7 @@ module MKfig
       xmax = 360
       # 描画
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-      GGraph.set_fig('window'=>[0,xmax,nil,nil])
+      GGraph.set_fig('window'=>set_window([0,xmax,nil,nil]))
   
       fig_opt = {'title'=>gp.long_name + " " + legend,
                  'annotate'=>false,
@@ -234,12 +237,10 @@ module MKfig
   end
 # -------------------------------------------
   def lontime(gpa,hash={})
-    # 時間軸確認
     return if !gpa.axnames.include?("time")
 
-    # 鉛直切り出し
     gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
-    # 緯度切り出し
+
     lat = 0
     lat = Lat if defined?(Lat)
     lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
@@ -362,15 +363,25 @@ module MKfig
 # -------------------------------------------
   def set_figopt
     figopt = {}
-    figopt["max"] = Opt.charge[:max] if Opt && !Opt.charge[:max].nil?
-    figopt["min"] = Opt.charge[:min] if Opt && !Opt.charge[:min].nil?
-    figopt["nlev"] = Opt.charge[:nlev] if Opt && !Opt.charge[:nlev].nil?
-    figopt["clr_max"] = Opt.charge[:clr_max] if Opt && !Opt.charge[:clr_max].nil?
-    figopt["clr_min"] = Opt.charge[:clr_min] if Opt && !Opt.charge[:clr_min].nil?
+    return figopt if !defined? Opt
+    figopt["max"] = Opt.charge[:max] if !Opt.charge[:max].nil?
+    figopt["min"] = Opt.charge[:min] if !Opt.charge[:min].nil?
+    figopt["nlev"] = Opt.charge[:nlev] if !Opt.charge[:nlev].nil?
+    figopt["clr_max"] = Opt.charge[:clr_max] if !Opt.charge[:clr_max].nil?
+    figopt["clr_min"] = Opt.charge[:clr_min] if !Opt.charge[:clr_min].nil?
     figopt = parse_Figopt(figopt)
     return figopt
   end
-# -------------------------------------------
+  # -------------------------------------------
+  def set_window(window=[nil,nil,nil,nil])
+    return window if !defined? Opt
+    window[0] = Opt.charge[:xmin] if !Opt.charge[:xmin].nil? 
+    window[1] = Opt.charge[:xmax] if !Opt.charge[:xmax].nil?
+    window[2] = Opt.charge[:ymin] if !Opt.charge[:ymin].nil? 
+    window[3] = Opt.charge[:ymax] if !Opt.charge[:ymax].nil?
+    return window
+  end
+  # -------------------------------------------
   def parse_Figopt(figopt)
     return figopt if !defined? Figopt
     if Figopt.class == Array
@@ -383,10 +394,13 @@ module MKfig
   end
 # -------------------------------------------
   def rename_img_file(id,scrfile) 
+    return if IWS == 1
     id = id.id if id.class == Explist
     img_lg = id+"_"+File.basename(scrfile,".rb").sub("mkfig_","")
-    img_lg += "_lat#{Opt.charge[:lat].to_i}" if Opt && !Opt.charge[:lat].nil?
-    img_lg += "_#{Opt.charge[:name]}"  if Opt && !Opt.charge[:name].nil?
+    if defined? Opt
+      img_lg += "_lat#{Opt.charge[:lat].to_i}" if !Opt.charge[:lat].nil?
+      img_lg += "_#{Opt.charge[:name]}"  if !Opt.charge[:name].nil?
+    end
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
     elsif IWS == 4
