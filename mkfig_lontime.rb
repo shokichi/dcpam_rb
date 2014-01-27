@@ -21,8 +21,8 @@ IWS = get_iws
 set_dcl(14)
 
 FigType = "lontime"
-if !Opt.charge[:varname].nil? then
-  make_figure(Opt.charge[:varname],list,set_figopt)
+if !Opt.charge[:name].nil? then
+  make_figure(Opt.charge[:name],list,set_figopt)
 else
   make_figure("Rain",list,"nlev"=>20)
 end

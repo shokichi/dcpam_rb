@@ -20,8 +20,8 @@ IWS = get_iws
 set_dcl(14)
 
 FigType = "lonlat"
-if !Opt.charge[:varname].nil? then
-  make_figure(Opt.charge[:varname],list,set_figopt)
+if !Opt.charge[:name].nil? then
+  make_figure(Opt.charge[:name],list,set_figopt)
 else
   make_figure("OSRA",list,"min"=>-1200,"max"=>0,"nlev"=>20,"clr_min"=>99,"clr_max"=>56)
   make_figure("OLRA",list,"min"=>0,"max"=>300,"nlev"=>20,"clr_min"=>56,"clr_max"=>13)

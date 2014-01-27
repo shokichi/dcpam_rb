@@ -22,8 +22,8 @@ GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
 FigType = "lat"
-if !Opt.charge[:varname].nil? then
-  make_figure(Opt.charge[:varname],list,set_figopt)
+if !Opt.charge[:name].nil? then
+  make_figure(Opt.charge[:name],list,set_figopt)
 else
   make_figure("OSRA",list,"min"=>0,"max"=>-320)
   make_figure("OLRA",list,"min"=>0,"max"=>320)
