@@ -3,6 +3,7 @@
 # 
 # 
 =begin
+
 == Module Function
 --- make_figure
 --- make_figure(varname,list,figopt)
@@ -20,6 +21,7 @@
 --- get_iws
 --- set_figopt
 --- set_window(window)
+--- option_notice?(key)
 --- parse_Figopt(figopt)
 --- rename_img_file(id,scrfile) 
 =end
@@ -70,8 +72,14 @@ module MKfig
 # --------------------------------------------------  
   def set_dcl(clr=false)    # DCL set
     clrmp = 14  # カラーマップ
+    iwidth = 700 
+    iheight = 700
+    iwidth = Opt.charge[:iwidth] if option_notice?(:iwidth)
+    iheight = Opt.charge[:iheight] if option_notice?(:iheight)
     DCL::swlset('lwnd',false) if IWS==4
     DCL.sgscmn(clrmp) if clr
+    DCL.swpset('iwidth',iwidth)
+    DCL.swpset('iheight',iheight)
     DCL.gropn(IWS)
     DCL.sgpset('lcntl',true)
     DCL.sgpset('isub', 96)
@@ -85,7 +93,7 @@ module MKfig
     tate = (amount.to_i+1)/2
     DCL.sldiv('T',yoko,tate) 
 #    DCL.sgpset('lcntl', false)   # 制御文字を解釈しない
-    DCL.sgpset('lfull',true)     # 全画面表示
+    DCL.sgpset('lfull',false)     # 全画面表示
   end
 # --------------------------------------------------  
   def merid(gpa,hash={}) # 子午面断面
@@ -95,6 +103,7 @@ module MKfig
     GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
     GGraph.set_fig('window'=>set_window([-90,90,nil,nil]))
 
+    hash["title"] = "" if option_notice?(:notitle)
 
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
@@ -118,6 +127,8 @@ module MKfig
     # 時間平均経度平均
     gpa = gpa.mean('time') if gpa.axnames.include?("time")
     gpa = gpa.mean("lon") if gpa.axnames.include?("lon")
+
+    hash["title"] = "" if option_notice?(:notitle)
   
     lc = 23
     vx = 0.82
@@ -162,9 +173,12 @@ module MKfig
     if gpa.axnames.include?("lat")
       lat = 0
       lat = Lat if defined?(Lat)
-      lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
+      lat = Opt.charge[:lat] if option_notice?(:lat)
       gpa = gpa.cut("lat"=>lat)
     end
+
+    hash["title"] = "" if option_notice?(:notitle)
+
     lc = 23
     vx = 0.82
     vy = 0.8
@@ -213,6 +227,8 @@ module MKfig
     # 時間平均経度平均
     gpa = gpa.mean('time') if gpa.axnames.include?("time")
 
+    hash["title"] = "" if option_notice?(:notitle)
+
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
       gp = gpa[legend]
@@ -239,8 +255,10 @@ module MKfig
     # 緯度切り出し
     lat = 0
     lat = Lat if defined?(Lat)
-    lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
+    lat = Opt.charge[:lat] if option_notice?(:lat)
     gpa = gpa.cut("lat"=>lat)
+
+    hash["title"] = "" if option_notice?(:notitle)
 
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
@@ -267,8 +285,10 @@ module MKfig
 
     lat = 0
     lat = Lat if defined?(Lat)
-    lat = Opt.charge[:lat] if defined? Opt && !Opt.charge[:lat].nil?
+    lat = Opt.charge[:lat] if option_notice?(:lat)
     gpa = gpa.cut("lat"=>lat)
+
+    hash["title"] = "" if option_notice?(:notitle)
 
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
@@ -361,8 +381,8 @@ module MKfig
 #   end
   # -------------------------------------------
   def self.cut_and_mean(gp)
-    eval "gp = gp.cut(#{Opt.charge[:cut]})" if defined? Opt.charge[:cut]
-    eval "gp = gp.cut(#{Opt.charge[:mean]})" if defined? Opt.charge[:mean]
+    eval "gp = gp.cut(#{Opt.charge[:cut]})" if option_notice?(:cut)
+    eval "gp = gp.cut(#{Opt.charge[:mean]})" if option_notice?(:mean)
     return gp
   end
   # -------------------------------------------
@@ -387,23 +407,29 @@ module MKfig
 # -------------------------------------------
   def set_figopt
     figopt = {}
-    return figopt if !defined? Opt
-    figopt["max"] = Opt.charge[:max] if !Opt.charge[:max].nil?
-    figopt["min"] = Opt.charge[:min] if !Opt.charge[:min].nil?
-    figopt["nlev"] = Opt.charge[:nlev] if !Opt.charge[:nlev].nil?
-    figopt["clr_max"] = Opt.charge[:clr_max] if !Opt.charge[:clr_max].nil?
-    figopt["clr_min"] = Opt.charge[:clr_min] if !Opt.charge[:clr_min].nil?
+    figopt["max"] = Opt.charge[:max] if option_notice?(:max)
+    figopt["min"] = Opt.charge[:min] if option_notice?(:min)
+    figopt["nlev"] = Opt.charge[:nlev] if option_notice?(:nlev)
+    figopt["clr_max"] = Opt.charge[:clr_max] if option_notice?(:clr_max)
+    figopt["clr_min"] = Opt.charge[:clr_min] if option_notice?(:clr_min)
     figopt = parse_Figopt(figopt)
     return figopt
   end
   # -------------------------------------------
   def set_window(window=[nil,nil,nil,nil])
-    return window if !defined? Opt
-    window[0] = Opt.charge[:xmin] if !Opt.charge[:xmin].nil? 
-    window[1] = Opt.charge[:xmax] if !Opt.charge[:xmax].nil?
-    window[2] = Opt.charge[:ymin] if !Opt.charge[:ymin].nil? 
-    window[3] = Opt.charge[:ymax] if !Opt.charge[:ymax].nil?
+    window[0] = Opt.charge[:xmin] if option_notice?(:xmin) 
+    window[1] = Opt.charge[:xmax] if option_notice?(:xmax)
+    window[2] = Opt.charge[:ymin] if option_notice?(:ymin) 
+    window[3] = Opt.charge[:ymax] if option_notice?(:ymax)
     return window
+  end
+  # -------------------------------------------
+  def option_notice?(key)
+    if defined? Opt
+      return !Opt.charge[key].nil?
+    else
+      return false
+    end
   end
   # -------------------------------------------
   def parse_Figopt(figopt)
@@ -421,10 +447,8 @@ module MKfig
     return if IWS == 1
     id = id.id if id.class == Explist
     img_lg = id+"_"+File.basename(scrfile,".rb").sub("mkfig_","")
-    if defined? Opt
-      img_lg += "_lat#{Opt.charge[:lat].to_i}" if !Opt.charge[:lat].nil?
-      img_lg += "_#{Opt.charge[:name]}"  if !Opt.charge[:name].nil?
-    end
+    img_lg += "_lat#{Opt.charge[:lat].to_i}" if option_notice?(:lat)
+    img_lg += "_#{Opt.charge[:name]}"  if option_notice?(:name)
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
     elsif IWS == 4
