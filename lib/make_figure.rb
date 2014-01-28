@@ -2,6 +2,30 @@
 # -*- coding: utf-8 -*-
 # 
 # 
+=begin
+== Module Function
+--- make_figure
+--- make_figure(varname,list,figopt)
+--- set_dcl(clr=false)
+--- plural_picture(amount)
+--- merid(gpa,option)
+--- lat(gpa,option)
+--- lon(gpa,option) 
+--- lonlat(gpa,option)
+--- lonsig(gpa,option)
+--- lontime(gpa,option)
+--- plot(y_coord,newframe=true,option)
+--- self.cut_and_mean(gp)
+--- fix_axis_local(gp)
+--- get_iws
+--- set_figopt
+--- set_window(window)
+--- parse_Figopt(figopt)
+--- rename_img_file(id,scrfile) 
+=end
+
+
+
 require "numru/ggraph"
 require 'numru/gphys'
 include NumRu
@@ -105,7 +129,7 @@ module MKfig
       GGraph.set_fig('window'=>set_window([-90,90,nil,nil]))
 
       # 
-#      gp = gp.wm2mmyr if gp.name.include?("Rain") 
+      gp = gp.wm2mmyr if gp.name.include?("Rain") 
   
       # 描画
       vy = vy - 0.025
@@ -149,7 +173,7 @@ module MKfig
       gp = gpa[legend]
       next if gp.nil?  
       # 降水量の単位変換
-#      gp = gp.wm2mmyr if gp.name.include?("Rain") 
+      gp = gp.wm2mmyr if gp.name.include?("Rain") 
 
       gp = fix_axis_local(gp)      
       # 描画
