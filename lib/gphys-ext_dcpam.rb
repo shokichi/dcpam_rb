@@ -85,7 +85,7 @@ module NumRu
       #----------------------
       def wm2mmyr  # 降水量の単位変換(W.m-2 -> mm.yr-1)
         gp = self.clone
-        return gp if gp.units.to_s.include?("W")
+        return gp if !gp.units.to_s.include?("W")
         gp = gp*(3600 * 24 * 360) * 1000 / LatentHeat / WtWet 
         gp.units = Units["mm.yr-1"]
         return gp
@@ -93,7 +93,7 @@ module NumRu
       #----------------------
       def wm2mmhr  # 降水量の単位変換(W.m-2 -> mm.hr-1)
         gp = self.clone
-        return gp if gp.units.to_s.include?("W")
+        return gp if !gp.units.to_s.include?("W")
         gp = gp* 3600 * 1000 / LatentHeat / WtWet 
         gp.units = Units["mm.hr-1"]
         return gp
