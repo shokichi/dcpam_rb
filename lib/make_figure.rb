@@ -86,7 +86,7 @@ module MKfig
     DCL.uzfact(1.0)
     plural_picture(Opt.charge[:parafig]) if defined? Opt
   end
-# --------------------------------------------------
+  # --------------------------------------------------
   def plural_picture(amount)
     return if amount.nil?
     yoko = 2
@@ -95,7 +95,7 @@ module MKfig
 #    DCL.sgpset('lcntl', false)   # 制御文字を解釈しない
     DCL.sgpset('lfull',false)     # 全画面表示
   end
-# --------------------------------------------------  
+  # --------------------------------------------------  
   def merid(gpa,hash={}) # 子午面断面
     gpa = gpa.mean("time") if gpa.axnames.include?("time")
     gpa = gpa.mean("lon") if gpa.axnames.include?("lon")
@@ -120,7 +120,7 @@ module MKfig
       GGraph.tone_and_contour(gp, true,fig_opt)
     end
   end
-#------------------------------------------------  
+  #------------------------------------------------  
   def lat(gpa,hash={}) # 緯度分布
     # 高さ方向にデータがある場合は最下層を取り出す
     gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")
@@ -410,6 +410,7 @@ module MKfig
     figopt["max"] = Opt.charge[:max] if option_notice?(:max)
     figopt["min"] = Opt.charge[:min] if option_notice?(:min)
     figopt["nlev"] = Opt.charge[:nlev] if option_notice?(:nlev)
+    figopt["interval"] = Opt.charge[:interval] if option_notice?(:interval)
     figopt["clr_max"] = Opt.charge[:clr_max] if option_notice?(:clr_max)
     figopt["clr_min"] = Opt.charge[:clr_min] if option_notice?(:clr_min)
     figopt = parse_Figopt(figopt)
@@ -442,7 +443,17 @@ module MKfig
     end
     return result
   end
-# -------------------------------------------
+  # -------------------------------------------
+  def convert_eps(psfile)
+    begin
+      require File.expand_path(File.dirname(__FILE__)+"/postscript.rb")
+      include PostScript
+      convert_ps2eps(psfile)
+    rescue
+      puts "*** Can't convert ps to eps ***"
+    end
+  end
+  # -------------------------------------------
   def rename_img_file(id,scrfile) 
     return if IWS == 1
     id = id.id if id.class == Explist
@@ -451,6 +462,7 @@ module MKfig
     img_lg += "_#{Opt.charge[:name]}"  if option_notice?(:name)
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
+      convert_eps("#{img_lg}.ps") if option_notice?(:eps)
     elsif IWS == 4
       Dir.glob("dcl_*.png").each{ |filename|
         File.rename(filename,filename.sub("dcl",img_lg)) }
