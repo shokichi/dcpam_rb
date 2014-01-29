@@ -37,6 +37,8 @@ module OptCharge
       @@opt.on("--min=[minimum]") {|min| @charge[:min] = min.to_f}
       @@opt.on("--nlev=[number of levels]") {
         |nlev| @charge[:nlev] = nlev.to_i}
+      @@opt.on("--interval=[contour interval]") {
+        |nlev| @charge[:interval] = nlev.to_i}
       @@opt.on("--clr_max=[maximum color id]") {
         |id| @charge[:clr_max] = id.to_i}
       @@opt.on("--clr_min=[minimum color id]") {
@@ -67,6 +69,10 @@ module OptCharge
     def picture_format
       @@opt.on("--parafig=[number of picture]"){
         |num| @charge[:parafig] = num.to_i }
+      @@opt.on("--iheight=[DCL iheight]"){
+        |num| @charge[:iheight] = num.to_i }
+      @@opt.on("--iwidth=[DCL iwidth]"){
+        |num| @charge[:iwidth] = num.to_i }
       @@opt.on("--eps") {@charge[:eps] = true} 
       @@opt.on("--ps")  {@charge[:ps]  = true}
       @@opt.on("--png") {@charge[:png] = true}
