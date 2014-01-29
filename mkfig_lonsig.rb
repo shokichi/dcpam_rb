@@ -21,7 +21,7 @@ IWS = get_iws
 set_dcl(14)
 
 FigType = "lonsig"
-if !Opt.charge[:name].nil then
+if !Opt.charge[:name].nil? then
   make_figure(Opt.charge[:name],list,set_figopt)
 else
   make_figure("Temp",list,"min"=>120,"max"=>320,"nlev"=>20)
