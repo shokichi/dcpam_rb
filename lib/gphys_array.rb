@@ -197,7 +197,11 @@ module AnalyDCPAM
     end
 
     def axnames
-      return @data[0].axnames
+      @data.each do |data|
+        next if data.nil?
+        return data.axnames
+      end
+      nil
     end
 
     def correlation(other_gpa)
