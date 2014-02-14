@@ -17,6 +17,7 @@ module GlobalAverage
       end
       @data = {}
       @@units = {}
+      @@long_name = {}
       @@refnum = @@list.refnum
     end
 
@@ -45,14 +46,6 @@ module GlobalAverage
 
     def delete(varname)
       @data.delete(varname)
-    end
-
-    def add_rotation_rate
-      @data = @data.merge(rotation_rate(@@list))
-    end
-
-    def add_planetary_albedo
-      @data = @data.merge(planetary_albedo)
     end
 
     def set_axis(varname)
@@ -86,8 +79,8 @@ module GlobalAverage
       val = self.data[varname]
       result = []
       val.each_index do |n|
-        if val[n].val == -999
-          result[n].val = -999 
+        if val[n] == -999
+          result[n] = -999 
         else
           result[n] = (val[n].to_f-val[@@refnum].to_f)/val[@@refnum].to_f
         end
@@ -158,22 +151,6 @@ module GlobalAverage
       return ary
     end
 
-    def rotation_rate(list) # 自転角速度
-      omega = []
-      list.name.each do |name|
-        omega << Utiles_spe.omega_ratio(name)
-      end
-      return {"Rotation"=>omega}
-    end
-
-    def planetary_albedo
-      alb = []
-      @@list.dir.each do |dir|
-        gp = gpopen dir + "OSRA.nc"
-        alb << calc_planetary_albedo(gp)
-      end
-      return {"Albedo"=>alb}
-    end
 
     def global_mean_data(varname,dir)  
       gp = gpopen dir + varname +".nc"
@@ -191,18 +168,23 @@ module GlobalAverage
         gp = gp.mask_night*mask_day_fix(gp) if defined? NightTime
       end
       gp = gp.wm2mmyr if varname.include? "Rain"
+      @@units[varname] = gp.units
+      @@long_name[varname] = gp.long_name
       
       gp = gp.glmean if gp.rank != 1
-      @@units[varname] = gp.units
       return gp
     end
 
     def convert_gphys(varname)
       gp = Utiles_spe.array2gp(@axis,@data[varname])
-      gp.name = varname
       axis = gp.axis(0).pos
       axis.name = @axis_name
+      axis.long_name = @@long_name[@axis_name]
+      axis.units = @@units[@axis_name]
       gp.axis(0).set_pos(axis)
+      gp.name = varname
+      gp.units = @@units[varname]
+      gp.long_name = @@long_name[varname]
       return gp
     end
     public
@@ -218,5 +200,55 @@ module GlobalAverage
   def mask_night_fix(gp) # for glmean
     nlon = gp.axis(0).length.to_f
     return nlon/(nlon/2-1)/2    
+  end
+end
+
+
+module GlobalAverage
+  class GLmean
+
+    def add_rotation_rate
+      @data = @data.merge(rotation_rate(@@list))
+      @@long_name["Rotation"] = "Normalized rotation rate"
+    end
+
+    def add_planetary_albedo
+      @data = @data.merge(planetary_albedo)
+      @@long_name["Albedo"] = "planetary albedo"
+    end
+
+    def add_greenhouse_effect
+      @data = @data.merge(greenhouse_effect)
+      @@long_name["Greenhouse"] = "greenhouse effect coef"
+    end
+
+    private
+    def rotation_rate(list) # 自転角速度
+      omega = []
+      list.name.each do |name|
+        omega << Utiles_spe.omega_ratio(name)
+      end
+      return {"Rotation"=>omega}
+    end
+
+    def planetary_albedo
+      alb = []
+      @@list.dir.each do |dir|
+        gp = gpopen dir + "OSRA.nc"
+        alb << calc_planetary_albedo(gp)
+      end
+      return {"Albedo"=>alb}
+    end
+
+    def greenhouse_effect
+      green = []
+      @@list.dir.each do |dir|
+        osr = gpopen dir + "OSRA.nc"
+        stemp = gpopen dir + "SurfTemp.nc"
+        green << calc_greenhouse_effect(osr,stemp)
+      end
+      return {"Greenhouse"=>green}
+    end
+
   end
 end
