@@ -102,10 +102,9 @@ module NumRu
       def sig2press(ps) # 鉛直座標変換(sig -> press)
         gp = self.clone
         # 座標データ取得
-        time = gp.axis("time").to_gphys if gp.axnames.include?("time")
         sig = gp.axis("sig").to_gphys if gp.axnames.include?("sig")
-        sig = gp.axis("sigm").to_gphys if gp.axnames.include?("sigm") 
-        
+        sig = gp.axis("sigm").to_gphys if gp.axnames.include?("sigm")       
+
         # 気圧データの準備
         press = calc_press(ps,sig)
         
@@ -113,8 +112,8 @@ module NumRu
         gp.set_assoc_coords([press])
         
         # 気圧座標の値を準備
-        press_crd = VArray.new( sig.val*RefPrs, {"units"=>"Pa"}, "press")
-        
+        press_crd = sig.val*RefPrs
+        press_crd = VArray.new(press_crd, {"units"=>"Pa"}, "press")
         # 鉛直座標を気圧に変換
         gp_press = gp.interpolate(sig.name=>press_crd)
         
@@ -330,19 +329,33 @@ module AnalyDCPAM
   end
   #-----------------------
   def calc_press(ps,sig)
-    lon = ps.axis(0)
-    lat = ps.axis(1)
-    time = ps.axis(2)
-    press_na = NArray.sfloat(lon.length,lat.length,sig.length,time.length)
-    grid = Grid.new(lon,lat,sig.axis(0),time)
+    grid_a = []
+    ps.axnames.each do |axname|
+      grid_a << ps.axis(axname)
+    end
+    
+    if ps.axnames.include? "time"
+      grid_a.insert(-2,sig.axis(0))
+    else
+      grid_a << sig.axis(0)
+    end
+
+    grid_length = []
+    grid_a.each do |axis|
+      grid_length << axis.length
+    end
+
+    press_na = NArray.sfloat(*grid_length)
+    grid = Grid.new(*grid_a)
     press = GPhys.new(grid,VArray.new(press_na))
-    press.units = "Pa"
-    press.name = "Press"
-    press.long_name = "pressure"
     
     press[false] = 1
     press = press * ps
     press = press * sig
+
+    press.units = "Pa"
+    press.name = "press"
+    press.long_name = "pressure"
     return press
   end
   #----------------------------------------- 
@@ -373,7 +386,6 @@ module AnalyDCPAM
       
       # 気圧座標の値を準備
       press_crd = sig.val*RefPrs
-      p press_crd
       press_crd = VArray.new( press_crd, {"units"=>"Pa"}, "press")
       
       # 鉛直座標を気圧に変換
@@ -387,6 +399,11 @@ module AnalyDCPAM
   #----------------------------------------- 
   def calc_planetary_albedo(osr)
     return 1.0 + osr.glmean/(SolarConst/4)
+  end
+  #----------------------------------------- 
+  def calc_greenhouse_effect(osr,stemp)
+    etemp = (SolarConst*(1.0-calc_planetary_albedo(osr))/(4*StB))**(1.0/4)
+    return stemp.glmean/etemp
   end
   #----------------------------------------- 
   def self.calc_msf_save(gv,gps,sigm)  # 質量流線関数の計算
