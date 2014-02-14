@@ -11,6 +11,7 @@ include Utiles_spe
 include NumRu
 include Math
 
+
 def anglmom(dir,name)
   data_name = 'AnglMom'
   # file open
@@ -55,8 +56,8 @@ def anglmom(dir,name)
 end
 
 opt = OptionParser.new
-opt.on("-r","--rank") {Flag_rank = true}
-opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
+opt.on("--rank") {Flag_rank = true}
+opt.on("--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.parse!(ARGV)
 
 list = Utiles_spe::Explist.new(ARGV[0])
