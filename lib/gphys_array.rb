@@ -22,6 +22,19 @@ module AnalyDCPAM
       @legend = get_legend
     end
 
+    def create(array_of_gphys,legends)
+      array_of_gphys = [array_of_gphys] if array_of_gphys.class != Array
+      legends = [legends] if legends.class != Array
+      if array_of_gphys.size != legends.size
+        puts "Array size is not agreement"
+        return 
+      end
+      @list = Explist.new
+      @data = array_of_gphys
+      @legend = legends
+      self
+    end
+
     def ref
       return self[@list.ref] 
     end
@@ -138,10 +151,11 @@ module AnalyDCPAM
       self
     end
 
-    def delete(*varnames)
-      varnames.each do |varname|
-        @data.delete_at(@legend.index(varname))
-        @legend.delete(varname)
+    def delete(*legends)
+      legends = [legends] if legends.class != Array
+      legends.each do |legend|
+        @data.delete_at(@legend.index(legend))
+        @legend.delete_at(@legend.index(legend))
       end
       self
     end
@@ -164,7 +178,7 @@ module AnalyDCPAM
       result = self.clone
       @legend.each do |key|
         next if self[key].nil?
-        result[key] = self[key].mean(*axis)
+        result[key] = result[key].mean(*axis)
       end
       return result
     end
@@ -173,7 +187,7 @@ module AnalyDCPAM
       result = self.clone
       @legend.each do |key|
         next if self[key].nil?
-        result[key] = self[key].cut(range)
+        result[key] = result[key].cut(range)
       end
       return result 
     end
@@ -182,7 +196,7 @@ module AnalyDCPAM
       result = self.clone
       @legend.each do |key|
         next if self[key].nil?
-        result[key] = self[key].glmean
+        result[key] = result[key].glmean
       end
       return result
     end
@@ -191,7 +205,7 @@ module AnalyDCPAM
       result = self.clone
       @legend.each do |key|
         next if self[key].nil?
-        result[key] = self[key].latmean
+        result[key] = result[key].latmean
       end
       return result
     end
@@ -238,5 +252,9 @@ module AnalyDCPAM
 
     public
     attr_reader :list,:name,:data,:legend
+  end
+
+  def gpaopen(varname,list="./")
+    return GPhysArray.new(varname,list)        
   end
 end
