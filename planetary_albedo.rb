@@ -13,8 +13,8 @@ include Math
 include NMath
 
 # 定数
-SolarConst = UNumeric[1366.0, "W.m-2"]
-StB = UNumeric[5.67e-8, "W.m-2.K-4"]
+#SolarConst = UNumeric[1366.0, "W.m-2"]
+#StB = UNumeric[5.67e-8, "W.m-2.K-4"]
 
 class Analy
   def initialize(list)
@@ -136,10 +136,16 @@ def drawclm_deltemp(file)
 
   file.each_index do |n|
     list = Utiles_spe::Explist.new(file[n])
+    data = Analy.new(list)
 
-    stemp = Utiles_spe.array2gp(get_omega(list),get_surftemp(list))  
-    albedo = Utiles_spe.array2gp(get_omega(list),get_albedo(list))  
-    green = Utiles_spe.array2gp(get_omega(list),get_greenhouse(list))
+    omega = data.omega
+    stemp = data.surftemp
+    albedo = data.albedo  
+    green = data.green
+
+    stemp = Utiles_spe.array2gp(omega,stemp)  
+    albedo = Utiles_spe.array2gp(omega,albedo)  
+    green = Utiles_spe.array2gp(omega,green)
 
     omega = albedo.axis("noname").pos
     omega.name = "omega"
@@ -175,13 +181,13 @@ opt = OptionParser.new
 opt.parse!(ARGV)
 
 
-file_all = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
-file_coriolis = "/home/ishioka/link/coriolis/fig/list/omega_coriolis_MTlocal.list"
-file_diurnal = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
+file_all = "/home/ishioka/link/fig/list/omega_all_MTlocal.list"
+file_coriolis = "/home/ishioka/link/fig/list/omega_coriolis_MTlocal.list"
+file_diurnal = "/home/ishioka/link/fig/list/omega_diurnal_MTlocal.list"
 
 
 #drawfig([file_all,file_coriolis,file_diurnal],type)
-drawclm([file_all,file_coriolis,file_diurnal])
+drawclm_deltemp([file_all,file_coriolis,file_diurnal])
 #list = Utiles_spe::Explist.new(file_all)
 #albedo = Utiles_spe.array2gp(get_omega(list),get_albedo(list))
 #GGraph.scatter albedo.axis("noname").to_gphys,albedo, false
