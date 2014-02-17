@@ -7,7 +7,7 @@
 
 require 'numru/ggraph'
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/utiles_omega.rb")
+require File.expand_path(File.dirname(__FILE__)+"/../lib/dcpam.rb")
 require 'optparse'
 include Utiles_spe
 include NumRu
@@ -15,16 +15,16 @@ include Math
 
 
 def fig_correlation_anml(var_name,lists)
-  all = Omega::Anomaly.new(var_name,lists[:all])
-  diurnal = Omega::Anomaly.new(var_name,lists[:diurnal])
-  coriolis = Omega::Anomaly.new(var_name,lists[:coriolis])
-  plus_dc = diurnal.plus(coriolis) # C+D
-  del_adc = all.minus(plus_dc)     # A-(C+D)
+  all = gpaopen(var_name,lists[:all])
+  diurnal = gpaopen(var_name,lists[:diurnal])
+  coriolis = gpaopen(var_name,lists[:coriolis])
+#  plus_dc = diurnal.plus(coriolis) # C+D
+#  del_adc = all.minus(plus_dc)     # A-(C+D)
 
-  coef_D = all.correlation(diurnal) # .class = GPhys 
-  coef_C = all.correlation(coriolis)
-  coef_DC = all.correlation(plus_dc)
-  coef_ADC = all.correlation(del_adc) 
+  coef_D = all.anomaly.correlation(diurnal.anomaly) # .class = GPhys 
+  coef_C = all.anomaly.correlation(coriolis.anomaly)
+#  coef_DC = all.correlation(plus_dc)
+#  coef_ADC = all.correlation(del_adc) 
 
   if defined?(CreateDatFile)
     # テキストファイルの作成
@@ -40,47 +40,32 @@ def fig_correlation_anml(var_name,lists)
       fin.print "#{coef_D.axis(0).to_gphys[n].val}\t"
       fin.print "#{coef_D[n].val}\t"
       fin.print "#{coef_C[n].val}\t"
-      fin.print "#{coef_DC[n].val}\t"
-      fin.print "#{coef_ADC[n].val}\n"
+#      fin.print "#{coef_DC[n].val}\t"
+#      fin.print "#{coef_ADC[n].val}\n"
     end
     fin.close
   else
-    clrmp = 14  # カラーマップ
-    DCL.sgscmn(clrmp)
-    DCL.gropn(IWS)
-    #DCL.sldiv('Y',2,1)
-    DCL.sgpset('lcntl',true)
-    DCL.sgpset('isub', 96)
-    DCL.uzfact(0.8)
-
-    GGraph.line coef_D, true, "title"=>"correlation coefficient"
+    set_dcl
+    GGraph.line coef_D, true, "title"=>""
     GGraph.line coef_C, false, "index"=>20
-    GGraph.line coef_DC, false, "index"=>30
+#    GGraph.line coef_DC, false, "index"=>30
     DCL.grcls
-    rename_img_file("omega_#{var_name}",__FILE__)
+    rename_img_file("omega",__FILE__)
   end
 end
 
-opt = OptionParser.new
-opt.on("-r","--rank") {Flag_rank = true}
-opt.on("--dat") {CreateDatFile = true}
-opt.on("--ps") { IWS = 2}
-opt.on("--png") { 
-  DCL::swlset('lwnd',false)
-  IWS = 4
-}
-opt.parse!(ARGV)
+Opt = OptCharge::OptCharge.new
+Opt.set
 
-# DCL set
-IWS = 1 if !defined?(IWS)
+IWS = get_iws
 
-a_list = "/home/ishioka/link/all/fig/list/omega_all_MTlocal.list"
-d_list = "/home/ishioka/link/diurnal/fig/list/omega_diurnal_MTlocal.list"
-c_list = "/home/ishioka/link/coriolis/fig/list/omega_coriolis_MTlocal.list"
+a_list = "/home/ishioka/link/fig/list/omega_all_MTlocal.list"
+d_list = "/home/ishioka/link/fig/list/omega_diurnal_MTlocal.list"
+c_list = "/home/ishioka/link/fig/list/omega_coriolis_MTlocal.list"
 lists={
-  all:      Utiles_spe::Explist.new(a_list),
-  diurnal:  Utiles_spe::Explist.new(d_list),
-  coriolis: Utiles_spe::Explist.new(c_list)
+  all:      Explist.new(a_list),
+  diurnal:  Explist.new(d_list),
+  coriolis: Explist.new(c_list)
 }
 
 fig_correlation_anml("OSRA",lists)
