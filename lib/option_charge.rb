@@ -44,6 +44,7 @@ module OptCharge
       @@opt.on("--clr_min=[minimum color id]") {
         |id| @charge[:clr_min] = id.to_i}
       @@opt.on("--notitle") {@charge[:notitle] = true}
+      @@opt.on("--nolegend") {@charge[:nolegend] = true}
       @@opt.on("--xmin=[x axis minimum]"){|min| @charge[:xmin] = min.to_f}
       @@opt.on("--xmax=[x axis maximum]"){|max| @charge[:xmax] = max.to_f}
       @@opt.on("--ymin=[y axis minimum]"){|min| @charge[:ymin] = min.to_f}
@@ -64,11 +65,16 @@ module OptCharge
       @@opt.on("--lat=[latitude]") {|lat| @charge[:lat] = lat.to_f}
       @@opt.on("--cut=[cut range]"){|range| @charge[:cut] = range }
       @@opt.on("--mean=[mean axis]"){|axis| @charge[:mean] = axis }
+      @@opt.on("--latmean"){@charge[:latmean] = true }
+      @@opt.on("--anomaly"){@charge[:anomaly] = true }
     end
     
     def picture_format
+      @@opt.on("--delete=[delete exp]"){
+        |legend| @charge[:delete] = legend }
       @@opt.on("--parafig=[number of picture]"){
         |num| @charge[:parafig] = num.to_i }
+      @@opt.on("--print_ident"){@charge[:print_ident] = true}
       @@opt.on("--iheight=[DCL iheight]"){
         |num| @charge[:iheight] = num.to_i }
       @@opt.on("--iwidth=[DCL iwidth]"){
