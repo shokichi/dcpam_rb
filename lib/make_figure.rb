@@ -50,6 +50,8 @@ module MKfig
       figopt.delete(:type)
     end
 
+    gpa = gpa.anomaly if option_notice?(:anomaly)
+    gpa.delete(Opt.charge[:delete]) if option_notice?(:delete)
     type = FigType if defined? FigType
     return if !defined? type    
 
@@ -91,6 +93,8 @@ module MKfig
     return if amount.nil?
     yoko = 2
     tate = (amount.to_i+1)/2
+    yoko = 3 if amount == 3
+    tate = 1 if amount <= 3
     DCL.sldiv('T',yoko,tate) 
 #    DCL.sgpset('lcntl', false)   # 制御文字を解釈しない
     DCL.sgpset('lfull',false)     # 全画面表示
@@ -103,8 +107,7 @@ module MKfig
     GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
     GGraph.set_fig('window'=>set_window([-90,90,nil,nil]))
 
-    hash["title"] = "" if option_notice?(:notitle)
-
+    n = 0
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
       gp = gpa[legend]
@@ -112,12 +115,14 @@ module MKfig
         gp = gp*1e-10
         gp.units = "10^10 " + gp.units.to_s
       end
-  
+
       fig_opt = {'color_bar'=>true,
                  'title'=>gp.long_name + " " + legend,
                  'annotate'=>false,
                  'nlev'=>20}.merge(hash)
       GGraph.tone_and_contour(gp, true,fig_opt)
+      print_identifier(n)
+      n += 1
     end
   end
   #------------------------------------------------  
@@ -128,8 +133,6 @@ module MKfig
     gpa = gpa.mean('time') if gpa.axnames.include?("time")
     gpa = gpa.mean("lon") if gpa.axnames.include?("lon")
 
-    hash["title"] = "" if option_notice?(:notitle)
-  
     lc = 23
     vx = 0.82
     vy = 0.8
@@ -137,6 +140,7 @@ module MKfig
       legend = gpa.legend[n]
       gp = gpa[legend]
       next if gp.nil?  
+      GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>set_window([-90,90,nil,nil]))
 
       # 
@@ -170,14 +174,13 @@ module MKfig
     gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")#最下層切り出し
     gpa = gpa.mean('time') if gpa.axnames.include?("time")#時間平均
     # 緯度切り出し
+    gpa = gpa.latmean if option_notice?(:latmean)
     if gpa.axnames.include?("lat")
       lat = 0
       lat = Lat if defined?(Lat)
       lat = Opt.charge[:lat] if option_notice?(:lat)
       gpa = gpa.cut("lat"=>lat)
     end
-
-    hash["title"] = "" if option_notice?(:notitle)
 
     lc = 23
     vx = 0.82
@@ -215,7 +218,7 @@ module MKfig
         GGraph.line( gp ,false ,fig_opt.merge(hash))
         DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
         DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
-      end 
+      end
     end      
   end
 
@@ -227,24 +230,24 @@ module MKfig
     # 時間平均経度平均
     gpa = gpa.mean('time') if gpa.axnames.include?("time")
 
-    hash["title"] = "" if option_notice?(:notitle)
-
+    n = 0
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
       gp = gpa[legend]
    
       # 横軸最大値
-      xcoord = gp.axis(0).to_gphys.val
-      xmax = (xcoord[1]-xcoord[0])*xcoord.length
+      gp = fix_axis_local(gp)      
   
       # 描画
-      GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-      GGraph.set_fig('window'=>set_window([0,xmax,nil,nil]))
+      GGraph.set_axes("xlabelint"=>90,"ylabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
+      GGraph.set_fig('window'=>set_window([0,360,-90,90]))
   
       fig_opt = {'title'=>gp.long_name + " " + legend,
                  'annotate'=>false,
                  'color_bar'=>true}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
+      print_identifier(n)
+      n += 1
     end
   end
 #---------------------------------------------
@@ -258,8 +261,7 @@ module MKfig
     lat = Opt.charge[:lat] if option_notice?(:lat)
     gpa = gpa.cut("lat"=>lat)
 
-    hash["title"] = "" if option_notice?(:notitle)
-
+    n = 0
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
       gp = gpa[legend]
@@ -275,6 +277,8 @@ module MKfig
                  'annotate'=>false,
                  'color_bar'=>true}.merge(hash)
       GGraph.tone_and_contour gp ,true, fig_opt
+      print_identifier(n)
+      n += 1
     end
   end
 # -------------------------------------------
@@ -287,9 +291,7 @@ module MKfig
     lat = Lat if defined?(Lat)
     lat = Opt.charge[:lat] if option_notice?(:lat)
     gpa = gpa.cut("lat"=>lat)
-
-    hash["title"] = "" if option_notice?(:notitle)
-
+    n = 0
     gpa.legend.each do |legend|
       next if gpa[legend].nil?
       gp = gpa[legend]
@@ -325,7 +327,7 @@ module MKfig
       # 横軸最大値
 #      gp = fix_axis_local(gp)
       xmax = 360
-
+      gp = gp.min2hrs
       # 描画
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>[0,xmax,nil,nil])
@@ -334,7 +336,55 @@ module MKfig
                  'annotate'=>false,
                  'color_bar'=>true}.merge(hash)
       GGraph.tone gp ,true, fig_opt
+      print_identifier(n)
+      n += 1
     end
+  end
+  # -------------------------------------------
+  def time(gpa,hash={})
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")#最下層切り出し
+
+    n = 0
+    lc = 23
+    vx = 0.82
+    vy = 0.8
+    gpa.legend.each_index do |n|
+      legend = gpa.legend[n]
+      gp = gpa[legend]
+      next if gp.nil?  
+      # 降水量の単位変換
+      gp = gp.wm2mmyr if gp.name.include?("Rain") 
+
+      gp = fix_axis_local(gp)      
+      # 描画
+      xmax = 360
+      GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
+      GGraph.set_fig('window'=>set_window([0,xmax,nil,nil]))
+
+      # 描画
+      vy = vy - 0.025
+      if n == 0 then
+        lc = 13 if gpa.list.ref.nil?
+        fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
+        GGraph.line( gp ,true ,fig_opt.merge(hash))
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
+        DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+      elsif n == gpa.list.refnum
+        lc_ref = 13
+        fig_opt = {'index'=>lc_ref}      
+        GGraph.line( gp ,false ,fig_opt.merge(hash))
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
+        DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
+      else
+        lc = lc + 10
+        fig_opt = {'index'=>lc}      
+        GGraph.line( gp ,false ,fig_opt.merge(hash))
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
+        DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+      end
+      print_identifier(n)
+      n += 1 
+    end          
   end
   # -------------------------------------------
   def plot(y_coord,newframe=true,hash={})
@@ -396,7 +446,13 @@ module MKfig
     gp.axis(0).set_pos(local)
     return gp
   end
-# -------------------------------------------
+  # -------------------------------------------
+  def print_identifier(n=0)
+    return if !option_notice?(:print_ident)
+    ident = ("a".."z").to_a
+    DCL.sgtxzv(0.45,0.05,"(#{ident[n.to_i]})",0.035,0,-1,3)
+  end
+  # -------------------------------------------
   def get_iws
     if defined? Opt
       return 2 if Opt.charge[:ps] || Opt.charge[:eps]
@@ -404,7 +460,7 @@ module MKfig
     end
     return 1 if !defined? IWS
   end
-# -------------------------------------------
+  # -------------------------------------------
   def set_figopt
     figopt = {}
     figopt["max"] = Opt.charge[:max] if option_notice?(:max)
@@ -413,6 +469,7 @@ module MKfig
     figopt["interval"] = Opt.charge[:interval] if option_notice?(:interval)
     figopt["clr_max"] = Opt.charge[:clr_max] if option_notice?(:clr_max)
     figopt["clr_min"] = Opt.charge[:clr_min] if option_notice?(:clr_min)
+    figopt["title"] = "" if option_notice?(:notitle) 
     figopt = parse_Figopt(figopt)
     return figopt
   end
@@ -459,7 +516,8 @@ module MKfig
     id = id.id if id.class == Explist
     img_lg = id+"_"+File.basename(scrfile,".rb").sub("mkfig_","")
     img_lg += "_lat#{Opt.charge[:lat].to_i}" if option_notice?(:lat)
-    img_lg += "_#{Opt.charge[:name]}"  if option_notice?(:name)
+    img_lg += "_#{Opt.charge[:name]}" if option_notice?(:name)
+    img_lg += "_anomaly" if option_notice?(:anomaly)
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")
       convert_eps("#{img_lg}.ps") if option_notice?(:eps)
