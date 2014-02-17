@@ -158,20 +158,20 @@ module Omega
       return gpa.anomaly[n]
     end
 
-    def calc_correlat_coef(x,y)  # 相関係数の計算 
-      x_mean = glmean(x)
-      y_mean = glmean(y)
-      xy_S = glmean((x-x_mean)*(y-y_mean))
-      xx_S = glmean((x-x_mean)**2)
-      yy_S = glmean((y-y_mean)**2)
+    def calc_correlat_coef(x,y)  # 相関係数 
+      x_mean = x.glmean
+      y_mean = y.glmean
+      xy_S = ((x-x_mean)*(y-y_mean)).glmean
+      xx_S = ((x-x_mean)**2).glmean
+      yy_S = ((y-y_mean)**2).glmean
       return xy_S /(xx_S * yy_S).sqrt
     end
 
-    def calc_regression_sloop(y,x)  # 回帰直線の傾き
-      x_mean = glmean(x)
-      y_mean = glmean(y)
-      xy_S = glmean((x-x_mean)*(y-y_mean))
-      xx_S = glmean((x-x_mean)**2)
+    def calc_regression_sloop(y,x)  # 回帰係数
+      x_mean = x.glmean
+      y_mean = y.glmean
+      xy_S = ((x-x_mean)*(y-y_mean)).glmean
+      xx_S = ((x-x_mean)**2).glmean
       return xy_S /xx_S      
     end
         
