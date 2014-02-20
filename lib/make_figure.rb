@@ -298,13 +298,14 @@ module MKfig
 
       # Use time:30 days, Intervel: 1/24 hours
 
+      ##############################################
       if defined? HrInDay 
         hr_in_day = HrInDay
       else
         hr_in_day = 24/omega_ratio(legend)
       end
       hr_in_day = 24 if gpa.list.id.include? "coriolis"
-
+      ##############################################
       # 時間切り出し
       time = gp.axis("time").pos
       range = 30  # [day]
@@ -394,41 +395,6 @@ module MKfig
       GGraph.scatter x_coord[n..n],gp[n..n],newframe,figopt
     end
   end
-  # -------------------------------------------
-#   def gave_netrad(dir,name)  # エネルギー収支の確認
-#     # データの取得
-#     begin
-#       osr = GPhys::IO.open(dir + "OSRA.nc","OSRA")
-#       olr = GPhys::IO.open(dir + "OLRA.nc","OLRA")
-#     rescue
-#       print "[OSR,OLR](#{dir}) is not exist\n"
-#       next
-#     end
-#     # 全球平均
-#     if osr.rank != 1 then
-#       osr = Utiles_spe.glmean(osr)
-#       olr = Utiles_spe.glmean(olr)
-#     end
-#     # 描画
-#     GGraph.line osr+olr,true,'title'=>'OSR+OLR '+name
-#   end
-#   # -------------------------------------------
-#   def gave_AM(dir,name)  # エネルギー収支の確認
-#     # データの取得
-#     begin
-#       am = GPhys::IO.open(dir + "AnglMom.nc","AnglMom")
-#       ps = GPhys::IO.open(dir + "Ps.nc","Ps")
-#     rescue
-#       print "[AnglMon](#{dir}) is not exist\n"
-#     next
-#     end
-#     
-#     # 全球平均
-#     am = Utiles_spe.virtical_integral(Utiles_spe.glmean(am*ps)) if am.rank !=1
-#     
-#     # 描画
-#     GGraph.line am, true, 'title'=>'AnglMom '+name
-#   end
   # -------------------------------------------
   def self.cut_and_mean(gp)
     eval "gp = gp.cut(#{Opt.charge[:cut]})" if option_notice?(:cut)
@@ -526,4 +492,7 @@ module MKfig
         File.rename(filename,filename.sub("dcl",img_lg)) }
     end
   end  
+end
+
+module MKfig
 end
