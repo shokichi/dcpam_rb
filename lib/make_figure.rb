@@ -72,14 +72,13 @@ module MKfig
 
   end
 # --------------------------------------------------  
-  def set_dcl(clr=false)    # DCL set
-    clrmp = 14  # カラーマップ
+  def set_dcl(clr=nil)    # DCL set
     iwidth = 700 
     iheight = 700
     iwidth = Opt.charge[:iwidth] if option_notice?(:iwidth)
     iheight = Opt.charge[:iheight] if option_notice?(:iheight)
     DCL::swlset('lwnd',false) if IWS==4
-    DCL.sgscmn(clrmp) if clr
+    DCL.sgscmn(clr) if !clr.nil?
     DCL.swpset('iwidth',iwidth)
     DCL.swpset('iheight',iheight)
     DCL.gropn(IWS)
@@ -189,7 +188,7 @@ module MKfig
       legend = gpa.legend[n]
       gp = gpa[legend]
       next if gp.nil?  
-      # 降水量の単位変換
+
       gp = gp.wm2mmyr if gp.name.include?("Rain") 
 
       gp = fix_axis_local(gp)      
@@ -525,5 +524,5 @@ module MKfig
       Dir.glob("dcl_*.png").each{ |filename|
         File.rename(filename,filename.sub("dcl",img_lg)) }
     end
-  end  
+  end 
 end

@@ -550,64 +550,6 @@ module Utiles_spe
     return result
   end
   # ---------------------------------------
-  def r_inp_z(z_gp,sigm)
-    sig = z_gp.axis("sig").to_gphys.val
-    r_gp = sub_sig2sigm(z_gp,sigm)
-    sigm = sigm.val
-    r_gp[false,0,true].val = z_gp[false,0,true].val
-    (sig.length-2).times do |n|
-      alph = log(sigm[n+1]/sig[n+1]) / log(sig[n]/sig[n+1])
-      beta = log(sig[n]/sigm[n+1]) / log(sig[n]/sig[n+1])
-      r_gp[false,n+1,true].val = alph * z_gp[false,n,true].val 
-                                 + beta * z_gp[false,n+1,true].val
-    end
-    r_gp[false,-1,true].val = z_gp[false,-1,true].val
-    
-    return r_gp
-  end
-  # ---------------------------------------
-  def day2min(gp,hr_in_day)
-    time =  gp.axis("time").pos * hr_in_day * 60
-    time.units = "min"
-    gp.axis("time").set_pos(time)  
-    return gp
-  end
-  #----------------------------------------
-  def hrs2min(gp,hr_in_day)
-    time =  gp.axis("time").pos * 60
-    time.units = "min"
-    gp.axis("time").set_pos(time)
-    return gp
-  end
-  # ---------------------------------------
-  def day2hrs(gp,hr_in_day)
-    time =  gp.axis("time").pos * hr_in_day
-    time.units = "hrs"
-    gp.axis("time").set_pos(time)  
-    return gp
-  end
-  #----------------------------------------
-  def min2hrs(gp,hr_in_day)
-    time =  gp.axis("time").pos / 60
-    time.units = "hrs"
-    gp.axis("time").set_pos(time)
-    return gp
-  end
-  #----------------------------------------
-  def hrs2day(gp,hr_in_day)
-    time =  gp.axis("time").pos / hr_in_day
-    time.units = "day"
-    gp.axis("time").set_pos(time)  
-    return gp
-  end
-  #----------------------------------------
-  def min2day(gp,hr_in_day)
-    time =  gp.axis("time").pos / hr_in_day / 60
-    time.units = "day"
-    gp.axis("time").set_pos(time)
-    return gp
-  end
-  #----------------------------------------
   def skip_num(gp,delnum)
     gp_ary = []
     (gp.axis("time").length-1).times do |t|
