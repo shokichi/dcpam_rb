@@ -101,7 +101,7 @@ module NumRu
       #-----------------------------------------  
       def sig2press(ps) # 鉛直座標変換(sig -> press)
         gp = self.clone
-        # 座標データ取得
+
         sig = gp.axis("sig").to_gphys if gp.axnames.include?("sig")
         sig = gp.axis("sigm").to_gphys if gp.axnames.include?("sigm")       
 
@@ -120,7 +120,7 @@ module NumRu
         return gp_press
       end
       # ---------------------------------------
-      def sub_sig2sigm(sigm)
+      def shape_sig2sigm(sigm)
         gp = self.clone 
         lon = gp.axis("lon")
         lat = gp.axis("lat")
@@ -137,7 +137,7 @@ module NumRu
       # ---------------------------------------
       def diff_sig(sigm)
         gp = self.clone 
-        result = sub_sig2sigm(gp,sigm)
+        result = gp.shape_sig2sigm(sigm)
         sig = gp.axis("sig").to_gphys.val
         (sig.length-1).times do |n|
         result[false,n+1,true].val = 
@@ -407,16 +407,11 @@ module AnalyDCPAM
   end
   #----------------------------------------- 
   def self.calc_msf_save(gv,gps,sigm)  # 質量流線関数の計算
-    # file open
-    if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
-      print "Argument is not [QVap,Temp,Ps]"
-      return
-    end
     # 座標データの取得
     lon = gv.axis("lon")
     lat = gv.axis("lat")
     
-    data_name = 'Strm'
+    data_name = 'MSF'
     ofile = NetCDF.create( dir + data_name + '.nc')
     GPhys::NetCDF_IO.each_along_dims_write([gv,gps], ofile, 'time') { 
       |vwind,ps|  
@@ -445,7 +440,7 @@ module AnalyDCPAM
     print "[#{data_name}](#{dir}) is created\n"
   end
   # -------------------------------------------
-  def self.calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
+  def calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
     # file check
   if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
     print "Argument is not [QVap,Temp,Ps]"

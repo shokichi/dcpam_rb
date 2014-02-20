@@ -12,8 +12,9 @@ module OptCharge
       @@arge = arge
       @@opt = OptionParser.new
       @charge = {}
-      figure_parameter
+      ggraph_parameter
       attribute_parameter
+      rotation_rate
       picture_format
       cut_and_mean
       self
@@ -32,7 +33,7 @@ module OptCharge
     end
     
     private
-    def figure_parameter
+    def ggraph_parameter
       @@opt.on("--max=[maximum]") {|max| @charge[:max] = max.to_f}
       @@opt.on("--min=[minimum]") {|min| @charge[:min] = min.to_f}
       @@opt.on("--nlev=[number of levels]") {
@@ -52,18 +53,21 @@ module OptCharge
     end
     
     def attribute_parameter
-     @@opt.on("-r","--rank") {@charge[:rank] = true}
+      @@opt.on("-r","--rank") {@charge[:rank] = true}
       @@opt.on("--name=[data name]") {|name| @charge[:name] = name}
+    end
+
+    def rotation_rate
       @@opt.on("--hr_in_day=[hours in day]") {
         |hrs| @charge[:hr_in_day] = hrs}
       @@opt.on("--omega=[rotation rate]") {
         |omega| @charge[:omega] = omega}
-      @@opt.on("--time_range=Day") {|day| @charge[:timerange] = day.to_f}
     end
     
     def cut_and_mean
-      @@opt.on("--lat=[latitude]") {|lat| @charge[:lat] = lat.to_f}
-      @@opt.on("--cut=[cut range]"){|range| @charge[:cut] = range }
+      @@opt.on("--lat=[latitude range]"){|lat| @charge[:lat] = lat.to_range}
+      @@opt.on("--lon=[latitude range]"){|lon| @charge[:lon] = lon.to_range}
+      @@opt.on("--time=[time range]"){|time| @charge[:time] = time.to_range}
       @@opt.on("--mean=[mean axis]"){|axis| @charge[:mean] = axis }
       @@opt.on("--latmean"){@charge[:latmean] = true }
       @@opt.on("--anomaly"){@charge[:anomaly] = true }
@@ -83,8 +87,17 @@ module OptCharge
       @@opt.on("--ps")  {@charge[:ps]  = true}
       @@opt.on("--png") {@charge[:png] = true}
     end
-    
     public
     attr_reader :charge
+  end
+  # --------------------------------------------------- 
+  class String
+    def to_range # String -> Range
+      str = self.clone
+      first, last = str.split("..")
+      return first.to_f if last.nil?
+      result = Range.new(first.to_f,last.to_f)
+      return result
+    end
   end
 end

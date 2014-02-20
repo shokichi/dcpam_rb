@@ -8,13 +8,10 @@
 * mkfig_gave.rb:全球平均値の表を作成
 * mkfig_latsig.rb:赤道断面の図を作成
 * mkfig_lontime.rb:ホフメラー図を作成
-* mkfig_anomaly_merid.rb: 
-* mkfig_anomaly_lonlat.rb: 
-* mkfig_anomaly_lonsig.rb: 
 * anime/:アニメーション作成ツール
 
 === 解析
-* albedo.rb:惑星アルベド
+* albedo.rb:アルベド
 * anglmom.rb:絶対角運動量
 * msf.rb:質量流線関数
 * rh.rb:相対湿度
@@ -77,11 +74,14 @@ NetCDFファイルが置いてあるディレクトリで
 
 === 図の保存
 描いた図を保存したい場合は以下のオプションをつける
-* -ps: ps で保存
+* --png: png で保存
+ $ mkfig_merid.rb --png
+
+* --ps: ps で保存
  $ mkfig_merid.rb --ps
 
-* -png: png で保存
- $ mkfig_merid.rb --png
+* --eps: eps で保存
+ $ mkfig_merid.rb --eps
 
 === 各種物理量の計算
 ==== 質量流線関数
@@ -92,6 +92,9 @@ NetCDFファイルが置いてあるディレクトリで
 
 ==== 可降水量
  $ prcwtr.rb
+
+==== 角運動量
+ $ anglmom.rb
 
 === その他
 ==== 時間平均・経度平均の計算
@@ -111,8 +114,8 @@ NetCDFファイルが置いてあるディレクトリで
  $ local_time.rb
 
 * オプション
- -n, --name       変数を指定
- -h, --hr_in_day  1日の長さを指定
+ --name       変数を指定
+ --hr_in_day  1日の長さを指定
 
 現状では地方時変換の後に時間平均される
 仕様になっている.
