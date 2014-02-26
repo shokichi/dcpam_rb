@@ -10,7 +10,7 @@ include NMath
 
 module AnalyDCPAM
   class GPhysArray
-    def initialize(name,listfile)
+    def initialize(name=nil,listfile=nil)
       @@listfile = listfile
       if listfile.class == Explist
         @list = listfile
@@ -22,17 +22,19 @@ module AnalyDCPAM
       @legend = get_legend
     end
 
-    def create(array_of_gphys,legends)
+    def self.create(array_of_gphys,legends)
       array_of_gphys = [array_of_gphys] if array_of_gphys.class != Array
       legends = [legends] if legends.class != Array
+
       if array_of_gphys.size != legends.size
-        puts "Array size is not agreement"
+        puts "Argument array size is not agreement"
         return 
       end
-      @list = Explist.new
-      @data = array_of_gphys
-      @legend = legends
-      self
+      gpa = self.new
+      gpa.name = array_of_gphys[0].name
+      gpa.data = array_of_gphys
+      gpa.legend = legends
+      return gpa
     end
 
     def ref
@@ -146,8 +148,18 @@ module AnalyDCPAM
       return 
     end
 
+    def name=(str)
+      @data = str
+      self
+    end
+
     def data=(ary)
       @data = ary
+      self
+    end
+
+    def legend=(ary)
+      @legend = ary
       self
     end
 
@@ -218,7 +230,7 @@ module AnalyDCPAM
       nil
     end
 
-    def correlation(other_gpa)
+    def correlation(other_gpa) # omega
       rotation = []
       coef_ary = []
       self.data.each_index do |n|
@@ -231,13 +243,34 @@ module AnalyDCPAM
       end
       coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
       coef_gp.axis(0).pos.name = "rotation rate" 
+      coef_gp.axis(0).pos.long_name = "Normalized rotation rate" 
       coef_gp.name = "correlation"
       coef_gp.long_name = "correlation coefficient"
       return coef_gp      
     end
 
+    def regression(other_gpa) # omega
+      rotation = []
+      coef_ary = []
+      self.data.each_index do |n|
+        gp1 = self.data[n]
+        gp2 = other_gpa[self.legend[n]]
+        coef = nil if gp2.nil?
+        coef = calc_regression_coef(gp1,gp2) if !gp2.nil?
+        rotation << omega_ratio(@legend[n])
+        coef_ary << coef
+      end
+      coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
+      coef_gp.axis(0).pos.name = "rotation rate" 
+      coef_gp.axis(0).pos.long_name = "Normalized rotation rate" 
+      coef_gp.name = "regression"
+      coef_gp.long_name = "regression coefficient"
+      return coef_gp      
+    end
+
     private
     def get_data
+      return [] if name.nil?  
       result = []
       @list.dir.each do |dir|
         gp = gpopen dir + @name+".nc"
@@ -258,3 +291,5 @@ module AnalyDCPAM
     return GPhysArray.new(varname,list)        
   end
 end
+
+
