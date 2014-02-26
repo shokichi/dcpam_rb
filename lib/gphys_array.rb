@@ -11,7 +11,6 @@ include NMath
 module AnalyDCPAM
   class GPhysArray
     def initialize(name=nil,listfile=nil)
-      @@listfile = listfile
       if listfile.class == Explist
         @list = listfile
       else
