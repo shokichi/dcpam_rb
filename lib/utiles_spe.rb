@@ -13,7 +13,7 @@ include ConstShk
 module Utiles_spe   
   class Explist
     # 実験ファイルリストの読み込み
-    def initialize(file_list)
+    def initialize(file_list=nil)
       @@filelist = file_list
       if !file_list.nil? then
         read_file
@@ -477,7 +477,7 @@ module Utiles_spe
     return xy_S /(xx_S * yy_S).sqrt
   end  
   # ---------------------------------------
-  def calc_regression_sloop(x,y)  # 回帰係数の計算
+  def calc_regression_coef(x,y)  # 回帰係数の計算
     x_mean = Utiles_spe.glmean(x)
     y_mean = Utiles_spe.glmean(y)
     xy_S = Utiles_spe.glmean((x-x_mean)*(y-y_mean))
@@ -579,7 +579,7 @@ module Utiles_spe
   end
   #---------------------------------------
   def gpopen(file,name=nil)
-    name = File.basename(file,".nc").gsub("_","").sub("MT","").sub("local","") if name.nil?
+    name = File.basename(file,".nc").split("_")[-1] if name.nil?
     if defined?(Flag_rank) and Flag_rank == true then
       gp = gpopen_rank(file,name)
       gp = gpopen_nomal(file,name) if gp.nil?
@@ -605,6 +605,8 @@ module Utiles_spe
       if !file.include?(name)
         gp = GPhys::IO.open(file.sub(".nc","_rank000000.nc"), name)
       else
+p Dir.glob(file.sub(".nc","_rank*.nc"))
+p name
         gp = GPhys::IO.open(Dir.glob(file.sub(".nc","_rank*.nc")), name)     #<=読み込みに時間がかかりすぎる
       end
     rescue
