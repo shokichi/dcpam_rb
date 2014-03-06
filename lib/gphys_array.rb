@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # GPhysArrayオブジェクト
 # 
-require File.expand_path(File.dirname(__FILE__)+"/"+"utiles_spe.rb")
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/"+"utiles.rb")
+include Utiles
 include NumRu
 include Math
 include NMath
@@ -240,7 +240,7 @@ module AnalyDCPAM
         rotation << omega_ratio(@legend[n])
         coef_ary << coef
       end
-      coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
+      coef_gp = Utiles.array2gp(rotation,coef_ary)
       coef_gp.axis(0).pos.name = "rotation rate" 
       coef_gp.axis(0).pos.long_name = "Normalized rotation rate" 
       coef_gp.name = "correlation"
@@ -259,7 +259,7 @@ module AnalyDCPAM
         rotation << omega_ratio(@legend[n])
         coef_ary << coef
       end
-      coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
+      coef_gp = Utiles.array2gp(rotation,coef_ary)
       coef_gp.axis(0).pos.name = "rotation rate" 
       coef_gp.axis(0).pos.long_name = "Normalized rotation rate" 
       coef_gp.name = "regression"

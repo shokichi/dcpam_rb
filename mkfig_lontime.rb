@@ -10,6 +10,11 @@ require 'optparse'
 include MKfig
 include NumRu
 
+config = {
+  "Rain"=>{"nlev"=>20}
+}
+
+#################################################
 # option
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
@@ -24,7 +29,7 @@ FigType = "lontime"
 if !Opt.charge[:name].nil? then
   make_figure(Opt.charge[:name],list,set_figopt)
 else
-  make_figure("Rain",list,"nlev"=>20)
+  config.keys.each{ |name| make_figure(name,list,config[name])}
 end
 
 DCL.grcls

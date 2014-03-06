@@ -22,4 +22,6 @@ module ConstShk
   GasRUniv = UNumeric[8.3144621,"J.K-1.mol-1"] # 気体定数
   CpDry = UNumeric[1004,"J.K-1.kg-1"]    # 乾燥空気の定圧比熱
   GasRDry = GasRUniv/MolWtDry            # 乾燥空気の気体定数
+  GasRWet = GasRUniv / MolWtWet          # 水蒸気の気体定数
+
 end

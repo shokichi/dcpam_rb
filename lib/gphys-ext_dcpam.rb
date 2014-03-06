@@ -2,9 +2,277 @@
 # -*- coding: utf-8 -*-
 # 
 # 
+=begin
+== GPhys Class
+
+---glmean  
+    全球平均
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---latmean  
+    緯度平均
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---variance(axis=0,ave=nil) 
+    分散
+
+    ARGUMNETS    
+    * index of axis
+    * average (optional)
+
+    RETURN VALUE
+    * GPhys <- ??
+
+    NOTE
+
+---virtical_integral  
+    鉛直積分
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---wm2mmyr  
+    降水量の単位変換(W.m-2 -> mm.yr-1)
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---wm2mmhr  
+    降水量の単位変換(W.m-2 -> mm.hr-1)
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---sig2press(ps) 
+    鉛直座標変換(sig -> press)
+
+    ARGUMNETS    
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---shape_sig2sigm(sigm)
+    
+
+    ARGUMNETS    
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---diff_sig(sigm)
+    sigma微分の計算
+
+    ARGUMNETS    
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---r_inp_z(sigm)
+    半整数レベル(層境界)における値に変換
+
+    ARGUMNETS    
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---day2min(hr_in_day)
+    時間軸の単位変換(days -> min) 
+
+    ARGUMNETS    
+    * hours in a day
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---day2hrs(hr_in_day)
+    時間軸の単位変換(day -> hrs) 
+
+    ARGUMNETS    
+    * hours in a day
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---min2hrs
+    時間軸の単位変換(min -> hrs) 
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---hrs2min
+    時間軸の単位変換(hrs -> min) 
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---hrs2day(hr_in_day)
+    時間軸の単位変換(hrs -> day) 
+
+    ARGUMNETS    
+    * hours in a day
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---min2day(hr_in_day)
+    時間軸の単位変換(min -> day) 
+
+
+    ARGUMNETS    
+    * hours in a day
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---skip_num(delnum)
+
+
+    ARGUMNETS    
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---skip_time(skip,hr_in_day=24.0)
+
+
+    ARGUMNETS    
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+---lon_max #
+
+
+    RETURN VALUE
+    * GPhys　 <- ??
+
+    NOTE
+
+---local2degree #
+
+
+    RETURN VALUE
+    * GPhys
+
+    NOTE
+
+== AnalyDCPAM module
+---local_time(gphys,hr_in_day)
+    地方時変換
+
+    ARGUMNETS    
+
+    RETURN VALUE
+
+    NOTE
+
+---sig2press_save(dir,var_name)
+    鉛直座標変換(sig -> press)
+
+    ARGUMNETS    
+
+    RETURN VALUE
+
+    NOTE
+
+---calc_press(ps,sig)
+    気圧の計算
+
+    ARGUMNETS    
+
+    RETURN VALUE
+
+    NOTE
+
+---calc_planetary_albedo(osr)
+    惑星アルベドの計算
+
+    ARGUMNETS    
+
+    RETURN VALUE
+
+    NOTE
+
+---calc_greenhouse_effect(osr,stemp)
+    温室効果係数の計算
+
+    ARGUMNETS    
+
+    RETURN VALUE
+
+    NOTE
+
+---calc_msf_save(gv,gps,sigm)  
+    質量流線関数の計算
+
+    ARGUMNETS    
+
+    RETURN VALUE
+
+    NOTE
+
+---calc_rh(gqvap,gtemp,gps) 
+    相対湿度の計算
+
+    ARGUMNETS    
+
+    RETURN VALUE
+
+    NOTE
+
+---self.calc_prcwtr(dir) 
+    可降水量の計算
+
+    ARGUMNETS    
+
+    RETURN VALUE
+
+    NOTE
+
+
+=end
+
 require "numru/ggraph"
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/utiles.rb")
 include NumRu
 include Math
 include NMath
@@ -164,7 +432,7 @@ module NumRu
         return r_gp
       end
       # ---------------------------------------
-      def day2min(hr_in_day)
+      def day2min(hr_in_day=24.0)
         gp = self.clone 
         time =  gp.axis("time").pos * hr_in_day * 60
         time.units = "min"
@@ -172,7 +440,7 @@ module NumRu
         return gp
       end
       # ---------------------------------------
-      def day2hrs(hr_in_day)
+      def day2hrs(hr_in_day=24.0)
         gp = self.clone 
         time =  gp.axis("time").pos * hr_in_day
         time.units = "hrs"
@@ -196,7 +464,7 @@ module NumRu
         return gp
       end
       #----------------------------------------
-      def hrs2day(hr_in_day)
+      def hrs2day(hr_in_day=24.0)
         gp = self.clone 
         time =  gp.axis("time").pos / hr_in_day
         time.units = "day"
@@ -204,7 +472,7 @@ module NumRu
         return gp
       end
       #----------------------------------------
-      def min2day(hr_in_day)
+      def min2day(hr_in_day=24.0)
         gp = self.clone 
         time =  gp.axis("time").pos / hr_in_day / 60
         time.units = "day"
@@ -242,7 +510,7 @@ module NumRu
         return result
       end
       # --------------------------------------
-      def diurnal(slon=nil)
+      def diurnal(slon=nil) #
         gp = self.clone
         max = gp.lon_max
         sunrise = max/4
@@ -251,13 +519,13 @@ module NumRu
         return gp
       end
       # --------------------------------------
-      def mask_diurnal(slon=nil)
+      def mask_diurnal(slon=nil) #
         gp = self.clone
         result = gp*day_mask(gp)
         return result
       end
       # ---------------------------------------
-      def mask_night(slon=nil)
+      def mask_night(slon=nil) #
         gp = self.clone
         result = gp*(1-day_mask(gp))
         return result
@@ -359,44 +627,6 @@ module AnalyDCPAM
     return press
   end
   #----------------------------------------- 
-  def sig2press_save(dir,var_name) # 鉛直座標変換(sig -> press)
-    # ファイルオープン
-    gphys = gpopen(dir + var_name +".nc",var_name)
-    gps = gpopen(dir + "Ps.nc","Ps")
-    
-    # 座標データ取得
-    sig = gphys.axis(-2).to_gphys
-    
-    ofile = NetCDF.create(dir + 'Prs_' + var_name + '.nc')
-    GPhys::NetCDF_IO.each_along_dims_write([gphys,gps],ofile, 'time') { 
-      |gp,ps|  
-      
-      # 気圧データの準備
-      press = gp.copy
-      press.units = 'Pa'
-      press.name = "press"
-      press.long_name = "pressure"
-      press[false] = 0
-      for k in 0..sig.length-1
-        press[false,k,true] = ps * sig[k].val
-      end
-      
-      # 補助座標に気圧を設定 
-      gp.set_assoc_coords([press])
-      
-      # 気圧座標の値を準備
-      press_crd = sig.val*RefPrs
-      press_crd = VArray.new( press_crd, {"units"=>"Pa"}, "press")
-      
-      # 鉛直座標を気圧に変換
-      gp_press = gp.interpolate(sig.name=>press_crd)
-      
-      # 出力
-      [gp_press]
-    }
-    
-  end
-  #----------------------------------------- 
   def calc_planetary_albedo(osr)
     return 1.0 + osr.glmean/(SolarConst/4)
   end
@@ -405,140 +635,8 @@ module AnalyDCPAM
     etemp = (SolarConst*(1.0-calc_planetary_albedo(osr))/(4*StB))**(1.0/4)
     return stemp.glmean/etemp
   end
-  #----------------------------------------- 
-  def self.calc_msf_save(gv,gps,sigm)  # 質量流線関数の計算
-    # 座標データの取得
-    lon = gv.axis("lon")
-    lat = gv.axis("lat")
-    
-    data_name = 'MSF'
-    ofile = NetCDF.create( dir + data_name + '.nc')
-    GPhys::NetCDF_IO.each_along_dims_write([gv,gps], ofile, 'time') { 
-      |vwind,ps|  
-      
-      time = vwind.axis("time")    
-      
-      msf_na = NArray.sfloat(lon.length,lat.length,sigm.length,time.length)
-      grid = Grid.new(lon,lat,sigm.axis("sigm"),time)
-      msf = GPhys.new(grid,VArray.new(msf_na))
-      msf.units = 'kg.s-1'
-      msf.long_name = 'mass stream function'
-      msf.name = data_name
-      msf[false] = 0
-      
-      cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
-      alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
-      kmax = 15
-      for i in 0..kmax
-        k = kmax-i
-        msf[false,k,true] = msf[false,k+1,true] +
-          alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
-      end
-      [msf]
-    }
-    ofile.close
-    print "[#{data_name}](#{dir}) is created\n"
-  end
-  # -------------------------------------------
-  def calc_rh(gqvap,gtemp,gps) # 相対湿度の計算
-    # file check
-  if gqvap.name != "QVap" or gps.name != "Ps" or gtemp.name != "Temp"
-    print "Argument is not [QVap,Temp,Ps]"
-    return
-  end
-    
-    # 座標データの取得
-    lon = gtemp.axis('lon')
-    lat = gtemp.axis('lat')
-    sig = gtemp.axis('sig').to_gphys
-    
-    # 定数設定
-    qvapmol = UNumeric[18.01528e-3, "kg.mol-1"]
-    drymol =UNumeric[28.964e-3,"kg.mol-1"]
-    p0 = UNumeric[1.4e+11,"Pa"]
-    latheat = UNumeric[43655,"J.mol-1"]
-    gasruniv = UNumeric[8.314,"J.K-1.mol-1"]
-    
-    es0 = UNumeric[611,"Pa"]
-    latentheat = UNumeric[2.5e+6,"J.kg-1"]
-    #  latheat = LatentHeat * MolWtWet
-    
-    gasrwet = gasruniv / qvapmol
-    epsv = qvapmol / drymol
-    
-    # 
-    data_name = 'RH'
-    file = gqvap.data.file.path.sub("QVap",data_name)
-    ofile = NetCDF.create(file)
-    GPhys::NetCDF_IO.each_along_dims_write([gqvap,gps,gtemp],ofile,'time'){ 
-      |qvap,ps,temp| 
-      # 気圧の計算
-      press = calc_press(ps,sig)    
-      
-      #    for k in 0..sig.length-1
-      #      press[false,k,true] = ps * sig[k].val
-      #    end
-      
-      # 飽和水蒸気圧の計算
-      es = es0 * ( latentheat / gasrwet * ( 1/273.0 - 1/temp ) ).exp
-      # 水蒸気圧の計算
-      e = qvap * press / epsv
-      # 相対湿度の計算
-      rh = e / es * 100 # [%]
-      
-      # 飽和非湿の計算
-      #    qvap_sat = epsv * (p0 / press) * (-latheat / (gasruniv * temp) ).exp
-      # 相対湿度の計算
-      #    rh = qvap / qvap_sat * 100 # [%]
-      
-      rh.units = '%'
-      rh.long_name = 'relative humidity'
-      rh.name = data_name  
-      
-      [rh]
-    }
-    ofile.close
-    print "[#{data_name}](#{file}) is created\n"
-  end
-  
   # --------------------------------------------
-  def self.calc_prcwtr(dir) # 可降水量の計算
-    # file open
-    gqv = gpopen(dir + "QVap.nc", "QVap")
-    gps = gpopen(dir + "Ps.nc", "Ps")
-    sigm = gpopen(dir + "QVap.nc", "sigm")
-    
-    lon = gqv.axis("lon")
-    lat = gqv.axis("lat")
-    
-    data_name = 'PrcWtr'
-    ofile = NetCDF.create( dir + data_name + '.nc')
-    GPhys::NetCDF_IO.each_along_dims_write([gqv,gps], ofile, 'time') { 
-      |qvap,ps|  
-      #
-      time = qvap.axis("time")    
-      
-      qc_na = NArray.sfloat(lon.length,lat.length,time.length)
-      grid = Grid.new(lon,lat,time)
-      qc = GPhys.new(grid,VArray.new(qc_na))
-      qc.units = 'kg.m-2'
-      qc.long_name = 'precipitable water'
-      qc.name = data_name
-      qc[false] = 0
-      
-      alph = qvap * ps / Grav 
-      kmax = 22
-      for i in 0..kmax
-        k = kmax-i
-        qc = qc + alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
-      end
-      [qc]
-    }
-    ofile.close
-    print "[#{data_name}](#{dir}) is created\n"
-  end  
-  # --------------------------------------------
-  def cos_ang(gp,hr_in_day=24.0) # cos(太陽天頂角) 
+  def cos_ang(gp,hr_in_day=24.0) # cos(太陽天頂角) ##
     # gp は地方時変換済みであることが前提
     gp = gp.local2degree
     lon = gp.axis("lon").to_gphys if gp.axnames.include?("lon")
@@ -561,7 +659,7 @@ module AnalyDCPAM
     return ang.mask_diurnal + 1e-14
   end
   # ---------------------------------------------
-  def day_mask(gp,slon=0)
+  def day_mask(gp,slon=0) #
     mask = gp.copy
     mask[false] = 0
     nmax = mask.axis(0).length

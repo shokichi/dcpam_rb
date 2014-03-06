@@ -8,6 +8,7 @@ require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/make_figure.rb")
 require File.expand_path(File.dirname(__FILE__)+"/gphys-ext_dcpam.rb")
 require File.expand_path(File.dirname(__FILE__)+"/gphys_array.rb")
+require File.expand_path(File.dirname(__FILE__)+"/diagnose.rb")
 require File.expand_path(File.dirname(__FILE__)+"/option_charge.rb")
 require File.expand_path(File.dirname(__FILE__)+"/global_ave.rb")
 
@@ -16,6 +17,7 @@ include Math
 include NMath
 include MKfig
 include AnalyDCPAM
+include Diagnose
 include OptCharge
 include ConstShk
 include GlobalAverage
