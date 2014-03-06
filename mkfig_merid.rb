@@ -9,6 +9,18 @@ require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
 include MKfig
 include NumRu
 
+config = {
+  'Temp'   =>{"min"=>120,"max"=>320,"interval"=>10},
+  'U'      =>{"min"=>-80,"max"=>80,"interval"=>5},
+  'V'      =>{"min"=>-8,"max"=>8},
+  'RH'     =>{"min"=>0,"max"=>100},
+  'SigDot' =>{"min"=>-1.5e-6,"max"=>1.5e-6},
+  'QVap'   =>{"min"=>0,"max"=>0.015},
+  'H2OLiq' =>{"min"=>0,"max"=>5e-5},
+  'Strm'   =>{"min"=>-50,"max"=>50,"nlev"=>20}
+}
+
+#################################################
 # option
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
@@ -23,14 +35,7 @@ FigType = "merid"
 if !Opt.charge[:name].nil? then
   make_figure(Opt.charge[:name],list,set_figopt)
 else
-  make_figure('Temp',list,"min"=>120,"max"=>320,"interval"=>10)
-  make_figure('U',list,"min"=>-80,"max"=>80,"interval"=>5)
-  make_figure('V',list,"min"=>-8,"max"=>8)
-  make_figure('RH',list,"min"=>0,"max"=>100)
-  make_figure('SigDot',list,"min"=>-1.5e-6,"max"=>1.5e-6)
-  make_figure('QVap',list,"min"=>0,"max"=>0.015)
-  make_figure('H2OLiq',list,"min"=>0,"max"=>5e-5)
-  make_figure('Strm',list,"min"=>-50,"max"=>50,"nlev"=>20)
+  config.keys.each{ |name| make_figure(name,list,config[name])}
 end
 
 DCL.grcls

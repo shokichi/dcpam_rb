@@ -1,14 +1,14 @@
 = dcpam解析用スクリプト取扱説明書
 == 内容物
 === 描画
-* mkfig_merid.rb:時間・経度平均した子午面(lat-sig)の図を作成
-* mkfig_lat.rb:時間・経度平均した緯度分布の図を作成
-* mkfig_lon.rb:時間平均した経度分布の図を作成
-* mkfig_lonlat.rb:水平面分布(lon-lat)の図を作成
-* mkfig_gave.rb:全球平均値の表を作成
+* mkfig_merid.rb:子午面(lat-sig)の図を作成
+* mkfig_lat.rb:緯度分布の図を作成
+* mkfig_lon.rb:経度分布の図を作成
+* mkfig_lonlat.rb:水平分布(lon-lat)の図を作成
+* mkfig_gave.rb:全球平均値の時間発展の図を作成
 * mkfig_latsig.rb:赤道断面の図を作成
 * mkfig_lontime.rb:ホフメラー図を作成
-* anime/:アニメーション作成ツール
+# * anime/:アニメーション作成ツール
 
 === 解析
 * albedo.rb:アルベド
@@ -23,7 +23,7 @@
 * run_mang.rb: dcpamのジョブ投入用スクリプト
 
 === ライブラリ
-* lib/utiles_spe.rb
+* lib/utiles.rb
 * lib/make_figure.rb
 * lib/gphys-ext_dcpam.rb
 * lib/gphys_array.rb
@@ -102,7 +102,7 @@ NetCDFファイルが置いてあるディレクトリで
 しかし扱うデータのサイズが大きい場合, 処理に時間がかかる or 
 メモリーリークを起こしてしまう.
 そのためサイズの大きなデータを扱う場合には mean4big.rb を使って
-事前に平均化処理をおこなっておくことをすすめる. 
+事前に平均化処理をおこなっておくことをおすすめする. 
 
  $ mean4big.rb [変数名]
 
@@ -141,7 +141,7 @@ ika.listには以下のようにデータの置いてあるディレクトリを
  $ mkfig_merid.rb list/hoge_exp.list --png
 
 * 地方時変換
- $ local_time.rb -n RH -h 24
+ $ local_time.rb --name=RH --hr_in_day=24
 
 ここで紹介されいないオプションについては --help オプションを付けることで
 確認できる

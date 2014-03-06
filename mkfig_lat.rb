@@ -3,12 +3,27 @@
 # 緯度分布の図を作成
 # 
 
-require "numru/ggraph"
-require 'optparse'
 require File.expand_path(File.dirname(__FILE__)+"/lib/make_figure.rb")
 include MKfig
 include NumRu
 
+config = {
+  "OSRA"        =>{"min"=>0,"max"=>-320},
+  "OLRA"        =>{"min"=>0,"max"=>320},
+  "EvapA"       =>{"min"=>-20,"max"=>300},
+  "SensA"       =>{"min"=>-20,"max"=>300},
+  "SSRA"        =>{"min"=>20,"max"=>-300},
+  "SLRA"        =>{"min"=>-20,"max"=>300},
+  "Temp"        =>{"min"=>200,"max"=>300},
+  "SurfTemp"    =>{"min"=>200,"max"=>300},
+  "Rain"        =>{"min"=>0,"max"=>6000},
+  "RainCumulus" =>{"min"=>0,"max"=>6000},
+  "RainLsc"     =>{"min"=>0,"max"=>6000},
+  "Ps"          =>{"min"=>90000,"max"=>110000},
+  "PrcWtr"      =>{"min"=>0,"max"=>50}
+}
+
+##############################################
 # option
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
@@ -25,19 +40,7 @@ FigType = "lat"
 if !Opt.charge[:name].nil? then
   make_figure(Opt.charge[:name],list,set_figopt)
 else
-  make_figure("OSRA",list,"min"=>0,"max"=>-320)
-  make_figure("OLRA",list,"min"=>0,"max"=>320)
-  make_figure("EvapA",list,"min"=>-20,"max"=>300)
-  make_figure("SensA",list,"min"=>-20,"max"=>300)
-  make_figure("SSRA",list,"min"=>20,"max"=>-300)
-  make_figure("SLRA",list,"min"=>-20,"max"=>300)
-  make_figure("Temp",list,"min"=>200,"max"=>300)
-  make_figure("SurfTemp",list,"min"=>200,"max"=>300)
-  make_figure("Rain",list,"min"=>0,"max"=>6000)
-  make_figure("RainCumulus",list,"min"=>0,"max"=>6000)
-  make_figure("RainLsc",list,"min"=>0,"max"=>6000)
-  make_figure("Ps",list,"min"=>90000,"max"=>110000)
-  make_figure("PrcWtr",list,"min"=>0,"max"=>50)
+  config.keys.each{ |name| make_figure(name,list,config[name])}
 end  
 
 DCL.grcls

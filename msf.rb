@@ -13,46 +13,6 @@ include NumRu
 include Math
 
 
-def calc_msf(dir)
-  data_name = 'MSF'
-  # file open
-  gv = gpopen(dir + "V.nc", "V")
-  gps = gpopen(dir + "Ps.nc", "Ps")
-  sigm = gpopen(dir + "V.nc", "sigm")
-  return if gv.nil? or gps.nil? or sigm.nil?
-
-  # 座標データの取得
-  lon = gv.axis("lon")
-  lat = gv.axis("lat")
-
-  ofile2 = NetCDF.create( dir + data_name + '.nc')
-  GPhys::NetCDF_IO.each_along_dims_write([gv,gps], ofile2, 'time') { 
-    |vwind,ps|  
-    #
-    time = vwind.axis("time")    
-
-    psi_na = NArray.sfloat(lon.length,lat.length,sigm.length,time.length)
-    grid = Grid.new(lon,lat,sigm.axis("sigm"),time)
-    psi = GPhys.new(grid,VArray.new(psi_na))
-    psi.units = 'kg.s-1'
-    psi.long_name = 'mass stream function'
-    psi.name = data_name
-    psi[false] = 0
-
-    cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
-    alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
-    kmax = 15
-    for i in 0..kmax
-      k = kmax-i
-      psi[false,k,true] = psi[false,k+1,true] +
-                alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
-    end
-    [psi]
-   }
-  ofile2.close
-  print "[#{data_name}](#{dir}) is created \n"
-end
-
 def calc_msf_local_time_mean(list)
   data_name = 'Strm'
   list.dir.each_index do |n|
@@ -76,10 +36,9 @@ def calc_msf_local_time_mean(list)
     GPhys.each_along_dims([gv,gps],'time') do 
       |vwind,ps|  
       #
-
-
+      msf = calc_msf(vwind,ps,sigm)
       # local time mean
-      ave += local_time(psi,hr_in_day)
+      ave += local_time(msf,hr_in_day)
     end
     
     ave = ave[false,0] if ave.axnames.include?("time")
@@ -105,27 +64,3 @@ else
   list.dir.each{|dir| calc_msf(dir)}
 end
 
-
-def calc_msf(vwind,ps,sigm=nil)
-  time = vwind.axis("time")
-  sigm = gpopen vwind.data.path, "sigm" if sigm.nil?    
-  psi_va = VArray.new(
-             NArray.sfloat(
-               lon.length,lat.length,sigm.length,time.length))
-
-  grid = Grid.new(lon,lat,sigm.axis("sigm"),time)
-  psi = GPhys.new(grid,psi_va)
-  psi.units = 'kg.s-1'
-  psi.long_name = 'mass stream function'
-  psi.name = data_name
-  psi[false] = 0
-  
-  cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
-  alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
-  kmax = 15
-  for i in 0..kmax
-    k = kmax-i
-    psi[false,k,true] = psi[false,k+1,true] +
-      alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
-  end
-end

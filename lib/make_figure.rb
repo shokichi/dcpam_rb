@@ -34,24 +34,25 @@ include NumRu
 include Math
 include NMath
 require File.expand_path(File.dirname(__FILE__)+"/option_charge.rb")
-require File.expand_path(File.dirname(__FILE__)+"/utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/utiles.rb")
 require File.expand_path(File.dirname(__FILE__)+"/gphys-ext_dcpam.rb")
 require File.expand_path(File.dirname(__FILE__)+"/gphys_array.rb")
 include AnalyDCPAM
-include Utiles_spe
+include Utiles
 
 
 module MKfig
   def make_figure(varname,list,figopt={})
-    gpa = GPhysArray.new(varname,list)
+    gpa = gpopen varname,list
+    gpa = cut_axes(gpa)
+
+    gpa = gpa.anomaly if option_notice?(:anomaly)
+    gpa = gpa.delete(Opt.charge[:delete]) if option_notice?(:delete)
 
     if !figopt[:type].nil?
       type = figopt[:type]
       figopt.delete(:type)
     end
-
-    gpa = gpa.anomaly if option_notice?(:anomaly)
-    gpa.delete(Opt.charge[:delete]) if option_notice?(:delete)
     type = FigType if defined? FigType
     return if !defined? type    
 
@@ -60,6 +61,8 @@ module MKfig
       lat(gpa,figopt)
     when "lon"
       lon(gpa,figopt)
+    when "time"
+      time(gpa,figopt)
     when "merid"
       merid(gpa,figopt)
     when "lonsig"
@@ -72,7 +75,7 @@ module MKfig
 
   end
 # --------------------------------------------------  
-  def set_dcl(clr=nil)    # DCL set
+  def set_dcl(clr=nil) # DCL set
     iwidth = 700 
     iheight = 700
     iwidth = Opt.charge[:iwidth] if option_notice?(:iwidth)
@@ -170,8 +173,8 @@ module MKfig
   end
 #------------------------------------------------
   def lon(gpa,hash={}) 
-    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")#最下層切り出し
-    gpa = gpa.mean('time') if gpa.axnames.include?("time")#時間平均
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig") #最下層切り出し
+    gpa = gpa.mean('time') if gpa.axnames.include?("time") #時間平均
     # 緯度切り出し
     gpa = gpa.latmean if option_notice?(:latmean)
     if gpa.axnames.include?("lat")
@@ -192,10 +195,47 @@ module MKfig
       gp = gp.wm2mmyr if gp.name.include?("Rain") 
 
       gp = fix_axis_local(gp)      
-      # 描画
       xmax = 360
       GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
       GGraph.set_fig('window'=>set_window([0,xmax,nil,nil]))
+
+      # 描画
+      vy = vy - 0.025
+      if n == 0 then
+        lc = 13 if gpa.list.ref.nil?
+        fig_opt = {'index'=>lc,'legend'=>false,'annotate'=>false}
+        GGraph.line( gp ,true ,fig_opt.merge(hash))
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
+        DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+      elsif n == gpa.list.refnum
+        lc_ref = 13
+        fig_opt = {'index'=>lc_ref}      
+        GGraph.line( gp ,false ,fig_opt.merge(hash))
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
+        DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc_ref)     
+      else
+        lc = lc + 10
+        fig_opt = {'index'=>lc}      
+        GGraph.line( gp ,false ,fig_opt.merge(hash))
+        DCL.sgtxzv(vx+0.05,vy,legend,0.015,0,-1,3)
+        DCL::sgplzv([vx,vx+0.04],[vy,vy],1,lc)
+      end
+    end      
+  end
+# ------------------------------------------------------
+  def time(gpa,hash={}) 
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")#最下層切り出し
+    gpa = gpa.glmean
+ 
+    lc = 23
+    vx = 0.82
+    vy = 0.8
+    gpa.legend.each_index do |n|
+      legend = gpa.legend[n]
+      gp = gpa[legend]
+      next if gp.nil?  
+
+      gp = gp.wm2mmyr if gp.name.include?("Rain") 
 
       # 描画
       vy = vy - 0.025
@@ -280,6 +320,7 @@ module MKfig
       n += 1
     end
   end
+
 # -------------------------------------------
   def lontime(gpa,hash={})
     return if !gpa.axnames.include?("time")
@@ -342,7 +383,7 @@ module MKfig
   end
   # -------------------------------------------
   def time(gpa,hash={})
-    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig")#最下層切り出し
+    gpa = gpa.cut("sig"=>1) if gpa.axnames.include?("sig") 
 
     n = 0
     lc = 23
@@ -395,9 +436,12 @@ module MKfig
     end
   end
   # -------------------------------------------
-  def self.cut_and_mean(gp)
-    eval "gp = gp.cut(#{Opt.charge[:cut]})" if option_notice?(:cut)
-    eval "gp = gp.cut(#{Opt.charge[:mean]})" if option_notice?(:mean)
+  def cut_axes(gp)
+    gp = gp.cut("lon"=>Opt.charge[:lon]}) if option_notice?(:lon)
+    gp = gp.cut("lat"=>Opt.charge[:lat]}) if option_notice?(:lat)
+    gp = gp.cut("time"=>Opt.charge[:time]}) if option_notice?(:time)
+#    eval "gp = gp.cut(#{Opt.charge[:cut]})" if option_notice?(:cut)
+#    eval "gp = gp.cut(#{Opt.charge[:mean]})" if option_notice?(:mean)
     return gp
   end
   # -------------------------------------------

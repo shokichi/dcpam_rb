@@ -5,7 +5,6 @@
 #
 module OptCharge
   require 'optparse'
-
   class OptCharge
  
     def initialize(arge=ARGV)

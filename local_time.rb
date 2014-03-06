@@ -153,99 +153,47 @@ HrInDay = 24 if list.id.include?("coriolis")
 if defined?(varname) and !varname.nil? then
   local_time_mean(varname,list)
 else
-var_list = 
-[ 
-  'Rain',
-  'RainCumulus',
-  'RainLsc',
-  'EvapA',
-  'SensA',
-  'SSRA',
-  'SLRA',
-  'OSRA',
-  'OLRA',
-  'SurfTemp',
-  'Temp',
-  "QVap",
-  "SigDot",
-  "U",
-  "V",
-  "RadLDWFLXA",
-  "RadSDWFLXA",
-  "RadLUWFLXA",
-  "RadSUWFLXA",
-  "Ps",
-  "H2OLiq",
-  "PrcWtr",
-  'RH',
-  "DQVapDtCond",
-  "DQVapDtVDiff",    
-  "DTempDtDyn",   
-  "DTempDtVDiff",
-  "DQVapDtCumulus",  
-  "DTempDtCond",     
-  "DTempDtLsc",   
-  "DQVapDtDyn",      
-  "DTempDtCumulus",  
-  "DTempDtRadL",
-  "DTempDtRadS",
-  "DQVapDtLsc",      
-  "DTempDtDryConv"  
-]
-
-var_list.each{ |var| local_time_mean(var,list) } 
-
+  var_list = 
+    [ 
+     'Rain',
+     'RainCumulus',
+     'RainLsc',
+     'EvapA',
+     'SensA',
+     'SSRA',
+     'SLRA',
+     'OSRA',
+     'OLRA',
+     'SurfTemp',
+     'Temp',
+     "QVap",
+     "SigDot",
+     "U",
+     "V",
+     "RadLDWFLXA",
+     "RadSDWFLXA",
+     "RadLUWFLXA",
+     "RadSUWFLXA",
+     "Ps",
+     "H2OLiq",
+     "PrcWtr",
+     'RH',
+     "DQVapDtCond",
+     "DQVapDtVDiff",    
+     "DTempDtDyn",   
+     "DTempDtVDiff",
+     "DQVapDtCumulus",  
+     "DTempDtCond",     
+     "DTempDtLsc",   
+     "DQVapDtDyn",      
+     "DTempDtCumulus",  
+     "DTempDtRadL",
+     "DTempDtRadS",
+     "DQVapDtLsc",      
+     "DTempDtDryConv"  
+    ]
+  
+  var_list.each{ |var| local_time_mean(var,list) } 
 end
 
 
-  #local_time("OSRA",list)
-=begin
-  local_time_mean_rank('Rain',list)
-  local_time_mean_rank('RainCumulus',list)
-  local_time_mean_rank('RainLsc',list)
-  local_time_mean_rank('EvapA',list)
-  local_time_mean_rank('SensA',list)
-  local_time_mean_rank('SSRA',list)
-  local_time_mean_rank('SLRA',list)
-  local_time_mean_rank('OSRA',list)
-  local_time_mean_rank('OLRA',list)
-  local_time_mean_rank('SurfTemp',list)
-  local_time_mean_rank('Temp',list)
-  #local_time_mean_rank("QVap",list)
-  local_time_mean_rank("SigDot",list)
-  local_time_mean_rank("U",list)
-  local_time_mean_rank("V",list)
-  local_time_mean_rank("RadLDWFLXA",list)
-  local_time_mean_rank("RadSDWFLXA",list)
-  local_time_mean_rank("RadLUWFLXA",list)
-  local_time_mean_rank("RadSUWFLXA",list)
-  
-  local_time_mean_rank("Ps",list)
-  #=end
-  #local_time_mean_rank("H2OLiq",list)
-  #local_time_mean_rank("PrcWtr",list)
-  local_time_mean_rank('RH',list)
-  
-  local_time_mean_rank("DQVapDtCond",list)
-  local_time_mean_rank("DQVapDtVDiff",list)    
-  local_time_mean_rank("DTempDtDyn",list)   
-  local_time_mean_rank("DTempDtVDiff",list)
-  local_time_mean_rank("DQVapDtCumulus",list)  
-  local_time_mean_rank("DTempDtCond",list)     
-  local_time_mean_rank("DTempDtLsc",list)   
-  local_time_mean_rank("DQVapDtDyn",list)      
-  local_time_mean_rank("DTempDtCumulus",list)  
-  local_time_mean_rank("DTempDtRadL",list)
-  local_time_mean_rank("DQVapDtLsc",list)      
-  local_time_mean_rank("DTempDtDryConv",list)  
-  local_time_mean_rank("DTempDtRadS",list)
-  print `date`
-=end
-=begin
-DCL.gropn(1)
-DCL.sgpset('lcntl',true)
-DCL.sgpset('isub', 96)
-DCL.uzfact(1.0)
-GGraph.tone gp_local.mean(-1)
-DCL.grcls
-=end 

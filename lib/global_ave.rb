@@ -176,7 +176,7 @@ module GlobalAverage
     end
 
     def convert_gphys(varname)
-      gp = Utiles_spe.array2gp(@axis,@data[varname])
+      gp = Utiles.array2gp(@axis,@data[varname])
       axis = gp.axis(0).pos
       axis.name = @axis_name
       axis.long_name = @@long_name[@axis_name]
@@ -226,7 +226,7 @@ module GlobalAverage
     def rotation_rate(list) # 自転角速度
       omega = []
       list.name.each do |name|
-        omega << Utiles_spe.omega_ratio(name)
+        omega << Utiles.omega_ratio(name)
       end
       return {"Rotation"=>omega}
     end

@@ -12,6 +12,27 @@ include MKfig
 include NumRu
 
 
+config = {
+  "OSRA"        =>{"min"=>-1200,"max"=>0},
+  "OLRA"        =>{"min"=>0,"max"=>300},
+  "EvapA"       =>{"max"=>1000},
+  "SensA"       =>{"max"=>200},
+  "SSRA"        =>{"min"=>-1000,"max"=>0},
+  "SLRA"        =>{"min"=>0,"max"=>200},
+  "Rain"        =>{"min"=>0,"max"=>1000},
+  "RainCumulus" =>{"min"=>0,"max"=>1000},
+  "RainLsc"     =>{"min"=>0,"max"=>1000},
+  "SurfTemp"    =>{"min"=>220,"max"=>360},
+  "Temp"        =>{"min"=>220,"max"=>320},
+  "Ps"          =>{"min"=>98000,"max"=>102000},
+  "RH"          =>{"min"=>0,"max"=>100},
+  "H2OLiqIntP"  =>{"min"=>0,"max"=>0.5},
+  "Albedo"      =>{"min"=>0,"max"=>1},
+ "PrcWtr"       =>{"min"=>0,"max"=>100},      
+  "U"           =>{"min"=>-20,"max"=>20}
+}
+###################################################
+
 #
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
@@ -25,23 +46,7 @@ FigType = "lon"
 if !Opt.charge[:name].nil? then
   make_figure(Opt.charge[:name],list,set_figopt)
 else
-  make_figure("OSRA",list,"min"=>-1200,"max"=>0)
-  make_figure("OLRA",list,"min"=>0,"max"=>300)
-  make_figure("EvapA",list,"max"=>1000)
-  make_figure("SensA",list,"max"=>200)
-  make_figure("SSRA",list,"min"=>-1000,"max"=>0)
-  make_figure("SLRA",list,"min"=>0,"max"=>200)
-  make_figure("Rain",list,"min"=>0,"max"=>1000)
-  make_figure("RainCumulus",list,"min"=>0,"max"=>1000)
-  make_figure("RainLsc",list,"min"=>0,"max"=>1000)
-  make_figure("SurfTemp",list,"min"=>220,"max"=>360)
-  make_figure("Temp",list,"min"=>220,"max"=>320)
-  make_figure("Ps",list,"min"=>98000,"max"=>102000)
-  make_figure("RH",list,"min"=>0,"max"=>100)
-  make_figure("H2OLiqIntP",list,"min"=>0,"max"=>0.5)
-  make_figure("Albedo",list,"min"=>0,"max"=>1)
-  make_figure("PrcWtr",list,"min"=>0,"max"=>100)      
-  make_figure("U",list,"min"=>-20,"max"=>20)      
+  config.keys.each{ |name| make_figure(name,list,config[name])}
 end  
 DCL.grcls
 rename_img_file(list,__FILE__)

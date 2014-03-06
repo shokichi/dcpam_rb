@@ -69,12 +69,3 @@ end
 
 
 
-
-=begin
-print "24\t#{rain24}\t#{hadley24}\n"
-print "22\t#{rain22}\t#{hadley22}\n"
-print "21\t#{rain21}\t#{hadley21}\n"
-print "42\t#{rain42}\t#{hadley42}\n"
-print "41\t#{rain41}\t#{hadley41}\n"
-print "81\t#{rain81}\t#{hadley81}\n"
-=end
