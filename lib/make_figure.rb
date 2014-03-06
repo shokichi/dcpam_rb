@@ -437,11 +437,11 @@ module MKfig
   end
   # -------------------------------------------
   def cut_axes(gp)
-    gp = gp.cut("lon"=>Opt.charge[:lon]}) if option_notice?(:lon)
-    gp = gp.cut("lat"=>Opt.charge[:lat]}) if option_notice?(:lat)
-    gp = gp.cut("time"=>Opt.charge[:time]}) if option_notice?(:time)
-#    eval "gp = gp.cut(#{Opt.charge[:cut]})" if option_notice?(:cut)
-#    eval "gp = gp.cut(#{Opt.charge[:mean]})" if option_notice?(:mean)
+    gp = gp.cut("lon"=>Opt.charge[:lon]) if option_notice?(:lon)
+    gp = gp.cut("lat"=>Opt.charge[:lat]) if option_notice?(:lat)
+    gp = gp.cut("time"=>Opt.charge[:time]) if option_notice?(:time)
+#    eval "gp = gp.cut(#{Opt.charge[:cut])" if option_notice?(:cut)
+#    eval "gp = gp.cut(#{Opt.charge[:mean])" if option_notice?(:mean)
     return gp
   end
   # -------------------------------------------

@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # GPhysArrayオブジェクト
 # 
-require File.expand_path(File.dirname(__FILE__)+"/"+"utiles.rb")
+require File.expand_path(File.dirname(__FILE__)+"/utiles.rb")
+include AnalyDCPAM
 include Utiles
 include NumRu
 include Math

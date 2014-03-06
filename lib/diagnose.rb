@@ -42,8 +42,8 @@ module AnalyDCPAM
       sig = gphys.axis(-2).to_gphys
       
       ofile = NetCDF.create(dir + 'Prs_' + data_name + '.nc')
-      GPhys::NetCDF_IO.each_along_dims_write([gphys,gps],ofile, 'time')  
-        |gp,ps|  
+      GPhys::NetCDF_IO.each_along_dims_write([gphys,gps],ofile,'time'){  
+        |gp,ps|
         
         gp_press = sig2press(gp,ps,sig)
         # 出力
@@ -179,7 +179,7 @@ module AnalyDCPAM
       x_mean = x.glmean
       y_mean = y.glmean
       xy_S = ((x-x_mean)*(y-y_mean)).glmean
-      xx_S = (x-x_mean)**2).glmean
+      xx_S = ((x-x_mean)**2).glmean
       return xy_S/xx_S      
     end
     # ---------------------------------------
