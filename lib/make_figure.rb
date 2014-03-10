@@ -43,11 +43,6 @@ include Utiles
 
 module MKfig
   def make_figure(varname,list,figopt={})
-    gpa = gpaopen varname,list
-    gpa = cut_axes(gpa)
-
-    gpa = gpa.anomaly if option_notice?(:anomaly)
-    gpa = gpa.delete(Opt.charge[:delete]) if option_notice?(:delete)
 
     if !figopt[:figtype].nil?
       type = figopt[:figtype]
@@ -55,6 +50,12 @@ module MKfig
     end
     type = FigType if defined? FigType
     return if !defined? type    
+
+    gpa = gpaopen varname,list
+
+    gpa = gpa.anomaly if option_notice?(:anomaly)
+    gpa = gpa.delete(Opt.charge[:delete]) if option_notice?(:delete)
+    gpa = cut_axes(gpa) if type != "time"
 
     case type 
     when "lat"
@@ -103,8 +104,9 @@ module MKfig
   end
   # --------------------------------------------------  
   def merid(gpa,hash={}) # 子午面断面
-    gpa = gpa.mean("time") if gpa.axnames.include?("time")
+
     gpa = gpa.mean("lon") if gpa.axnames.include?("lon")
+    gpa = gpa.mean("time") if gpa.axnames.include?("time")
 
     GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
     GGraph.set_fig('window'=>set_window([-90,90,nil,nil]))
