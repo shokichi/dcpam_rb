@@ -43,15 +43,15 @@ include Utiles
 
 module MKfig
   def make_figure(varname,list,figopt={})
-    gpa = gpopen varname,list
+    gpa = gpaopen varname,list
     gpa = cut_axes(gpa)
 
     gpa = gpa.anomaly if option_notice?(:anomaly)
     gpa = gpa.delete(Opt.charge[:delete]) if option_notice?(:delete)
 
-    if !figopt[:type].nil?
-      type = figopt[:type]
-      figopt.delete(:type)
+    if !figopt[:figtype].nil?
+      type = figopt[:figtype]
+      figopt.delete(:figtype)
     end
     type = FigType if defined? FigType
     return if !defined? type    
@@ -392,15 +392,10 @@ module MKfig
     gpa.legend.each_index do |n|
       legend = gpa.legend[n]
       gp = gpa[legend]
-      next if gp.nil?  
+      next if gp.nil?
+      gp = gp.glmean
       # 降水量の単位変換
       gp = gp.wm2mmyr if gp.name.include?("Rain") 
-
-      gp = fix_axis_local(gp)      
-      # 描画
-      xmax = 360
-      GGraph.set_axes("xlabelint"=>xmax/4,'xside'=>'bt', 'yside'=>'lr')
-      GGraph.set_fig('window'=>set_window([0,xmax,nil,nil]))
 
       # 描画
       vy = vy - 0.025

@@ -7,7 +7,7 @@ require 'numru/ggraph'
 require 'numru/gphys'
 require 'optparse'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/dcpam.rb")
-include Utiles_spe
+include Utiles
 include NumRu
 include Math
 
@@ -21,7 +21,7 @@ def albedo(dir,name)
   if defined?(HrInDay) and !HrInDay.nil? then
     hr_in_day = HrInDay
   else
-    hr_in_day = 24 / Utiles_spe.omega_ratio(name)
+    hr_in_day = 24 / Utiles.omega_ratio(name)
   end
 
   nlon = osr.axis("lon").length
@@ -33,7 +33,7 @@ def albedo(dir,name)
       |sw|
 
       # 太陽直下点の計算
-#      time = Utiles_spe.min2day(sw,hr_in_day).axis("time").to_gphys
+#      time = Utiles.min2day(sw,hr_in_day).axis("time").to_gphys
 #      slon = (time - time.to_i)*360
 #      slon = UNumeric[slon[0].val,"degree"]    # 太陽直下点経度
       slon = UNumeric[0,"degree"]    # 太陽直下点経度
@@ -77,7 +77,7 @@ opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.parse!(ARGV)
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 HrInDay = 24 if list.id.include?("coriolis") && !defined? HrInDay
 
 list.dir.each_index{|n| albedo(list.dir[n],list.name[n]) } 

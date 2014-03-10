@@ -53,6 +53,8 @@ module AnalyDCPAM
     end
     # ----------------------------------------------
     def calc_msf(vwind,ps,sigm=nil)
+      lon = vwind.axis("lon")
+      lat = vwind.axis("lat")
       time = vwind.axis("time")
       sigm = gpopen( vwind.data.path, "sigm") if sigm.nil?    
       msf_va = VArray.new(
@@ -61,14 +63,16 @@ module AnalyDCPAM
       
       grid = Grid.new(lon,lat,sigm.axis("sigm"),time)
       msf = GPhys.new(grid,msf_va)
-      msf.units = 'kg.s-1'
-      msf.long_name = 'mass stream function'
-      msf.name = data_name
+#      msf.units = 'kg.s-1'
+#      msf.long_name = 'mass stream function'
+#      msf.name = data_name
       msf[false] = 0
       
       cos_phi = ( vwind.axis("lat").to_gphys * (PI/180.0) ).cos
       alph = vwind * cos_phi * ps * RPlanet * PI * 2 / Grav 
-      (0..sigm.length-2).reverse.each do |k|
+      kmax = sigm.length-2
+      (0..kmax).each do |kk|
+        k = kmax - kk
         msf[false,k,true] = msf[false,k+1,true] +
           alph[false,k,true] * (sigm[k].val - sigm[k+1].val) 
       end
@@ -133,12 +137,12 @@ module AnalyDCPAM
       print "[#{data_name}](#{file}) is created\n"
     end
     # --------------------------------------------
-    def calc_prcwtr_save(gqv,gps,sigm) # 可降水量の計算           
-      gqvap = gpopen dir + "QVap.nc"
+    def calc_prcwtr_save(dir) # 可降水量の計算           
+      gqv = gpopen dir + "QVap.nc"
       gps = gpopen dir + "Ps.nc"
       sigm = gpopen dir + "QVap.nc","sigm"
 
-      return if gqvap.nil? || gps.nil?
+      return if gqv.nil? || gps.nil?
 
       data_name = 'PrcWtr' 
       ofile = NetCDF.create(dir + data_name + '.nc')

@@ -6,8 +6,7 @@
 require 'numru/ggraph'
 require 'numru/gphys'
 require 'optparse'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/dcpam.rb")
 include NumRu
 include Math
 
@@ -47,7 +46,7 @@ opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.parse!(ARGV)
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 HrInDay = 24 if list.id.include?("coriolis")
 
 list.dir.each_index{|n| calc_es(list.dir[n],list.name[n]) } 

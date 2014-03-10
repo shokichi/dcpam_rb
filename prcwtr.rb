@@ -6,8 +6,8 @@
 require 'numru/ggraph'
 require 'numru/gphys'
 require 'optparse'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/dcpam.rb")
+include Utiles
 include NumRu
 include Math
 
@@ -39,6 +39,6 @@ end
 opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.parse!(ARGV)
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 
 list.dir.each{|dir| calc_prcwtr(dir)}

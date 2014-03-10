@@ -5,9 +5,9 @@
 
 require 'numru/ggraph'
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles.rb")
 require 'optparse'
-include Utiles_spe
+include Utiles
 include NumRu
 include Math
 
@@ -146,7 +146,7 @@ opt.on("-n VAR","--name=VAR") {|str| VarName = str}
 opt.on("--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_f}
 opt.parse!(ARGV)
 
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 varname = VarName if defined?(VarName)
 HrInDay = 24 if list.id.include?("coriolis")
 

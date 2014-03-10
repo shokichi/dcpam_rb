@@ -26,7 +26,7 @@ config = {
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
 
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 IWS = get_iws
 
 # DCL set
@@ -36,7 +36,7 @@ FigType = "lonsig"
 if !Opt.charge[:name].nil? then
   make_figure(Opt.charge[:name],list,set_figopt)
 else
-  config.keys.each{ |name| make_figure(name,list,config[name])}
+  config.keys.each{ |name| make_figure(name,list,{:figtype=>"lonsig"}.merge(config[name]))}
 end
 
 DCL.grcls

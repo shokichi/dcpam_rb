@@ -5,9 +5,9 @@
 
 require 'numru/ggraph'
 require 'numru/gphys'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles.rb")
 require 'optparse'
-include Utiles_spe
+include Utiles
 include NumRu
 include Math
 
@@ -60,6 +60,6 @@ opt.on("--rank") {Flag_rank = true}
 opt.on("--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.parse!(ARGV)
 
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 HrInDay = 24 if list.id.include?("diurnal")
 list.dir.each_index{|n| anglmom(list.dir[n],list.name[n])} 

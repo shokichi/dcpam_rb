@@ -19,7 +19,7 @@ def hist_fig(data_name,list,opt={})
     if list.id.include? "coriolis"
       hr_in_day = 24
     else
-      hr_in_day = 24.0/Utiles_spe.omega_ratio(list.name[n])
+      hr_in_day = 24.0/Utiles.omega_ratio(list.name[n])
     end
     gp = local_time(gp.cut("lat"=>0),hr_in_day)  # 
     gh = histogram_lon(gp,opt)
@@ -78,7 +78,7 @@ end
 Opt = OptCharge::OptCharge.new(ARGV)
 Opt.set
 
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 IWS = get_iws
 
 set_dcl(14)

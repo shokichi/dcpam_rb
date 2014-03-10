@@ -227,7 +227,7 @@ module AnalyDCPAM
         next if data.nil?
         return data.axnames
       end
-      nil
+      [nil]
     end
 
     def correlation(other_gpa) # omega

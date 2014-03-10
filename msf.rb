@@ -8,7 +8,7 @@ require 'numru/ggraph'
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/lib/dcpam.rb")
 require "optparse"
-include Utiles_spe
+include Utiles
 include NumRu
 include Math
 
@@ -55,7 +55,7 @@ opt = OptionParser.new
 opt.on("-r","--rank") {Flag_rank = true}
 opt.on("-h VAL","--hr_in_day=VAL") {|hr_in_day| HrInDay = hr_in_day.to_i}
 opt.parse!(ARGV)
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 HrInDay = 24 if list.id.include?("coriolis")
 
 if defined? Flag_rank

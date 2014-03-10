@@ -7,7 +7,7 @@ require 'numru/ggraph'
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/"+"lib/dcpam.rb")
 require 'optparse'
-include Utiles_spe
+include Utiles
 include NumRu
 include Math
 
@@ -60,7 +60,7 @@ Opt.add_option("--time",:time_mean,"flag")
 Opt.add_option("--lon",:lon_mean,"flag")
 Opt.set
 
-list = Utiles_spe::Explist.new(ARGV[0])
+list = Utiles::Explist.new(ARGV[0])
 IWS = get_iws
 
 varname = Opt.charge[:name]

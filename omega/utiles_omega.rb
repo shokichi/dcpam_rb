@@ -7,7 +7,7 @@ require "numru/ggraph"
 require 'numru/gphys'
 require File.expand_path(File.dirname(__FILE__)+"/../lib/make_figure.rb")
 require 'optparse'
-include Utiles_spe
+include Utiles
 include MKfig
 include NumRu
 include Math
@@ -108,7 +108,7 @@ module Omega
         rotation << omega_ratio(@legend[n])
         coef_ary << coef
       end
-      coef_gp = Utiles_spe.array2gp(rotation,coef_ary)
+      coef_gp = Utiles.array2gp(rotation,coef_ary)
       coef_gp.axis(0).pos.name = "rotation rate" 
       coef_gp.name = "correlation"
       coef_gp.long_name = "correlation coefficient"
@@ -126,7 +126,7 @@ module Omega
         rotation << omega_ratio(@legend[n])
         sloop_ary << sloop
       end
-      sloop_gp = Utiles_spe.array2gp(rotation,sloop_ary)
+      sloop_gp = Utiles.array2gp(rotation,sloop_ary)
       sloop_gp.axis(0).pos.name = "rotation rate" 
       sloop_gp.name = "correlation"
       sloop_gp.long_name = "correlation coefficient"
@@ -140,10 +140,10 @@ module Omega
 #       @anomaly.each_index do |n|
 #         gp1 = @anomaly[n]
 #         rotation << omega_ratio(self.legend[n])
-#         coef = Utiles_spe.glmean(gp1).to_f
+#         coef = Utiles.glmean(gp1).to_f
 #         gl_ary << coef
 #       end
-#       coef_gp = Utiles_spe.array2gp(rotation,gl_ary)
+#       coef_gp = Utiles.array2gp(rotation,gl_ary)
 #       coef_gp.axis(0).pos.name = "rotation rate" 
 #       coef_gp.name = @anomaly[0].name 
 #       coef_gp.long_name = @anomaly[0].long_name
@@ -228,7 +228,7 @@ module Omega
 
       
       # 降水量の単位変換
-      gp = Utiles_spe.wm2mmyr(gp) if gp.name.include?("Rain") 
+      gp = Utiles.wm2mmyr(gp) if gp.name.include?("Rain") 
       
       # 描画
       vy = vy - 0.025

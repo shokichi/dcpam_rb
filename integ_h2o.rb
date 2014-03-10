@@ -6,8 +6,8 @@
 require 'numru/ggraph'
 require 'numru/gphys'
 require 'optparse'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles_spe.rb")
-include Utiles_spe
+require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles.rb")
+include Utiles
 include NumRu
 include Math
 
@@ -37,7 +37,7 @@ opt.on("-r","--rank") {Flag_rank = true}
 opt.on("--prefix=STR") {|str| PRF = str}
 opt.parse!(ARGV)
 
-Utiles_spe::Explist.new(ARGV[0]).dir.each{
+Utiles::Explist.new(ARGV[0]).dir.each{
   |dir| 
   intg_h2o(dir)
 }
