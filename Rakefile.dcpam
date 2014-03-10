@@ -1,0 +1,125 @@
+#
+#
+
+require "/home/ishioka/ruby/dcpam_rb/lib/dcpam.rb"
+Opt = OptCharge::OptCharge.new
+Opt.set
+
+##########################################################
+# configure
+list_file = nil
+
+## lat
+lat_conf = {
+  "OSRA"        =>{},
+  "OLRA"        =>{},
+  "EvapA"       =>{},
+  "SensA"       =>{},
+  "SSRA"        =>{},
+  "SLRA"        =>{},
+  "Rain"        =>{},
+  "SurfTemp"    =>{},
+  "Temp"        =>{},
+  "Ps"        =>{},
+  "PrcWtr"      =>{}      
+}
+## lat-sig
+latsig_conf = {
+  'Temp'   =>{},
+  'U'      =>{},
+  'V'      =>{},
+  'SigDot'      =>{},
+  'RH'     =>{},
+  'QVap'   =>{},
+  'MSF'   =>{}
+}
+## lon-lat
+lonlat_conf = {
+  "OSRA"        =>{},
+  "OLRA"        =>{},
+  "EvapA"       =>{},
+  "SensA"       =>{},
+  "SSRA"        =>{},
+  "SLRA"        =>{},
+  "Rain"        =>{},
+  "RainCumulus" =>{},
+  "RainLsc"     =>{},
+  "SurfTemp"    =>{},
+  "Temp"        =>{},
+  "PrcWtr"      =>{}      
+} 
+## time
+time_conf = {
+  "OSRA"        =>{},
+  "OLRA"        =>{},
+  "SSRA"        =>{},
+  "SLRA"        =>{},
+  "EvapA"       =>{},
+  "SensA"       =>{},
+  "Rain"        =>{},
+  "SurfTemp"    =>{},
+  "Temp"        =>{},
+  "PrcWtr"      =>{}      
+}
+
+time_range = 0..10
+fig_format = "eps"
+
+##########################################################
+explist = Explist.new(list_file)
+Opt.charge[fig_format.to_sym] = true if defined? fig_format
+Opt.charge[:time_range] = time_range  if defined? time_range
+IWS = get_iws
+
+task all: [:all_anly, :all_draw]
+# ----------------------------------------------
+# analize
+task all_anly: [:msf, :rh, :prcwtr]
+## mass stream function
+task :msf do
+  explist.dir.each{|dir| calc_msf_save(dir)} 
+end
+
+## relative humidity
+task :rh do
+  explist.dir.each{|dir| calc_rh_save(dir)} 
+end
+
+## precipitation water
+task :prcwtr do
+  explist.dir.each{|dir| calc_prcwtr_save(dir)} 
+end
+
+# ----------------------------------------------
+# draw
+task :all_draw do 
+  sh "rake lat"
+  sh "rake latsig"
+  sh "rake lonlat"
+  sh "rake time"
+end
+
+task :lat do
+  drawfig(explist,"lat",lat_conf)
+end
+
+task :latsig do
+  drawfig(explist,"merid",latsig_conf)
+end
+
+task :lonlat do
+  drawfig(explist,"lonlat",lonlat_conf)
+end
+
+task :time do
+  drawfig(explist,"time",time_conf)
+end
+
+def drawfig(list,type,config)
+  set_dcl(14)
+  config.keys.each do |name| 
+    make_figure(name, list, {:figtype=>type}.merge(config[name]))
+  end
+  DCL.grcls
+  rename_img_file(list,type)
+end
