@@ -68,7 +68,7 @@ fig_format = "eps"
 ##########################################################
 explist = Explist.new(list_file)
 Opt.charge[fig_format.to_sym] = true if defined? fig_format
-Opt.charge[:time_range] = time_range  if defined? time_range
+Opt.charge[:time] = time_range  if defined? time_range
 IWS = get_iws
 
 task all: [:all_anly, :all_draw]
