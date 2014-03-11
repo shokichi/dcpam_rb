@@ -73,9 +73,14 @@ time_conf = {
   "Ps"      =>{}
 }
 
+
 # 時間切り出し
 ################################
 time_range = 0..10
+
+# color 番号
+################################
+color_num = 14
 
 # 出力ファイルのフォーマット
 ################################
@@ -134,7 +139,7 @@ task :time do
 end
 
 def drawfig(list,type,config)
-  set_dcl(14)
+  set_dcl(color_num)
   config.keys.each do |name| 
     make_figure(name, list, {:figtype=>type}.merge(config[name]))
   end
