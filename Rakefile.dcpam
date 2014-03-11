@@ -1,13 +1,20 @@
+# -*- coding: utf-8 -*-
 #
 #
 
 require "/home/ishioka/ruby/dcpam_rb/lib/dcpam.rb"
-Opt = OptCharge::OptCharge.new
-Opt.set
+
 
 ##########################################################
 # configure
+
+# 実験リストファイルの設定
+###############################
 list_file = nil
+
+
+# 各図の設定
+###############################
 
 ## lat
 lat_conf = {
@@ -20,19 +27,21 @@ lat_conf = {
   "Rain"        =>{},
   "SurfTemp"    =>{},
   "Temp"        =>{},
-  "Ps"        =>{},
+  "Ps"          =>{},
   "PrcWtr"      =>{}      
 }
+
 ## lat-sig
 latsig_conf = {
   'Temp'   =>{},
   'U'      =>{},
   'V'      =>{},
-  'SigDot'      =>{},
+  'SigDot' =>{},
   'RH'     =>{},
   'QVap'   =>{},
-  'MSF'   =>{}
+  'MSF'    =>{}
 }
+
 ## lon-lat
 lonlat_conf = {
   "OSRA"        =>{},
@@ -48,6 +57,7 @@ lonlat_conf = {
   "Temp"        =>{},
   "PrcWtr"      =>{}      
 } 
+
 ## time
 time_conf = {
   "OSRA"        =>{},
@@ -59,17 +69,25 @@ time_conf = {
   "Rain"        =>{},
   "SurfTemp"    =>{},
   "Temp"        =>{},
-  "PrcWtr"      =>{}      
+  "PrcWtr"      =>{},      
+  "Ps"      =>{}
 }
 
+# 時間切り出し
+################################
 time_range = 0..10
+
+# 出力ファイルのフォーマット
+################################
 fig_format = "eps"
 
 ##########################################################
-explist = Explist.new(list_file)
+Opt = OptCharge::OptCharge.new
+Opt.set
 Opt.charge[fig_format.to_sym] = true if defined? fig_format
 Opt.charge[:time] = time_range  if defined? time_range
 IWS = get_iws
+explist = Explist.new(list_file)
 
 task all: [:all_anly, :all_draw]
 # ----------------------------------------------
