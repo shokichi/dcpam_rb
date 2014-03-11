@@ -55,19 +55,19 @@ end
 
 
 # option
-Opt = OptCharge::OptCharge.new(ARGV)
-Opt.add_option("--time",:time_mean,"flag")
-Opt.add_option("--lon",:lon_mean,"flag")
-Opt.set
+$Opt = OptCharge::OptCharge.new(ARGV)
+$Opt.add_option("--time",:time_mean,"flag")
+$Opt.add_option("--lon",:lon_mean,"flag")
+$Opt.set
 
 list = Utiles::Explist.new(ARGV[0])
 IWS = get_iws
 
-varname = Opt.charge[:name]
+varname = $Opt.charge[:name]
 
-if Opt.charge[:time_mean]
+if $Opt.charge[:time_mean]
   list.dir.each{|dir| time_mean(dir,varname)}
-elsif  Opt.charge[:lon_mean]
+elsif  $Opt.charge[:lon_mean]
   list.dir.each{|dir| lon_mean(dir,varname)}
 else
   list.dir.each{|dir| big_mean(dir,varname)}

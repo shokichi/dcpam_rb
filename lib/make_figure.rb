@@ -54,7 +54,7 @@ module MKfig
     gpa = gpaopen varname,list
 
     gpa = gpa.anomaly if option_notice?(:anomaly)
-    gpa = gpa.delete(Opt.charge[:delete]) if option_notice?(:delete)
+    gpa = gpa.delete($Opt.charge[:delete]) if option_notice?(:delete)
     gpa = cut_axes(gpa) if type != "time"
 
     case type 
@@ -79,8 +79,8 @@ module MKfig
   def set_dcl(clr=nil) # DCL set
     iwidth = 700 
     iheight = 700
-    iwidth = Opt.charge[:iwidth] if option_notice?(:iwidth)
-    iheight = Opt.charge[:iheight] if option_notice?(:iheight)
+    iwidth = $Opt.charge[:iwidth] if option_notice?(:iwidth)
+    iheight = $Opt.charge[:iheight] if option_notice?(:iheight)
     DCL::swlset('lwnd',false) if IWS==4
     DCL.sgscmn(clr) if !clr.nil?
     DCL.swpset('iwidth',iwidth)
@@ -89,7 +89,7 @@ module MKfig
     DCL.sgpset('lcntl',true)
     DCL.sgpset('isub', 96)
     DCL.uzfact(1.0)
-    plural_picture(Opt.charge[:parafig]) if defined? Opt
+    plural_picture($Opt.charge[:parafig]) if defined? $Opt
   end
   # --------------------------------------------------
   def plural_picture(amount)
@@ -182,7 +182,7 @@ module MKfig
     if gpa.axnames.include?("lat")
       lat = 0
       lat = Lat if defined?(Lat)
-      lat = Opt.charge[:lat] if option_notice?(:lat)
+      lat = $Opt.charge[:lat] if option_notice?(:lat)
       gpa = gpa.cut("lat"=>lat)
     end
 
@@ -299,7 +299,7 @@ module MKfig
     # 緯度切り出し
     lat = 0
     lat = Lat if defined?(Lat)
-    lat = Opt.charge[:lat] if option_notice?(:lat)
+    lat = $Opt.charge[:lat] if option_notice?(:lat)
     gpa = gpa.cut("lat"=>lat)
 
     n = 0
@@ -331,7 +331,7 @@ module MKfig
 
     lat = 0
     lat = Lat if defined?(Lat)
-    lat = Opt.charge[:lat] if option_notice?(:lat)
+    lat = $Opt.charge[:lat] if option_notice?(:lat)
     gpa = gpa.cut("lat"=>lat)
     n = 0
     gpa.legend.each do |legend|
@@ -434,11 +434,11 @@ module MKfig
   end
   # -------------------------------------------
   def cut_axes(gp)
-    gp = gp.cut("lon"=>Opt.charge[:lon]) if option_notice?(:lon)
-    gp = gp.cut("lat"=>Opt.charge[:lat]) if option_notice?(:lat)
-    gp = gp.cut("time"=>Opt.charge[:time]) if option_notice?(:time)
-#    eval "gp = gp.cut(#{Opt.charge[:cut])" if option_notice?(:cut)
-#    eval "gp = gp.cut(#{Opt.charge[:mean])" if option_notice?(:mean)
+    gp = gp.cut("lon"=>$Opt.charge[:lon]) if option_notice?(:lon)
+    gp = gp.cut("lat"=>$Opt.charge[:lat]) if option_notice?(:lat)
+    gp = gp.cut("time"=>$Opt.charge[:time]) if option_notice?(:time)
+#    eval "gp = gp.cut(#{$Opt.charge[:cut])" if option_notice?(:cut)
+#    eval "gp = gp.cut(#{$Opt.charge[:mean])" if option_notice?(:mean)
     return gp
   end
   # -------------------------------------------
@@ -460,37 +460,37 @@ module MKfig
   end
   # -------------------------------------------
   def get_iws
-    if defined? Opt
-      return 2 if Opt.charge[:ps] || Opt.charge[:eps]
-      return 4 if Opt.charge[:png]
+    if defined? $Opt
+      return 2 if $Opt.charge[:ps] || $Opt.charge[:eps]
+      return 4 if $Opt.charge[:png]
     end
     return 1 if !defined? IWS
   end
   # -------------------------------------------
   def set_figopt
     figopt = {}
-    figopt["max"] = Opt.charge[:max] if option_notice?(:max)
-    figopt["min"] = Opt.charge[:min] if option_notice?(:min)
-    figopt["nlev"] = Opt.charge[:nlev] if option_notice?(:nlev)
-    figopt["interval"] = Opt.charge[:interval] if option_notice?(:interval)
-    figopt["clr_max"] = Opt.charge[:clr_max] if option_notice?(:clr_max)
-    figopt["clr_min"] = Opt.charge[:clr_min] if option_notice?(:clr_min)
+    figopt["max"] = $Opt.charge[:max] if option_notice?(:max)
+    figopt["min"] = $Opt.charge[:min] if option_notice?(:min)
+    figopt["nlev"] = $Opt.charge[:nlev] if option_notice?(:nlev)
+    figopt["interval"] = $Opt.charge[:interval] if option_notice?(:interval)
+    figopt["clr_max"] = $Opt.charge[:clr_max] if option_notice?(:clr_max)
+    figopt["clr_min"] = $Opt.charge[:clr_min] if option_notice?(:clr_min)
     figopt["title"] = "" if option_notice?(:notitle) 
     figopt = parse_Figopt(figopt)
     return figopt
   end
   # -------------------------------------------
   def set_window(window=[nil,nil,nil,nil])
-    window[0] = Opt.charge[:xmin] if option_notice?(:xmin) 
-    window[1] = Opt.charge[:xmax] if option_notice?(:xmax)
-    window[2] = Opt.charge[:ymin] if option_notice?(:ymin) 
-    window[3] = Opt.charge[:ymax] if option_notice?(:ymax)
+    window[0] = $Opt.charge[:xmin] if option_notice?(:xmin) 
+    window[1] = $Opt.charge[:xmax] if option_notice?(:xmax)
+    window[2] = $Opt.charge[:ymin] if option_notice?(:ymin) 
+    window[3] = $Opt.charge[:ymax] if option_notice?(:ymax)
     return window
   end
   # -------------------------------------------
   def option_notice?(key)
-    if defined? Opt
-      return !Opt.charge[key].nil?
+    if defined? $Opt
+      return !$Opt.charge[key].nil?
     else
       return false
     end
@@ -521,8 +521,8 @@ module MKfig
     return if IWS == 1
     id = id.id if id.class == Explist
     img_lg = id+"_"+File.basename(scrfile,".rb").sub("mkfig_","")
-    img_lg += "_lat#{Opt.charge[:lat].to_i}" if option_notice?(:lat)
-    img_lg += "_#{Opt.charge[:name]}" if option_notice?(:name)
+    img_lg += "_lat#{$Opt.charge[:lat].to_i}" if option_notice?(:lat)
+    img_lg += "_#{$Opt.charge[:name]}" if option_notice?(:name)
     img_lg += "_anomaly" if option_notice?(:anomaly)
     if IWS == 2 
       File.rename("dcl.ps","#{img_lg}.ps")

@@ -82,10 +82,10 @@ time_range = 0..10
 fig_format = "eps"
 
 ##########################################################
-Opt = OptCharge::OptCharge.new
-Opt.set
-Opt.charge[fig_format.to_sym] = true if defined? fig_format
-Opt.charge[:time] = time_range  if defined? time_range
+$Opt = OptCharge::OptCharge.new
+$Opt.set
+$Opt.charge[fig_format.to_sym] = true if defined? fig_format
+$Opt.charge[:time] = time_range  if defined? time_range
 IWS = get_iws
 explist = Explist.new(list_file)
 

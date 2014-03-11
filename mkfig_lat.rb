@@ -25,8 +25,8 @@ config = {
 
 ##############################################
 # option
-Opt = OptCharge::OptCharge.new(ARGV)
-Opt.set
+$Opt = OptCharge::OptCharge.new(ARGV)
+$Opt.set
 list = Utiles::Explist.new(ARGV[0])
 IWS = get_iws
 
@@ -36,8 +36,8 @@ set_dcl
 GGraph.set_axes("xlabelint"=>30,'xside'=>'bt', 'yside'=>'lr')
 GGraph.set_fig('window'=>[-90,90,nil,nil])
 
-if !Opt.charge[:name].nil? then
-  make_figure(Opt.charge[:name],list,set_figopt)
+if !$Opt.charge[:name].nil? then
+  make_figure($Opt.charge[:name],list,set_figopt)
 else
   config.keys.each{ |name| make_figure(name,list,{:figtype=>"lat"}.merge(config[name]))}
 end  

@@ -23,8 +23,8 @@ config = {
 
 #######################################################
 # option
-Opt = OptCharge::OptCharge.new(ARGV)
-Opt.set
+$Opt = OptCharge::OptCharge.new(ARGV)
+$Opt.set
 
 list = Utiles::Explist.new(ARGV[0])
 IWS = get_iws
@@ -33,8 +33,8 @@ IWS = get_iws
 set_dcl(14)
 
 FigType = "lonsig"
-if !Opt.charge[:name].nil? then
-  make_figure(Opt.charge[:name],list,set_figopt)
+if !$Opt.charge[:name].nil? then
+  make_figure($Opt.charge[:name],list,set_figopt)
 else
   config.keys.each{ |name| make_figure(name,list,{:figtype=>"lonsig"}.merge(config[name]))}
 end
