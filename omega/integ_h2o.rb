@@ -1,4 +1,5 @@
-#!/usr/bin/ruby
+# -*- coding: utf-8 -*-
+B1;3201;0c#!/usr/bin/ruby
 # -*- coding: utf-8 -*-
 # H2Oの鉛直積分
 #
@@ -6,7 +7,7 @@
 require 'numru/ggraph'
 require 'numru/gphys'
 require 'optparse'
-require File.expand_path(File.dirname(__FILE__)+"/"+"lib/utiles.rb")
+require File.expand_path(File.dirname(__FILE__)+"/../"+"lib/utiles.rb")
 include Utiles
 include NumRu
 include Math
