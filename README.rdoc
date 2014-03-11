@@ -20,6 +20,7 @@
 * local_time.rb:地方時変換
 
 === おまけ
+* Rakefile.dcpam: 一括描画
 * run_mang.rb: dcpamのジョブ投入用スクリプト
 
 === ライブラリ
@@ -145,3 +146,14 @@ ika.listには以下のようにデータの置いてあるディレクトリを
 
 ここで紹介されいないオプションについては --help オプションを付けることで
 確認できる
+
+== Rakefile.dcpamの使い方(おおまかに)
+* Rakefile.dcpamを作業ディレクトリに移動
+ $ cp Rakefile.dcpam /hogehoge/work/Rakefile 
+
+* ファイル内のrequireの行を自分の環境に合わせて編集
+* list_fileを指定
+  * list_fileを指定しない場合はデータが置いてある場所にRakefileを置く
+* 実行
+ $ rake all
+
